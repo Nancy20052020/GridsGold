@@ -3135,11 +3135,15 @@ h1 {
   box-shadow: 0 4px 12px rgba(230, 165, 32, 0.12);
 }
 
-.portal-actions {
+.portal-actions-desktop {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-left: auto;
+}
+
+.portal-actions-mobile {
+  display: none;
 }
 
 .portal-rate {
