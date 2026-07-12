@@ -25,6 +25,7 @@ export type Item = {
   stock: number;
   branch: string;
   icon: string;
+  image?: string;
 };
 
 export type Customer = {
@@ -114,16 +115,16 @@ export const BRANCHES = ["Main Branch", "Branch 2", "Branch 3", "Branch 4", "Vau
 const seedRates: Rates = { "24K": 7900, "22K": 7245, "18K": 5920, "925": 85, PT950: 3150 };
 
 const seedItems: Item[] = [
-  { id: "it1", name: "22K Gold Ring", sku: "RG22K-00124", category: "Rings", karat: "22K", weight: 5.25, making: 1200, stoneValue: 0, stock: 8, branch: "Main Branch", icon: "ring" },
-  { id: "it2", name: "Heritage Gold Necklace Set", sku: "NK22K-00098", category: "Necklaces", karat: "22K", weight: 18.75, making: 2980, stoneValue: 22000, stock: 5, branch: "Main Branch", icon: "necklace" },
-  { id: "it3", name: "Diamond Drop Earrings", sku: "ER18K-00231", category: "Earrings", karat: "18K", weight: 6.12, making: 3200, stoneValue: 28000, stock: 2, branch: "Branch 2", icon: "earrings" },
-  { id: "it4", name: "Royal Gold Bangle", sku: "BG22K-00112", category: "Bangles", karat: "22K", weight: 15.3, making: 2600, stoneValue: 0, stock: 3, branch: "Main Branch", icon: "bangle" },
-  { id: "it5", name: "Gold Chain", sku: "CH22K-00105", category: "Chains", karat: "22K", weight: 11.85, making: 1800, stoneValue: 0, stock: 0, branch: "Main Branch", icon: "chain" },
-  { id: "it6", name: "Gold Pendant", sku: "PD22K-00177", category: "Pendants", karat: "22K", weight: 4.76, making: 900, stoneValue: 4500, stock: 6, branch: "Branch 3", icon: "pendant" },
+  { id: "it1", name: "22K Gold Ring", sku: "RG22K-00124", category: "Rings", karat: "22K", weight: 5.25, making: 1200, stoneValue: 0, stock: 8, branch: "Main Branch", icon: "ring", image: "ring_1.png" },
+  { id: "it2", name: "Heritage Gold Necklace Set", sku: "NK22K-00098", category: "Necklaces", karat: "22K", weight: 18.75, making: 2980, stoneValue: 22000, stock: 5, branch: "Main Branch", icon: "necklace", image: "necklace_1.png" },
+  { id: "it3", name: "Diamond Drop Earrings", sku: "ER18K-00231", category: "Earrings", karat: "18K", weight: 6.12, making: 3200, stoneValue: 28000, stock: 2, branch: "Branch 2", icon: "earrings", image: "earrings_1.png" },
+  { id: "it4", name: "Royal Gold Bangle", sku: "BG22K-00112", category: "Bangles", karat: "22K", weight: 15.3, making: 2600, stoneValue: 0, stock: 3, branch: "Main Branch", icon: "bangle", image: "ring_3.png" },
+  { id: "it5", name: "Gold Chain", sku: "CH22K-00105", category: "Chains", karat: "22K", weight: 11.85, making: 1800, stoneValue: 0, stock: 0, branch: "Main Branch", icon: "chain", image: "necklace_1.png" },
+  { id: "it6", name: "Gold Pendant", sku: "PD22K-00177", category: "Pendants", karat: "22K", weight: 4.76, making: 900, stoneValue: 4500, stock: 6, branch: "Branch 3", icon: "pendant", image: "ring_5.png" },
   { id: "it7", name: "Gold Bar 10g", sku: "GB24K-01003", category: "Gold Bars", karat: "24K", weight: 10, making: 500, stoneValue: 0, stock: 12, branch: "Vault", icon: "" },
-  { id: "it8", name: "Silver Anklet", sku: "SA925-00211", category: "Others", karat: "925", weight: 12.5, making: 300, stoneValue: 0, stock: 9, branch: "Branch 4", icon: "" },
-  { id: "it9", name: "Platinum Ring", sku: "PR950-00021", category: "Rings", karat: "PT950", weight: 6.2, making: 3500, stoneValue: 12000, stock: 2, branch: "Vault", icon: "ring" },
-  { id: "it10", name: "Bridal Choker", sku: "NK22K-00301", category: "Necklaces", karat: "22K", weight: 42.4, making: 8500, stoneValue: 65000, stock: 1, branch: "Main Branch", icon: "necklace" },
+  { id: "it8", name: "Silver Anklet", sku: "SA925-00211", category: "Others", karat: "925", weight: 12.5, making: 300, stoneValue: 0, stock: 9, branch: "Branch 4", icon: "", image: "anklet_1.png" },
+  { id: "it9", name: "Platinum Ring", sku: "PR950-00021", category: "Rings", karat: "PT950", weight: 6.2, making: 3500, stoneValue: 12000, stock: 2, branch: "Vault", icon: "ring", image: "ring_2.png" },
+  { id: "it10", name: "Bridal Choker", sku: "NK22K-00301", category: "Necklaces", karat: "22K", weight: 42.4, making: 8500, stoneValue: 65000, stock: 1, branch: "Main Branch", icon: "necklace", image: "necklace_2.png" },
 ];
 
 const seedCustomers: Customer[] = [
@@ -293,7 +294,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (d.rates) setRates((p) => ({ ...p, ...d.rates }));
         if (d.selectedBranch) setSelectedBranch(d.selectedBranch);
         if (d.currentUser) setCurrentUser(d.currentUser);
-        if (d.items) setItems(d.items);
+        if (d.items) {
+          setItems(
+            (d.items as Item[]).map((item) => {
+              const seed = seedItems.find((s) => s.id === item.id);
+              return seed ? { ...item, image: seed.image, icon: seed.icon } : item;
+            }),
+          );
+        }
         if (d.customers) setCustomers(d.customers);
         if (d.invoices) setInvoices(d.invoices);
         if (d.repairs) setRepairs(d.repairs);

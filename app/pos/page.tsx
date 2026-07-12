@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, Minus, Plus, ScanBarcode, Search, Trash2, X } from "lucide-react";
 import { AppShell } from "../components/AppShell";
+import { ItemImage } from "../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR } from "../lib/store";
 
 const categories = ["All", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Chains"];
@@ -93,7 +94,7 @@ export default function PosPage() {
                     disabled={disabled}
                     onClick={() => addToCart(item.id)}
                   >
-                    <span className={`jewel-icon ${item.icon}`} />
+                    <ItemImage item={item} className="product-img tile-img" />
                     <strong>{item.name}</strong>
                     <small>{item.karat} · {item.weight} g</small>
                     <em>{formatINR(itemPrice(item, rates))}</em>

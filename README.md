@@ -17,45 +17,39 @@ npm run build
 
 ## Images & logo
 
-Put all images in the **`public/images/`** folder. Anything there is served from the
-site root, so a file at `public/images/ring.jpg` is referenced in code as `/images/ring.jpg`.
+Put all images in **`public/images/`**. A file at `public/images/ring_1.png` is served as `/images/ring_1.png`.
 
-### Logo (gold circle with “G” inside)
+### Logo
 
-The default mark is a **gold circle with a serif “G”** inside. To use your own artwork,
-add a square PNG with the G centred in the circle:
+The logo is a **gold circle with a serif “G” centred inside** (Playfair Display). No image file is required.
 
-| File | Size | Used for |
-|------|------|----------|
-| `public/images/logo.png` | 512×512 px, transparent or gold circle PNG | Sidebar, login page, customer header, receipts |
-| `app/icon.png` | 512×512 px (Next.js scales down) | Browser tab favicon |
-| `app/apple-icon.png` | 180×180 px (optional) | iOS home-screen icon |
+Optional browser icons: `app/icon.png` (512×512), `app/apple-icon.png` (180×180).
 
-If `logo.png` is missing, the styled gold **G-in-circle** fallback is shown automatically.
+### Product photos — add these exact filenames
 
-### Product & marketing photos (optional, for when you wire real images)
-
-The UI currently uses CSS jewel placeholders. When you add photos, use clear filenames:
-
-| File | Purpose |
-|------|---------|
-| `public/images/hero-jewellery.jpg` | Customer portal hero banner |
-| `public/images/products/RG22K-00124.jpg` | Product photo by SKU (match inventory SKU) |
-| `public/images/products/NK22K-00098.jpg` | …one file per product SKU |
-
-Suggested folder layout:
+| File | Used for |
+|------|----------|
+| `ring_1.png` … `ring_5.png` | Ring products + category tiles |
+| `necklace_1.png` … `necklace_3.png` | Necklace products + hero banner |
+| `earrings_1.png`, `earrings_2.png` | Earring products + category tile |
+| `anklet_1.png` | Silver Anklet product |
 
 ```
 public/images/
-  logo.png
-  hero-jewellery.jpg
-  products/
-    RG22K-00124.jpg
-    NK22K-00098.jpg
-    …
+  ring_1.png
+  ring_2.png
+  ring_3.png
+  ring_4.png
+  ring_5.png
+  necklace_1.png
+  necklace_2.png
+  necklace_3.png
+  earrings_1.png
+  earrings_2.png
+  anklet_1.png
 ```
 
-Product images are not wired in code yet — drop files with these names so they are ready when product pages are updated to use them.
+If a file is missing, the UI falls back to the jewel icon placeholder for that item.
 
 ## Environment variables (Supabase / PostgreSQL auth)
 

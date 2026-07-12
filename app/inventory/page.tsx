@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Boxes, Plus, Search } from "lucide-react";
 import { AppShell } from "../components/AppShell";
+import { ItemImage } from "../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR } from "../lib/store";
 
 const tabs = ["All Items", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Chains", "Gold Bars", "Others"];
@@ -100,7 +101,7 @@ export default function InventoryPage() {
                     <tr key={item.id}>
                       <td>
                         <Link className="cell-link" href={`/inventory/item-details?id=${item.id}`}>
-                          <span className={`jewel-icon ${item.icon || "ring"}`} /> {item.name}
+                          <ItemImage item={item} className="product-img cell-img" /> {item.name}
                         </Link>
                       </td>
                       <td>{item.sku}</td>

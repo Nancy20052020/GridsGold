@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Gem, Search, ShoppingCart } from "lucide-react";
 import { AppShell } from "../components/AppShell";
+import { ItemImage } from "../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR } from "../lib/store";
 
 const cats = ["All", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Chains", "Gold Bars", "Others"];
@@ -51,7 +52,7 @@ export default function JewelryCatalogPage() {
               return (
                 <article className="catalog-card" key={item.id}>
                   <Link href={`/inventory/item-details?id=${item.id}`} className="catalog-media">
-                    <span className={`jewel-icon ${item.icon || "ring"}`} />
+                    <ItemImage item={item} className="product-img catalog-img" />
                   </Link>
                   <span className={`status-pill ${s === "In Stock" ? "success" : s === "Low Stock" ? "warning" : "danger"}`}>{s}</span>
                   <strong>{item.name}</strong>

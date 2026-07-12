@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, ShoppingCart } from "lucide-react";
 import { AppShell } from "../../components/AppShell";
+import { ItemImage } from "../../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR } from "../../lib/store";
 
 function ItemDetail() {
@@ -58,8 +59,7 @@ function ItemDetail() {
 
       <div className="detail-layout">
         <article className="erp-panel media-panel">
-          <div className="product-photo"><span className={`jewel-icon ${item.icon || "ring"}`} /></div>
-          <div className="detail-note">Add real photos in <strong>/public/images</strong></div>
+          <div className="product-photo"><ItemImage item={item} className="product-img detail-img" /></div>
         </article>
 
         <article className="erp-panel">
