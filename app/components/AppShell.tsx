@@ -18,7 +18,6 @@ import {
   LogOut,
   Menu,
   Moon,
-  PanelLeft,
   ReceiptText,
   Search,
   Settings,
@@ -60,7 +59,6 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
   const router = useRouter();
   const { rates, selectedBranch, setBranch, currentUser, logout, notifications, markNotificationsRead, theme, toggleTheme } = useStore();
 
-  const [collapsed, setCollapsed] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [menu, setMenu] = useState<null | "branch" | "notif" | "calendar" | "profile">(null);
   const shellRef = useRef<HTMLDivElement>(null);
@@ -81,27 +79,11 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
-  useEffect(() => {
-    try {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setCollapsed(localStorage.getItem("gg_sidebar") === "1");
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("gg_sidebar", collapsed ? "1" : "0");
-    } catch {
-      /* ignore */
-    }
-  }, [collapsed]);
-
   const unread = notifications.filter((n) => !n.read).length;
   const displayName = currentUser?.name ?? "Store Admin";
   const displayRole = currentUser?.role === "customer" ? "Customer" : "Administrator";
-  const initials = (firstName(currentUser) || "Store").slice(0, 2).toUpperCase();
+  const greeting = firstName(currentUser);
+  const initials = (greeting || "Store").slice(0, 2).toUpperCase();
 
   function signOut() {
     logout();
@@ -109,7 +91,7 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
   }
 
   return (
-    <div className={`app-shell ${collapsed ? "collapsed" : ""} ${mobileNavOpen ? "mobile-nav-open" : ""}`} ref={shellRef}>
+    <div className={`app-shell ${mobileNavOpen ? "mobile-nav-open" : ""}`} ref={shellRef}>
       {mobileNavOpen ? (
         <button
           className="sidebar-backdrop"
@@ -127,9 +109,6 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
               <span>JEWELRY ERP</span>
             </div>
           </Link>
-          <button className="collapse-btn" type="button" onClick={() => setCollapsed((c) => !c)} aria-label="Toggle sidebar">
-            <PanelLeft size={18} />
-          </button>
         </div>
 
         <nav className="nav-list" aria-label="Main navigation">
@@ -160,6 +139,18 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
           </strong>
           <em>↑ 1.21% vs yesterday</em>
           <Link className="gold-widget-link" href="/gold-rates">View Gold Rates</Link>
+        </div>
+
+        <div className="sidebar-foot">
+          {greeting ? <p className="sidebar-greeting">Hi, {greeting}</p> : null}
+          <div className="sidebar-actions">
+            <Link className="sidebar-account" href="/settings" onClick={() => setMobileNavOpen(false)}>
+              <UserRound size={18} /> Account &amp; Settings
+            </Link>
+            <button className="sidebar-logout" type="button" onClick={signOut}>
+              <LogOut size={18} /> Sign out
+            </button>
+          </div>
         </div>
       </aside>
 

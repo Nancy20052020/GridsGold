@@ -204,6 +204,14 @@ export default function AuthLandingPage() {
 
       <main className="auth-main">
         <div className="auth-card">
+          <div className="auth-mobile-brand">
+            <BrandMark className="auth-logo-mark" />
+            <div>
+              <strong>GRIDS GOLD</strong>
+              <span>FINE JEWELLERY</span>
+            </div>
+          </div>
+
           <div className="auth-card-head">
             <Gem size={26} />
             <h2>{isSignup ? "Create your account" : "Welcome back"}</h2>
