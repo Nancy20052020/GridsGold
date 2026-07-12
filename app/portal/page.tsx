@@ -3,7 +3,9 @@
 import Link from "next/link";
 import { ArrowRight, Clock, Heart, Package, ShieldCheck, Sparkles, Truck } from "lucide-react";
 import { CustomerShell } from "../components/CustomerShell";
+import { ItemImage, ProductImage } from "../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR, firstName } from "../lib/store";
+import { CATEGORY_IMAGES, HERO_IMAGE } from "../lib/productImages";
 
 const categories = [
   { name: "Rings", icon: "ring" },
@@ -48,11 +50,7 @@ export default function CustomerPortalHome() {
           </div>
         </div>
         <div className="portal-hero-visual" aria-hidden="true">
-          <span className="jewel-icon necklace" />
-          <div className="portal-hero-note">
-            <small>Add product images in</small>
-            <strong>/public/images</strong>
-          </div>
+          <ProductImage image={HERO_IMAGE} icon="necklace" className="product-img hero-img" alt="" />
         </div>
       </section>
 
@@ -64,7 +62,7 @@ export default function CustomerPortalHome() {
         <div className="portal-categories">
           {categories.map((category) => (
             <Link className="portal-category" href={`/portal/catalog?cat=${category.name}`} key={category.name}>
-              <span className={`jewel-icon ${category.icon}`} />
+              <ProductImage image={CATEGORY_IMAGES[category.name]} icon={category.icon} className="product-img category-img" alt="" />
               <strong>{category.name}</strong>
               <small>{items.filter((i) => i.category === category.name).length} designs</small>
             </Link>
@@ -83,7 +81,7 @@ export default function CustomerPortalHome() {
             return (
               <article className="portal-product" key={product.id}>
                 <div className="portal-product-media">
-                  <Link href={`/portal/product/${product.id}`}><span className={`jewel-icon ${product.icon || "ring"}`} /></Link>
+                  <Link href={`/portal/product/${product.id}`}><ItemImage item={product} /></Link>
                   <button
                     type="button"
                     className={`portal-wish ${wished ? "on" : ""}`}

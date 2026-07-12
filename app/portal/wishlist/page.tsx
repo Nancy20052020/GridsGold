@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Heart, Trash2 } from "lucide-react";
 import { CustomerShell } from "../../components/CustomerShell";
+import { ItemImage } from "../../components/ProductImage";
 import { useStore, itemPrice, formatINR } from "../../lib/store";
 
 export default function WishlistPage() {
@@ -31,7 +32,7 @@ export default function WishlistPage() {
             {saved.map((product) => (
               <article className="portal-product" key={product.id}>
                 <div className="portal-product-media">
-                  <Link href={`/portal/product/${product.id}`}><span className={`jewel-icon ${product.icon || "ring"}`} /></Link>
+                  <Link href={`/portal/product/${product.id}`}><ItemImage item={product} /></Link>
                   <button type="button" className="portal-wish on" onClick={() => toggleWishlist(product.id)} aria-label="Remove"><Trash2 size={15} /></button>
                 </div>
                 <Link href={`/portal/product/${product.id}`} className="portal-product-title">{product.name}</Link>

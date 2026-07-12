@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Heart, Search } from "lucide-react";
 import { CustomerShell } from "../../components/CustomerShell";
+import { ItemImage } from "../../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR } from "../../lib/store";
 
 const cats = ["All", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Chains", "Others"];
@@ -47,7 +48,7 @@ function Catalog() {
           return (
             <article className="portal-product" key={product.id}>
               <div className="portal-product-media">
-                <Link href={`/portal/product/${product.id}`}><span className={`jewel-icon ${product.icon || "ring"}`} /></Link>
+                <Link href={`/portal/product/${product.id}`}><ItemImage item={product} /></Link>
                 <button type="button" className={`portal-wish ${wished ? "on" : ""}`} onClick={() => toggleWishlist(product.id)} aria-label="Toggle wishlist">
                   <Heart size={16} fill={wished ? "currentColor" : "none"} />
                 </button>

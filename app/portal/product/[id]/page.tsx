@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, Heart, ShieldCheck, Sparkles, Truck } from "lucide-react";
 import { CustomerShell } from "../../../components/CustomerShell";
+import { ItemImage } from "../../../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR } from "../../../lib/store";
 
 export default function ProductDetailPage() {
@@ -35,8 +36,7 @@ export default function ProductDetailPage() {
         <Link className="link-plain" href="/portal/catalog"><ArrowLeft size={15} /> Back to Collection</Link>
         <div className="pdp">
           <div className="pdp-media">
-            <span className={`jewel-icon ${item.icon || "ring"}`} />
-            <div className="portal-hero-note"><small>Add real photos in</small><strong>/public/images</strong></div>
+            <ItemImage item={item} className="product-img pdp-img" />
           </div>
           <div className="pdp-info">
             <span className={`status-pill ${s === "In Stock" ? "success" : s === "Low Stock" ? "warning" : "danger"}`}>{s}</span>
