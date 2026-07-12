@@ -1,15 +1,7 @@
 import Link from "next/link";
 import {
   ArrowUpRight,
-  BadgeCheck,
-  Barcode,
-  Boxes,
   CalendarDays,
-  ClipboardList,
-  Gem,
-  IndianRupee,
-  PackageCheck,
-  Printer,
   Search,
   ShieldCheck,
   SlidersHorizontal,
@@ -351,24 +343,6 @@ export function ErpScreen({ screen }: { screen: ScreenConfig }) {
       {screen.kind === "settings" ? <SettingsScreen screen={screen} /> : null}
       {screen.kind === "hub" && !isIndex ? <HubScreen screen={screen} /> : null}
       {screen.kind === "report" ? <ReportsScreen screen={screen} /> : null}
-
-      <section className="quick-actions-strip">
-        {[
-          [Barcode, "Barcode"],
-          [Printer, "Print"],
-          [PackageCheck, "Approve"],
-          [ClipboardList, "Audit"],
-          [BadgeCheck, "Certificate"],
-          [IndianRupee, "Payment"],
-          [Gem, "Jewellery"],
-          [Boxes, "Stock"],
-        ].map(([Icon, label]) => (
-          <button type="button" key={String(label)}>
-            <Icon size={20} />
-            <span>{String(label)}</span>
-          </button>
-        ))}
-      </section>
     </section>
   );
 }
