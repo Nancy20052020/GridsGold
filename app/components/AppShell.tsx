@@ -5,53 +5,31 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
-  Boxes,
   CalendarDays,
-  ChartNoAxesCombined,
   ChevronDown,
   ChevronRight,
-  Factory,
-  Gem,
-  Handshake,
-  Home,
-  LayoutGrid,
   LogOut,
   Menu,
   Moon,
-  ReceiptText,
+  Plus,
   Search,
-  Settings,
-  ShoppingCart,
   Sun,
-  TrendingUp,
   UserRound,
-  WalletCards,
-  Wrench,
 } from "lucide-react";
+import { adminNavGroups, adminQuickAddLinks } from "../lib/adminNav";
 import { BRANCHES, firstName, useStore } from "../lib/store";
 import { BrandMark } from "./BrandMark";
-
-const menuItems = [
-  { label: "Dashboard", icon: Home, href: "/dashboard" },
-  { label: "POS / Sales", icon: ShoppingCart, href: "/pos" },
-  { label: "Inventory", icon: Boxes, href: "/inventory" },
-  { label: "Jewelry", icon: Gem, href: "/jewelry" },
-  { label: "Repairs", icon: Wrench, href: "/repairs" },
-  { label: "Customers", icon: UserRound, href: "/customers" },
-  { label: "Purchasing", icon: ReceiptText, href: "/purchase-orders" },
-  { label: "Manufacturing", icon: Factory, href: "/manufacturing" },
-  { label: "Wholesale", icon: Handshake, href: "/wholesale" },
-  { label: "Finance", icon: WalletCards, href: "/finance" },
-  { label: "Reports", icon: LayoutGrid, href: "/reports" },
-  { label: "Analytics", icon: ChartNoAxesCombined, href: "/analytics" },
-  { label: "Gold Rates", icon: TrendingUp, href: "/gold-rates" },
-  { label: "Settings", icon: Settings, href: "/settings" },
-];
 
 type AppShellProps = { children: React.ReactNode; searchPlaceholder?: string };
 
 function isActive(pathname: string, href: string) {
-  return href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
+  if (href === "/dashboard") return pathname === "/dashboard";
+  if (href === "/pos") return pathname === "/pos";
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+function groupActive(pathname: string, group: (typeof adminNavGroups)[number]) {
+  return group.items.some((item) => isActive(pathname, item.href));
 }
 
 export function AppShell({ children, searchPlaceholder = "Search item, customer, invoice or barcode..." }: AppShellProps) {
@@ -60,8 +38,14 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
   const { rates, selectedBranch, setBranch, currentUser, logout, notifications, markNotificationsRead, theme, toggleTheme } = useStore();
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [menu, setMenu] = useState<null | "branch" | "notif" | "calendar" | "profile">(null);
+  const [menu, setMenu] = useState<null | "branch" | "notif" | "calendar" | "profile" | "quickadd">(null);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const shellRef = useRef<HTMLDivElement>(null);
+
+  function isGroupOpen(group: (typeof adminNavGroups)[number]) {
+    if (openGroups[group.label] !== undefined) return openGroups[group.label];
+    return groupActive(pathname, group);
+  }
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
@@ -90,17 +74,17 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
     router.push("/");
   }
 
+  function toggleGroup(label: string) {
+    setOpenGroups((prev) => ({ ...prev, [label]: !prev[label] }));
+  }
+
   return (
     <div className={`app-shell ${mobileNavOpen ? "mobile-nav-open" : ""}`} ref={shellRef}>
       {mobileNavOpen ? (
-        <button
-          className="sidebar-backdrop"
-          aria-label="Close menu"
-          type="button"
-          onClick={() => setMobileNavOpen(false)}
-        />
+        <button className="sidebar-backdrop" aria-label="Close menu" type="button" onClick={() => setMobileNavOpen(false)} />
       ) : null}
-      <aside className="sidebar">
+
+      <aside className="sidebar sidebar-rich">
         <div className="brand-row">
           <Link className="brand" href="/dashboard" onClick={() => setMobileNavOpen(false)}>
             <BrandMark className="brand-mark" />
@@ -111,22 +95,51 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
           </Link>
         </div>
 
-        <nav className="nav-list" aria-label="Main navigation">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(pathname, item.href);
+        <div className="sidebar-quickadd-wrap menu-wrap">
+          <button className="sidebar-quickadd" type="button" onClick={() => setMenu(menu === "quickadd" ? null : "quickadd")}>
+            <Plus size={16} /> Add new <ChevronDown size={14} />
+          </button>
+          {menu === "quickadd" ? (
+            <div className="dropdown sidebar-quickadd-menu">
+              {adminQuickAddLinks.map((link) => (
+                <Link key={link.href} href={link.href} onClick={() => { setMenu(null); setMobileNavOpen(false); }}>
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
+        <nav className="sidebar-nav-scroll" aria-label="Main navigation">
+          {adminNavGroups.map((group) => {
+            const open = isGroupOpen(group);
             return (
-              <Link
-                className={`nav-item ${active ? "active" : ""}`}
-                href={item.href}
-                key={item.label}
-                title={item.label}
-                onClick={() => setMobileNavOpen(false)}
-              >
-                <Icon size={20} />
-                <span className="nav-label">{item.label}</span>
-                <ChevronRight className="nav-caret" size={15} />
-              </Link>
+              <div className="sidebar-group" key={group.label}>
+                <button type="button" className="sidebar-group-head" onClick={() => toggleGroup(group.label)}>
+                  <span>{group.label}</span>
+                  <ChevronDown size={14} className={open ? "open" : ""} />
+                </button>
+                {open ? (
+                  <div className="sidebar-group-items">
+                    {group.items.map((item) => {
+                      const Icon = item.icon;
+                      const active = isActive(pathname, item.href);
+                      return (
+                        <Link
+                          className={`nav-item ${active ? "active" : ""}`}
+                          href={item.href}
+                          key={item.href}
+                          title={item.label}
+                          onClick={() => setMobileNavOpen(false)}
+                        >
+                          <Icon size={18} />
+                          <span className="nav-label">{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
             );
           })}
         </nav>
@@ -134,10 +147,8 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
         <div className="gold-widget">
           <div className="gold-visual" />
           <p>Gold Price (22K)</p>
-          <strong>
-            ₹ {rates["22K"].toLocaleString("en-IN")} <span>/gm</span>
-          </strong>
-          <em>↑ 1.21% vs yesterday</em>
+          <strong>₹ {rates["22K"].toLocaleString("en-IN")} <span>/gm</span></strong>
+          <em>Live rate · updates all prices</em>
           <Link className="gold-widget-link" href="/gold-rates">View Gold Rates</Link>
         </div>
 
@@ -207,54 +218,39 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
               <button className="icon-button" aria-label="Calendar" type="button" onClick={() => setMenu(menu === "calendar" ? null : "calendar")}>
                 <CalendarDays size={20} />
               </button>
-              {menu === "calendar" ? <div className="dropdown"><MiniCalendar /></div> : null}
+              {menu === "calendar" ? (
+                <div className="dropdown">
+                  <div className="dropdown-head">Today</div>
+                  <div className="dropdown-row"><strong>POS sessions</strong><small>3 active counters</small></div>
+                  <div className="dropdown-row"><strong>Repairs due</strong><small>2 pickups today</small></div>
+                </div>
+              ) : null}
             </div>
 
-            <Link className="icon-button" aria-label="Settings" href="/settings"><Settings size={20} /></Link>
-          </div>
-
-          <div className="menu-wrap">
-            <button className="profile" type="button" onClick={() => setMenu(menu === "profile" ? null : "profile")}>
-              <div className="avatar">{initials}</div>
-              <div className="profile-text">
-                <strong>{displayName}</strong>
-                <span>{displayRole}</span>
-              </div>
-              <ChevronDown size={16} />
-            </button>
-            {menu === "profile" ? (
-              <div className="dropdown right">
-                <Link href="/settings" onClick={() => setMenu(null)}>Settings</Link>
-                <button type="button" onClick={signOut}><LogOut size={15} /> Sign out</button>
-              </div>
-            ) : null}
+            <div className="menu-wrap">
+              <button className="profile" type="button" onClick={() => setMenu(menu === "profile" ? null : "profile")}>
+                <span className="profile-avatar">{initials}</span>
+                <span className="profile-text">
+                  <strong>{displayName}</strong>
+                  <span>{displayRole}</span>
+                </span>
+                <ChevronRight size={16} />
+              </button>
+              {menu === "profile" ? (
+                <div className="dropdown right">
+                  <Link href="/settings">Account settings</Link>
+                  <Link href="/gold-rates">Gold rates</Link>
+                  <button type="button" onClick={signOut}>Sign out</button>
+                </div>
+              ) : null}
+            </div>
           </div>
         </header>
 
-        {menu ? <button className="menu-backdrop" aria-hidden="true" tabIndex={-1} onClick={() => setMenu(null)} /> : null}
+        {menu ? <button className="menu-backdrop" type="button" aria-label="Close menu" onClick={() => setMenu(null)} /> : null}
 
         {children}
       </main>
-    </div>
-  );
-}
-
-function MiniCalendar() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
-  const first = new Date(year, month, 1).getDay();
-  const days = new Date(year, month + 1, 0).getDate();
-  const cells: (number | null)[] = [...Array(first).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)];
-  return (
-    <div className="mini-cal">
-      <div className="mini-cal-head">{now.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</div>
-      <div className="mini-cal-grid">
-        {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => <span className="dow" key={i}>{d}</span>)}
-        {cells.map((c, i) => (
-          <span key={i} className={c === now.getDate() ? "day today" : "day"}>{c ?? ""}</span>
-        ))}
-      </div>
     </div>
   );
 }

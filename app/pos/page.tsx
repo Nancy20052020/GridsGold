@@ -2,47 +2,35 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, Minus, Plus, ScanBarcode, Search, Trash2, X } from "lucide-react";
-import { isRemovedCategory, SHOP_CATEGORIES } from "../lib/categories";
+import {
+  CheckCircle2,
+  Minus,
+  Plus,
+  ScanBarcode,
+  Search,
+  ShoppingCart,
+  Trash2,
+  X,
+} from "lucide-react";
+import { AddSaleItemModal } from "../components/AddSaleItemModal";
 import { AppShell } from "../components/AppShell";
 import { ItemImage } from "../components/ProductImage";
-import { useStore, itemPrice, itemStatus, formatINR } from "../lib/store";
+import { useStore, itemPrice, formatINR } from "../lib/store";
 
-const categories = [...SHOP_CATEGORIES];
+type PaymentLine = { id: string; method: string; amount: number };
 
 export default function PosPage() {
-  const { items, rates, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, customers } = useStore();
-  const [category, setCategory] = useState("All");
+  const { items, rates, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, customers, selectedBranch } = useStore();
   const [query, setQuery] = useState("");
   const [customer, setCustomer] = useState("Walk-in Customer");
+  const [customerPhone, setCustomerPhone] = useState("");
   const [receipt, setReceipt] = useState<{ number: string; total: number } | null>(null);
-  const [scanOpen, setScanOpen] = useState(false);
   const [scanValue, setScanValue] = useState("");
-  const [scanMsg, setScanMsg] = useState("");
-
-  function doScan() {
-    const ok = addToCartBySku(scanValue);
-    if (ok) {
-      setScanMsg(`Added ${scanValue.toUpperCase()} to sale.`);
-      setScanValue("");
-    } else {
-      setScanMsg("No in-stock item with that SKU/barcode.");
-    }
-  }
-
-  const visible = useMemo(
-    () =>
-      items.filter((item) => {
-        if (isRemovedCategory(item.category)) return false;
-        const inCat = category === "All" || item.category === category;
-        const inQuery =
-          !query ||
-          item.name.toLowerCase().includes(query.toLowerCase()) ||
-          item.sku.toLowerCase().includes(query.toLowerCase());
-        return inCat && inQuery;
-      }),
-    [items, category, query],
-  );
+  const [addOpen, setAddOpen] = useState(false);
+  const [tab, setTab] = useState<"client" | "workshop">("client");
+  const [status, setStatus] = useState("Created");
+  const [payments, setPayments] = useState<PaymentLine[]>([]);
+  const [seller] = useState("Store Admin");
 
   const lines = cart
     .map((line) => {
@@ -54,91 +42,73 @@ export default function PosPage() {
   const subtotal = lines.reduce((sum, l) => sum + l.amount, 0);
   const gst = Math.round(subtotal * 0.03);
   const total = subtotal + gst;
+  const paid = payments.reduce((s, p) => s + p.amount, 0);
+  const outstanding = Math.max(total - paid, 0);
+
+  const filteredBrowse = useMemo(
+    () =>
+      items.filter((item) => {
+        if (!query) return false;
+        return (
+          item.name.toLowerCase().includes(query.toLowerCase()) ||
+          item.sku.toLowerCase().includes(query.toLowerCase())
+        );
+      }).slice(0, 6),
+    [items, query],
+  );
+
+  function doScan() {
+    if (!scanValue.trim()) return;
+    addToCartBySku(scanValue);
+    setScanValue("");
+  }
+
+  function addPayment() {
+    const amount = outstanding > 0 ? outstanding : total;
+    if (amount <= 0) return;
+    setPayments((prev) => [
+      ...prev,
+      { id: `pay-${Date.now()}`, method: "Cash", amount },
+    ]);
+  }
 
   return (
     <AppShell searchPlaceholder="Search item, SKU or scan barcode...">
-      <section className="page-content">
-        <div className="page-heading">
-          <div className="heading-copy">
-            <div>
-              <span className="eyebrow">Sales Counter</span>
-              <h1>Point of Sale</h1>
-              <p>Add items, apply the live gold rate, and collect payment.</p>
-            </div>
+      <section className="page-content sales-workspace-page">
+        <div className="sales-workspace-head">
+          <div>
+            <span className="eyebrow">Sales</span>
+            <h1>Sales counter</h1>
+          </div>
+          <div className="sales-workspace-toolbar">
+            <button type="button" className="gold-action" onClick={() => setAddOpen(true)}>+ Add item</button>
+            <Link className="ghost-action" href="/inventory">Use material from stock</Link>
+            <Link className="ghost-action" href="/repairs">Workshop job</Link>
           </div>
         </div>
 
-        <div className="pos-layout">
-          <article className="erp-panel">
-            <div className="table-toolbar">
-              <div className="filter-search">
-                <Search size={18} />
-                <input placeholder="Search products..." value={query} onChange={(e) => setQuery(e.target.value)} />
+        <div className="sales-workspace">
+          <article className="sales-main erp-panel">
+            <div className="sales-tabs">
+              <button type="button" className={tab === "client" ? "active" : ""} onClick={() => setTab("client")}>Client</button>
+              <button type="button" className={tab === "workshop" ? "active" : ""} onClick={() => setTab("workshop")}>Workshop</button>
+            </div>
+
+            {lines.length === 0 ? (
+              <div className="sales-empty">
+                <ShoppingCart size={42} />
+                <strong>No items added yet</strong>
+                <p>Search for a product or scan a barcode to start a sale.</p>
+                <button type="button" className="gold-action" onClick={() => setAddOpen(true)}>+ Add item</button>
               </div>
-              <button type="button" onClick={() => { setScanOpen(true); setScanMsg(""); }}><ScanBarcode size={17} /> Scan</button>
-            </div>
-            <div className="category-tabs compact-tabs">
-              {categories.map((tab) => (
-                <button className={tab === category ? "active" : ""} key={tab} type="button" onClick={() => setCategory(tab)}>
-                  {tab}
-                </button>
-              ))}
-            </div>
-            <div className="product-grid">
-              {visible.map((item) => {
-                const status = itemStatus(item.stock);
-                const disabled = status === "Out of Stock";
-                return (
-                  <button
-                    className="product-tile"
-                    key={item.id}
-                    type="button"
-                    disabled={disabled}
-                    onClick={() => addToCart(item.id)}
-                  >
-                    <ItemImage item={item} className="product-img tile-img" />
-                    <strong>{item.name}</strong>
-                    <small>{item.karat} · {item.weight} g</small>
-                    <em>{formatINR(itemPrice(item, rates))}</em>
-                    <span className={`status-pill ${status === "In Stock" ? "success" : status === "Low Stock" ? "warning" : "danger"}`}>
-                      {status}
-                    </span>
-                  </button>
-                );
-              })}
-              {visible.length === 0 ? <p className="empty-note">No products match your search.</p> : null}
-            </div>
-          </article>
-
-          <article className="erp-panel invoice-card">
-            <div className="panel-title-row">
-              <h2>Current Sale</h2>
-              {cart.length ? (
-                <button type="button" className="link-plain" onClick={clearCart}>Clear</button>
-              ) : null}
-            </div>
-
-            <label className="field">
-              <span>Customer</span>
-              <div className="field-input">
-                <select value={customer} onChange={(e) => setCustomer(e.target.value)}>
-                  <option>Walk-in Customer</option>
-                  {customers.map((c) => (
-                    <option key={c.id}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
-            </label>
-
-            <div className="cart-lines">
-              {lines.length === 0 ? (
-                <p className="empty-note">Cart is empty. Tap a product to add it.</p>
-              ) : (
-                lines.map(({ item, qty, amount }) => (
+            ) : (
+              <div className="cart-lines sales-cart-lines">
+                {lines.map(({ item, qty, amount }) => (
                   <div className="cart-line" key={item.id}>
+                    <ItemImage item={item} className="product-img cart-thumb" />
                     <div>
                       <strong>{item.name}</strong>
-                      <small>{formatINR(itemPrice(item, rates))} each</small>
+                      <small>{item.sku} · {formatINR(itemPrice(item, rates))} each</small>
                     </div>
                     <div className="qty-control">
                       <button type="button" onClick={() => setQty(item.id, qty - 1)} aria-label="Decrease"><Minus size={14} /></button>
@@ -148,53 +118,148 @@ export default function PosPage() {
                     <span className="cart-amount">{formatINR(amount)}</span>
                     <button type="button" className="cart-remove" onClick={() => removeFromCart(item.id)} aria-label="Remove"><Trash2 size={15} /></button>
                   </div>
-                ))
-              )}
+                ))}
+              </div>
+            )}
+
+            <div className="sales-scan-row">
+              <div className="field-input sales-scan-input">
+                <ScanBarcode size={18} />
+                <input
+                  placeholder="Scan or type barcode"
+                  value={scanValue}
+                  onChange={(e) => setScanValue(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); doScan(); } }}
+                />
+              </div>
+              <button type="button" className="ghost-action" onClick={doScan}>Add</button>
             </div>
 
-            <div className="totals">
-              <div><span>Sub Total</span><strong>{formatINR(subtotal)}</strong></div>
-              <div><span>GST (3%)</span><strong>{formatINR(gst)}</strong></div>
-              <div className="grand"><span>Total</span><strong>{formatINR(total)}</strong></div>
-            </div>
+            {query ? (
+              <div className="sales-quick-picks">
+                {filteredBrowse.map((item) => (
+                  <button key={item.id} type="button" className="sale-item-pick compact" onClick={() => addToCart(item.id)}>
+                    <strong>{item.name}</strong>
+                    <em>{formatINR(itemPrice(item, rates))}</em>
+                  </button>
+                ))}
+              </div>
+            ) : null}
 
-            <button
-              className="gold-action full"
-              type="button"
-              disabled={lines.length === 0}
-              onClick={() => {
-                const inv = checkout(customer);
-                setReceipt({ number: inv.number, total: inv.total });
-              }}
-            >
-              Checkout &amp; Collect Payment
-            </button>
+            <div className="sales-main-search">
+              <Search size={16} />
+              <input placeholder="Quick search products..." value={query} onChange={(e) => setQuery(e.target.value)} />
+            </div>
           </article>
+
+          <aside className="sales-sidepanel">
+            <section className="sales-side-block">
+              <div className="sales-side-block-head">
+                <h3>Customer</h3>
+                <Link href="/customers" className="link-plain">+ Add new</Link>
+              </div>
+              <label className="field">
+                <span>Select a customer</span>
+                <div className="field-input">
+                  <select value={customer} onChange={(e) => setCustomer(e.target.value)}>
+                    <option>Walk-in Customer</option>
+                    {customers.map((c) => (
+                      <option key={c.id} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </label>
+              <label className="field">
+                <span>Search by phone number</span>
+                <div className="field-input">
+                  <input value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="Phone" />
+                </div>
+              </label>
+            </section>
+
+            <section className="sales-side-block">
+              <div className="sales-side-block-head">
+                <h3>Transactions</h3>
+                <button type="button" className="link-plain" onClick={addPayment} disabled={total <= 0}>+ Add transaction</button>
+              </div>
+              <div className="sales-txn-summary">
+                <div><span>Total amount</span><strong>{formatINR(total)}</strong></div>
+                <div><span>Outstanding</span><strong className={outstanding === 0 && total > 0 ? "ok" : ""}>{formatINR(outstanding)} {outstanding === 0 && total > 0 ? "✓" : ""}</strong></div>
+              </div>
+              <div className="sales-txn-list">
+                {payments.length === 0 ? (
+                  <p className="muted">No payments recorded yet.</p>
+                ) : (
+                  payments.map((p) => (
+                    <div className="sales-txn-row" key={p.id}>
+                      <span>{p.method}</span>
+                      <strong>{formatINR(p.amount)}</strong>
+                    </div>
+                  ))
+                )}
+              </div>
+              <div className="totals compact-totals">
+                <div><span>Subtotal</span><strong>{formatINR(subtotal)}</strong></div>
+                <div><span>GST (3%)</span><strong>{formatINR(gst)}</strong></div>
+              </div>
+              <button
+                className="gold-action full"
+                type="button"
+                disabled={lines.length === 0}
+                onClick={() => {
+                  const inv = checkout(customer);
+                  setReceipt({ number: inv.number, total: inv.total });
+                  setPayments([]);
+                }}
+              >
+                Checkout &amp; Collect Payment
+              </button>
+              {cart.length ? (
+                <button type="button" className="ghost-action full" onClick={clearCart}>Clear sale</button>
+              ) : null}
+            </section>
+
+            <section className="sales-side-block">
+              <h3>Details</h3>
+              <label className="field">
+                <span>Date</span>
+                <div className="field-input"><input readOnly value={new Date().toLocaleString("en-IN")} /></div>
+              </label>
+              <label className="field">
+                <span>Seller</span>
+                <div className="field-input"><input readOnly value={seller} /></div>
+              </label>
+              <label className="field">
+                <span>Sales channel</span>
+                <div className="field-input"><input readOnly value="Grids Gold Showroom" /></div>
+              </label>
+              <label className="field">
+                <span>Branch</span>
+                <div className="field-input"><input readOnly value={selectedBranch} /></div>
+              </label>
+              <label className="field">
+                <span>Status</span>
+                <div className="field-input">
+                  <select value={status} onChange={(e) => setStatus(e.target.value)}>
+                    <option>Created</option>
+                    <option>In progress</option>
+                    <option>Completed</option>
+                    <option>Delivered</option>
+                  </select>
+                </div>
+              </label>
+            </section>
+          </aside>
         </div>
       </section>
 
-      {scanOpen ? (
-        <div className="modal-backdrop" role="dialog" aria-modal="true">
-          <form className="modal-card wide" onSubmit={(e) => { e.preventDefault(); doScan(); }}>
-            <button className="modal-close" type="button" onClick={() => setScanOpen(false)} aria-label="Close"><X size={18} /></button>
-            <h2>Scan / Enter Barcode</h2>
-            <p className="muted">Type or scan an item SKU / barcode and press Enter to add it to the sale.</p>
-            <label className="field">
-              <span>SKU / Barcode</span>
-              <div className="field-input">
-                <ScanBarcode size={17} />
-                <input autoFocus value={scanValue} onChange={(e) => setScanValue(e.target.value)} placeholder="e.g. RG22K-00124" />
-              </div>
-            </label>
-            <p className="muted" style={{ fontSize: 12 }}>Try: {items.slice(0, 4).map((i) => i.sku).join(", ")}</p>
-            {scanMsg ? <p className={scanMsg.startsWith("Added") ? "banner-success" : "auth-error"}>{scanMsg}</p> : null}
-            <div className="form-actions">
-              <button className="ghost-action" type="button" onClick={() => setScanOpen(false)}>Done</button>
-              <button className="gold-action" type="submit">Add to Sale</button>
-            </div>
-          </form>
-        </div>
-      ) : null}
+      <AddSaleItemModal
+        open={addOpen}
+        onClose={() => setAddOpen(false)}
+        onAdd={(itemId, qty) => {
+          for (let i = 0; i < qty; i += 1) addToCart(itemId);
+        }}
+      />
 
       {receipt ? (
         <div className="modal-backdrop" role="dialog" aria-modal="true">
