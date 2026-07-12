@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "./lib/store";
+import { isSupabaseConfigured, supabase } from "./lib/supabase";
 import {
   ArrowRight,
   BadgeCheck,
@@ -54,6 +55,7 @@ export default function AuthLandingPage() {
     confirm: "",
   });
 
+  const [busy, setBusy] = useState(false);
   const isSignup = mode === "signup";
   const isAdmin = role === "admin";
 
@@ -62,7 +64,7 @@ export default function AuthLandingPage() {
     if (error) setError("");
   }
 
-  function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
 
     if (!form.email.trim() || !form.password) {
@@ -84,6 +86,41 @@ export default function AuthLandingPage() {
       }
     }
 
+    // When Supabase (PostgreSQL) is configured, authenticate against it.
+    if (isSupabaseConfigured && supabase) {
+      setBusy(true);
+      try {
+        if (isSignup) {
+          const { error: err } = await supabase.auth.signUp({
+            email: form.email.trim(),
+            password: form.password,
+            options: { data: { full_name: form.fullName.trim(), role, mobile: form.mobile.trim(), city: form.company.trim() } },
+          });
+          if (err) {
+            setError(err.message);
+            setBusy(false);
+            return;
+          }
+        } else {
+          const { error: err } = await supabase.auth.signInWithPassword({
+            email: form.email.trim(),
+            password: form.password,
+          });
+          if (err) {
+            setError(err.message);
+            setBusy(false);
+            return;
+          }
+        }
+      } catch {
+        setError("Could not reach the authentication service. Please try again.");
+        setBusy(false);
+        return;
+      }
+      setBusy(false);
+    }
+
+    // Reflect the signed-in user in the app (name shows across the UI).
     if (isSignup) {
       signup({ name: form.fullName.trim(), email: form.email.trim(), mobile: form.mobile.trim(), city: form.company.trim(), role });
     } else {
@@ -313,8 +350,8 @@ export default function AuthLandingPage() {
 
             {error ? <p className="auth-error">{error}</p> : null}
 
-            <button type="submit" className="auth-submit">
-              {isSignup ? "Create account" : "Sign in"}
+            <button type="submit" className="auth-submit" disabled={busy}>
+              {busy ? "Please wait…" : isSignup ? "Create account" : "Sign in"}
               <ArrowRight size={18} />
             </button>
 
