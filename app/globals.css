@@ -293,6 +293,12 @@ button {
   padding: 0 16px;
 }
 
+a.date-button,
+a.export-button {
+  text-decoration: none;
+  color: var(--ink);
+}
+
 .icon-button {
   width: 42px;
   display: inline-grid;
@@ -6394,10 +6400,9 @@ a.ghost-action {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ffd76d, #e6a520);
-  color: #061327;
-  font-size: 12px;
-  font-weight: 900;
+  background: linear-gradient(135deg, rgba(242, 179, 61, 0.22), rgba(6, 19, 39, 0.92));
+  border: 1px solid rgba(242, 179, 61, 0.35);
+  color: #ffd36c;
 }
 
 /* ---- Sales workspace (Gem Logic style POS) ---- */

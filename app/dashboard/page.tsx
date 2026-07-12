@@ -24,10 +24,10 @@ import {
   monthlyBars,
   recentTransactions,
   salesByCategory,
-  salesTrendFromInvoices,
   sumInvoices,
   todaySummary,
   topSellingItems,
+  DEMO_SALES_TREND,
 } from "../lib/analytics";
 import { AppShell } from "../components/AppShell";
 import { firstName, formatINR, useStore } from "../lib/store";
@@ -90,7 +90,7 @@ export default function DashboardPage() {
   const profit = estimateProfit(totalSales, expenses);
   const categories = useMemo(() => salesByCategory(invoices, items), [invoices, items]);
   const topItems = useMemo(() => topSellingItems(invoices, items, rates), [invoices, items, rates]);
-  const trend = useMemo(() => salesTrendFromInvoices(invoices), [invoices]);
+  const trend = DEMO_SALES_TREND;
   const bars = useMemo(() => monthlyBars(invoices), [invoices]);
   const branches = useMemo(() => branchComparison(invoices), [invoices]);
   const summary = todaySummary(invoices, repairs, customers.length);
@@ -150,7 +150,7 @@ export default function DashboardPage() {
           <article className="panel panel-wide">
             <div className="panel-head">
               <h2>Sales Trend</h2>
-              <span className="muted" style={{ fontSize: 13 }}>From invoices · hover for detail</span>
+              <span className="muted" style={{ fontSize: 13 }}>Weekly sales · ₹ Lakhs</span>
             </div>
             <TrendChart points={trend} />
           </article>
