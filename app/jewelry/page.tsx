@@ -3,11 +3,12 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Gem, Search, ShoppingCart } from "lucide-react";
+import { isRemovedCategory, SHOP_CATEGORIES } from "../lib/categories";
 import { AppShell } from "../components/AppShell";
 import { ItemImage } from "../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR } from "../lib/store";
 
-const cats = ["All", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Gold Bars", "Others"];
+const cats = ["All", ...SHOP_CATEGORIES.filter((c) => c !== "All")] as const;
 
 export default function JewelryCatalogPage() {
   const { items, rates, addToCart } = useStore();
@@ -15,7 +16,13 @@ export default function JewelryCatalogPage() {
   const [query, setQuery] = useState("");
 
   const visible = useMemo(
-    () => items.filter((i) => (cat === "All" || i.category === cat) && (!query || i.name.toLowerCase().includes(query.toLowerCase()))),
+    () =>
+      items.filter(
+        (i) =>
+          !isRemovedCategory(i.category) &&
+          (cat === "All" || i.category === cat) &&
+          (!query || i.name.toLowerCase().includes(query.toLowerCase())),
+      ),
     [items, cat, query],
   );
 

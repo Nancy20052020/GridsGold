@@ -8,10 +8,11 @@ import {
   Sparkles,
 } from "lucide-react";
 import { inventoryRows, sampleRows, screenConfigs, screenGroups, type ScreenConfig } from "../data";
+import { SHOP_CATEGORIES } from "../lib/categories";
 
 const inventoryColumns = ["Item", "SKU / Barcode", "Category", "Purity", "Weight", "Status", "Location", "Value"];
 const defaultColumns = ["Reference", "Party", "Description", "Amount", "Status", "Date"];
-const inventoryTabs = ["All Items", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Gold Bars", "Coins", "Diamonds"];
+const inventoryTabs = ["All Items", ...SHOP_CATEGORIES.filter((c) => c !== "All"), "Gold Bars", "Coins", "Diamonds"];
 
 const defaultStats = [
   { label: "Open Records", value: "128", delta: "Actionable", tone: "gold" },
@@ -117,7 +118,7 @@ function PosScreen() {
           <button type="button">Scan Barcode</button>
         </div>
         <div className="category-tabs compact-tabs">
-          {["All", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants"].map((tab, index) => (
+          {["All", ...SHOP_CATEGORIES.filter((c) => c !== "All")].map((tab, index) => (
             <button className={index === 0 ? "active" : ""} key={tab} type="button">{tab}</button>
           ))}
         </div>

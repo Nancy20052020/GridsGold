@@ -3,11 +3,12 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Boxes, Plus, Search } from "lucide-react";
+import { INVENTORY_TABS, isRemovedCategory } from "../lib/categories";
 import { AppShell } from "../components/AppShell";
 import { ItemImage } from "../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR } from "../lib/store";
 
-const tabs = ["All Items", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Gold Bars", "Others"];
+const tabs = [...INVENTORY_TABS];
 
 export default function InventoryPage() {
   const { items, rates } = useStore();
@@ -18,6 +19,7 @@ export default function InventoryPage() {
   const visible = useMemo(
     () =>
       items.filter((item) => {
+        if (isRemovedCategory(item.category)) return false;
         const inTab = tab === "All Items" || item.category === tab;
         const inQuery =
           !query ||

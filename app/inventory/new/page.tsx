@@ -4,13 +4,14 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, PackagePlus } from "lucide-react";
+import { INVENTORY_CATEGORIES, PRODUCT_ICONS } from "../../lib/categories";
 import { AppShell } from "../../components/AppShell";
 import { useStore, itemPrice, formatINR, type Karat } from "../../lib/store";
 
-const categories = ["Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Gold Bars", "Coins", "Others"];
+const categories = [...INVENTORY_CATEGORIES];
 const karats: Karat[] = ["24K", "22K", "18K", "925", "PT950"];
 const branches = ["Main Branch", "Branch 2", "Branch 3", "Branch 4", "Vault"];
-const icons = ["ring", "necklace", "bangle", "earrings", "pendant"];
+const icons = [...PRODUCT_ICONS];
 
 export default function AddItemPage() {
   const router = useRouter();
