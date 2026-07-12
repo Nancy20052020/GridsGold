@@ -7,7 +7,7 @@ import { AppShell } from "../components/AppShell";
 import { ItemImage } from "../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR } from "../lib/store";
 
-const cats = ["All", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Chains", "Gold Bars", "Others"];
+const cats = ["All", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Gold Bars", "Others"];
 
 export default function JewelryCatalogPage() {
   const { items, rates, addToCart } = useStore();

@@ -7,10 +7,10 @@ import { ArrowLeft, PackagePlus } from "lucide-react";
 import { AppShell } from "../../components/AppShell";
 import { useStore, itemPrice, formatINR, type Karat } from "../../lib/store";
 
-const categories = ["Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Chains", "Gold Bars", "Coins", "Others"];
+const categories = ["Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Gold Bars", "Coins", "Others"];
 const karats: Karat[] = ["24K", "22K", "18K", "925", "PT950"];
 const branches = ["Main Branch", "Branch 2", "Branch 3", "Branch 4", "Vault"];
-const icons = ["ring", "necklace", "bangle", "earrings", "pendant", "chain"];
+const icons = ["ring", "necklace", "bangle", "earrings", "pendant"];
 
 export default function AddItemPage() {
   const router = useRouter();

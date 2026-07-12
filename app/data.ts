@@ -136,7 +136,7 @@ export const inventoryRows = [
   ["Gold Necklace Set", "NK22K-00098", "Necklaces", "22K (916)", "18.750 g", "In Stock", "Main Branch", "â‚¹ 1,35,919"],
   ["Diamond Earrings", "ER18K-00231", "Earrings", "18K (750)", "6.120 g", "In Stock", "Branch 2", "â‚¹ 72,031"],
   ["Gold Bangle", "BG22K-00112", "Bangles", "22K (916)", "15.300 g", "Low Stock", "Main Branch", "â‚¹ 2,21,759"],
-  ["Gold Chain", "CH22K-00105", "Chains", "22K (916)", "11.850 g", "Out of Stock", "Main Branch", "-"],
+  ["Gold Pendant", "PD22K-00177", "Pendants", "22K (916)", "4.760 g", "In Stock", "Branch 3", "₹ 48,500"],
   ["Gold Bar 10g", "GB22K-01003", "Gold Bars", "24K (999)", "10.000 g", "In Stock", "Vault", "â‚¹ 3,47,500"],
 ];
 

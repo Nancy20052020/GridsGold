@@ -11,7 +11,7 @@ import { inventoryRows, sampleRows, screenConfigs, screenGroups, type ScreenConf
 
 const inventoryColumns = ["Item", "SKU / Barcode", "Category", "Purity", "Weight", "Status", "Location", "Value"];
 const defaultColumns = ["Reference", "Party", "Description", "Amount", "Status", "Date"];
-const inventoryTabs = ["All Items", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Chains", "Gold Bars", "Coins", "Diamonds"];
+const inventoryTabs = ["All Items", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Gold Bars", "Coins", "Diamonds"];
 
 const defaultStats = [
   { label: "Open Records", value: "128", delta: "Actionable", tone: "gold" },
@@ -108,7 +108,7 @@ function ScreenTable({ screen }: { screen: ScreenConfig }) {
 }
 
 function PosScreen() {
-  const products = ["22K Ring", "Gold Necklace", "Bangle Bracelet", "Diamond Ring", "Gold Chain", "22K Pendant"];
+  const products = ["22K Ring", "Gold Necklace", "Bangle Bracelet", "Diamond Ring", "Gold Pendant", "22K Pendant"];
   return (
     <section className="pos-layout">
       <article className="erp-panel">

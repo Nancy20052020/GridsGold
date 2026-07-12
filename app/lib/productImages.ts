@@ -3,6 +3,8 @@ export const PRODUCT_IMAGE_FILES = {
   rings: ["ring_1.png", "ring_2.png", "ring_3.png", "ring_4.png", "ring_5.png"],
   necklaces: ["necklace_1.png", "necklace_2.png", "necklace_3.png"],
   earrings: ["earrings_1.png", "earrings_2.png"],
+  bangles: ["bangle_1.png", "bangle_2.png"],
+  pendants: ["pendant_1.png", "pendant_2.png"],
   anklet: ["anklet_1.png"],
 } as const;
 
@@ -10,10 +12,9 @@ export const PRODUCT_IMAGE_FILES = {
 export const CATEGORY_IMAGES: Record<string, string> = {
   Rings: "ring_1.png",
   Necklaces: "necklace_1.png",
-  Bangles: "ring_5.png",
+  Bangles: "bangle_1.png",
   Earrings: "earrings_1.png",
-  Pendants: "ring_2.png",
-  Chains: "necklace_3.png",
+  Pendants: "pendant_1.png",
 };
 
 /** Hero banner on `/portal`. */

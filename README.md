@@ -32,7 +32,9 @@ Optional browser icons: `app/icon.png` (512×512), `app/apple-icon.png` (180×18
 | `ring_1.png` … `ring_5.png` | Ring products + category tiles |
 | `necklace_1.png` … `necklace_3.png` | Necklace products + hero banner |
 | `earrings_1.png`, `earrings_2.png` | Earring products + category tile |
-| `anklet_1.png` | Silver Anklet product |
+| `bangle_1.png`, `bangle_2.png` | Bangle products + category tile |
+| `pendant_1.png`, `pendant_2.png` | Pendant products + category tile |
+| `anklet_1.png` | Gold Stone Anklet product |
 
 ```
 public/images/
@@ -46,6 +48,10 @@ public/images/
   necklace_3.png
   earrings_1.png
   earrings_2.png
+  bangle_1.png
+  bangle_2.png
+  pendant_1.png
+  pendant_2.png
   anklet_1.png
 ```
 

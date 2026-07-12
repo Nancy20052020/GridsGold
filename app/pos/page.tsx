@@ -7,7 +7,7 @@ import { AppShell } from "../components/AppShell";
 import { ItemImage } from "../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR } from "../lib/store";
 
-const categories = ["All", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Chains"];
+const categories = ["All", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants"];
 
 export default function PosPage() {
   const { items, rates, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, customers } = useStore();
