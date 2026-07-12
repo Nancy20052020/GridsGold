@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown, ShieldCheck, Sparkles, Truck } from "lucide-react";
 import { moduleGroups } from "../lib/landingModules";
 import { BrandMark } from "./BrandMark";
 
@@ -21,68 +21,78 @@ export function LandingNav() {
   }, []);
 
   return (
-    <header className="landing-nav">
-      <Link className="landing-nav-brand" href="/">
-        <BrandMark className="auth-logo-mark" />
-        <div>
-          <strong>GRIDS GOLD</strong>
-          <span>JEWELLERY ERP</span>
-        </div>
-      </Link>
-
-      <nav className="landing-nav-links" aria-label="Landing sections">
-        <div className="landing-nav-dropdown-wrap" ref={wrapRef}>
-          <button
-            type="button"
-            className={`landing-nav-dropdown-trigger ${modulesOpen ? "open" : ""}`}
-            aria-expanded={modulesOpen}
-            aria-haspopup="true"
-            onClick={() => setModulesOpen((open) => !open)}
-          >
-            Modules <ChevronDown size={15} />
-          </button>
-
-          {modulesOpen ? (
-            <div className="landing-mega-menu" role="menu">
-              <div className="landing-mega-grid">
-                {moduleGroups.map((group) => (
-                  <div className="landing-mega-col" key={group.label}>
-                    <span className="landing-mega-label">{group.label}</span>
-                    {group.items.map(({ icon: Icon, title, copy, href }) => (
-                      <a
-                        className="landing-mega-item"
-                        href={href}
-                        key={title}
-                        role="menuitem"
-                        onClick={() => setModulesOpen(false)}
-                      >
-                        <span className="landing-mega-icon"><Icon size={17} /></span>
-                        <span>
-                          <strong>{title}</strong>
-                          <small>{copy}</small>
-                        </span>
-                      </a>
-                    ))}
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null}
-        </div>
-
-        <a href="#features">Features</a>
-        <a href="#pricing">Pricing</a>
-        <a href="#about">About</a>
-      </nav>
-
-      <div className="landing-nav-actions">
-        <Link className="landing-nav-signin" href="/login">
-          Sign in
-        </Link>
-        <Link className="landing-nav-cta" href="/login?signup=1">
-          Get started <ArrowRight size={16} />
-        </Link>
+    <div className="landing-nav-wrap">
+      <div className="landing-announcement">
+        <span><Sparkles size={13} /> Live 22K gold rate pricing</span>
+        <span><ShieldCheck size={13} /> BIS Hallmarked</span>
+        <span><Truck size={13} /> Insured delivery</span>
+        <span>100% Secure</span>
       </div>
-    </header>
+
+      <header className="landing-nav">
+        <Link className="landing-nav-brand" href="/">
+          <BrandMark className="auth-logo-mark" />
+          <div>
+            <strong>GRIDS GOLD</strong>
+            <span>JEWELLERY ERP</span>
+          </div>
+        </Link>
+
+        <nav className="landing-nav-links" aria-label="Landing sections">
+          <div className="landing-nav-dropdown-wrap" ref={wrapRef}>
+            <button
+              type="button"
+              className={`landing-nav-dropdown-trigger ${modulesOpen ? "open" : ""}`}
+              aria-expanded={modulesOpen}
+              aria-haspopup="true"
+              onClick={() => setModulesOpen((open) => !open)}
+            >
+              Modules <ChevronDown size={15} />
+            </button>
+
+            {modulesOpen ? (
+              <div className="landing-mega-menu" role="menu">
+                <div className="landing-mega-grid">
+                  {moduleGroups.map((group) => (
+                    <div className="landing-mega-col" key={group.label}>
+                      <span className="landing-mega-label">{group.label}</span>
+                      {group.items.map(({ icon: Icon, title, copy, href }) => (
+                        <a
+                          className="landing-mega-item"
+                          href={href}
+                          key={title}
+                          role="menuitem"
+                          onClick={() => setModulesOpen(false)}
+                        >
+                          <span className="landing-mega-icon"><Icon size={17} /></span>
+                          <span>
+                            <strong>{title}</strong>
+                            <small>{copy}</small>
+                          </span>
+                        </a>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+
+          <a href="#demo">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#about">About</a>
+        </nav>
+
+        <div className="landing-nav-actions">
+          <Link className="landing-nav-signin" href="/login">
+            Sign in
+          </Link>
+          <Link className="landing-nav-cta" href="/login?signup=1">
+            Get started <ArrowRight size={16} />
+          </Link>
+        </div>
+      </header>
+    </div>
   );
 }

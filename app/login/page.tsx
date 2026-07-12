@@ -3,63 +3,101 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, BadgeCheck, ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
+import {
+  BadgeCheck,
+  Boxes,
+  ShieldCheck,
+  ShoppingBag,
+  Sparkles,
+  TrendingUp,
+  Wrench,
+} from "lucide-react";
 import { AuthPanel } from "../components/AuthPanel";
 import { BrandMark } from "../components/BrandMark";
+
+const highlights = [
+  { icon: ShoppingBag, title: "Point of Sale", copy: "Barcode billing, gold-rate pricing & split payments." },
+  { icon: Boxes, title: "Live Inventory", copy: "Track weight, purity & stones across branches." },
+  { icon: Wrench, title: "Repairs & Orders", copy: "Follow jobs from intake to pickup." },
+  { icon: BadgeCheck, title: "Certificates", copy: "Hallmark & lab docs with every item." },
+];
+
+const trust = [
+  { icon: TrendingUp, label: "Live Gold Rate", value: "₹ 7,245 /gm" },
+  { icon: ShieldCheck, label: "Secure", value: "Cloud ready" },
+];
 
 function LoginContent() {
   const params = useSearchParams();
   const isSignup = params.get("signup") === "1";
 
   return (
-    <div className="auth-standalone">
-      <Link className="auth-back-link" href="/">
-        <ArrowLeft size={16} /> Back to Grids Gold
-      </Link>
-
-      <div className="auth-standalone-grid">
-        <aside className="auth-standalone-brand">
-          <div className="auth-standalone-brand-top">
+    <div className="auth-page">
+      <aside className="auth-brand">
+        <div className="auth-brand-top">
+          <Link className="auth-logo" href="/">
             <BrandMark className="auth-logo-mark" />
             <div>
               <strong>GRIDS GOLD</strong>
               <span>JEWELLERY ERP</span>
             </div>
-          </div>
+          </Link>
+          <span className="auth-rate-pill">
+            <Sparkles size={14} /> Gold 22K · ₹ 7,245/gm
+          </span>
+        </div>
 
-          <h1>{isSignup ? "Create your workspace" : "Welcome back"}</h1>
+        <div className="auth-brand-hero">
+          <span className="auth-eyebrow">Retail · Repairs · Wholesale</span>
+          <h1>
+            {isSignup ? "Create your " : "Welcome back to "}
+            <span>Grids Gold.</span>
+          </h1>
           <p>
             {isSignup
-              ? "Join as a customer to track orders and repairs, or sign in as staff to run your showroom."
-              : "Sign in to your customer portal or admin workspace."}
+              ? "Join as a customer or sign in as staff to run your showroom from one elegant platform."
+              : "Sign in to your customer portal or admin workspace — inventory, billing and repairs in sync."}
           </p>
 
-          <ul className="auth-standalone-points">
-            <li><Sparkles size={16} /> Live gold-rate pricing</li>
-            <li><BadgeCheck size={16} /> BIS hallmark ready</li>
-            <li><TrendingUp size={16} /> Multi-branch inventory</li>
-            <li><ShieldCheck size={16} /> Secure cloud access</li>
-          </ul>
+          <div className="auth-highlights">
+            {highlights.map(({ icon: Icon, title, copy }) => (
+              <div className="auth-highlight" key={title}>
+                <span><Icon size={18} /></span>
+                <div>
+                  <strong>{title}</strong>
+                  <small>{copy}</small>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-          <p className="auth-standalone-foot">
-            New here?{" "}
-            <Link href={isSignup ? "/login" : "/login?signup=1"}>
-              {isSignup ? "Sign in instead" : "Create an account"}
-            </Link>
-          </p>
-        </aside>
+        <div className="auth-trust">
+          {trust.map(({ icon: Icon, label, value }) => (
+            <div className="auth-trust-item" key={label}>
+              <Icon size={16} />
+              <div>
+                <small>{label}</small>
+                <strong>{value}</strong>
+              </div>
+            </div>
+          ))}
+        </div>
+      </aside>
 
-        <main className="auth-standalone-main">
-          <AuthPanel initialMode={isSignup ? "signup" : "signin"} />
-        </main>
-      </div>
+      <main className="auth-main">
+        <AuthPanel initialMode={isSignup ? "signup" : "signin"} />
+        <p className="auth-foot">
+          <Link href="/">← Back to website</Link>
+        </p>
+      </main>
     </div>
   );
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="auth-standalone auth-standalone-loading">Loading…</div>}>
+    <Suspense fallback={<div className="auth-page auth-page-loading">Loading…</div>}>
       <LoginContent />
     </Suspense>
   );
