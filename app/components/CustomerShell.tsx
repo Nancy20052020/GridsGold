@@ -132,17 +132,22 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
             <Sparkles size={14} /> 22K · ₹ {rates["22K"].toLocaleString("en-IN")}/gm
           </span>
           {greeting ? <span className="portal-greeting">Hi, {greeting}</span> : null}
-          <Link className="portal-account" href="/portal/account" aria-label="Account">
+          <Link className="portal-icon-btn" href="/portal/account" aria-label="Account">
             <UserRound size={18} />
           </Link>
-          <button className="portal-logout" type="button" onClick={signOut} aria-label="Sign out">
+          <button className="portal-icon-btn" type="button" onClick={signOut} aria-label="Sign out">
             <LogOut size={18} />
           </button>
         </div>
 
-        <Link className="portal-account portal-header-account" href="/portal/account" aria-label="Account">
-          <UserRound size={18} />
-        </Link>
+        <div className="portal-actions portal-actions-mobile">
+          <Link className="portal-icon-btn" href="/portal/account" aria-label="Account">
+            <UserRound size={18} />
+          </Link>
+          <button className="portal-icon-btn" type="button" onClick={signOut} aria-label="Sign out">
+            <LogOut size={18} />
+          </button>
+        </div>
       </header>
 
       <main className="portal-main">{children}</main>
