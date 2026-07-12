@@ -65,8 +65,6 @@ export function AdminQuickSearch({ placeholder = "Search item, customer, invoice
           value={query}
           placeholder={placeholder}
           aria-label="Quick search"
-          aria-expanded={showPanel}
-          aria-controls="admin-search-results"
           onChange={(e) => {
             setQuery(e.target.value);
             setOpen(true);
