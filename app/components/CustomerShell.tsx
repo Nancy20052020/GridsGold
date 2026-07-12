@@ -127,7 +127,7 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="portal-actions portal-actions-desktop">
+        <div className="portal-actions-desktop">
           <span className="portal-rate">
             <Sparkles size={14} /> 22K · ₹ {rates["22K"].toLocaleString("en-IN")}/gm
           </span>
@@ -140,7 +140,7 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
           </button>
         </div>
 
-        <div className="portal-actions portal-actions-mobile">
+        <div className="portal-actions-mobile">
           <Link className="portal-icon-btn" href="/portal/account" aria-label="Account">
             <UserRound size={18} />
           </Link>
