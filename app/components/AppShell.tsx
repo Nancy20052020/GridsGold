@@ -17,7 +17,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { adminNavGroups, adminQuickAddLinks } from "../lib/adminNav";
-import { BRANCHES, firstName, useStore, userInitials } from "../lib/store";
+import { BRANCHES, firstName, useStore } from "../lib/store";
 import { BrandMark } from "./BrandMark";
 
 type AppShellProps = { children: React.ReactNode; searchPlaceholder?: string };
@@ -67,7 +67,6 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
   const displayName = currentUser?.name ?? "Store Admin";
   const displayRole = currentUser?.role === "customer" ? "Customer" : "Administrator";
   const greeting = firstName(currentUser);
-  const initials = userInitials(currentUser) || "GG";
 
   function signOut() {
     logout();
@@ -228,7 +227,9 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
 
             <div className="menu-wrap">
               <button className="profile" type="button" onClick={() => setMenu(menu === "profile" ? null : "profile")}>
-                <span className="profile-avatar">{initials}</span>
+                <span className="profile-avatar" aria-hidden="true">
+                  <UserRound size={17} strokeWidth={2.2} />
+                </span>
                 <span className="profile-text">
                   <strong>{displayName}</strong>
                   <span>{displayRole}</span>

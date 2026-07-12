@@ -66,12 +66,7 @@ export function topSellingItems(invoices: Invoice[], items: Item[], rates: Rates
 
 export function salesTrendFromInvoices(invoices: Invoice[]) {
   if (invoices.length === 0) {
-    return [
-      { label: "Week 1", value: 0.8 },
-      { label: "Week 2", value: 1.1 },
-      { label: "Week 3", value: 0.9 },
-      { label: "Week 4", value: 1.4 },
-    ];
+    return DEMO_SALES_TREND;
   }
 
   return invoices.slice(-8).map((inv, i) => ({
@@ -79,6 +74,18 @@ export function salesTrendFromInvoices(invoices: Invoice[]) {
     value: inv.total / 100000,
   }));
 }
+
+/** Demo weekly sales trend (₹ Lakhs) for dashboard when live data is sparse. */
+export const DEMO_SALES_TREND = [
+  { label: "Week 1", value: 2.1 },
+  { label: "Week 2", value: 2.6 },
+  { label: "Week 3", value: 2.3 },
+  { label: "Week 4", value: 3.1 },
+  { label: "Week 5", value: 2.9 },
+  { label: "Week 6", value: 3.4 },
+  { label: "Week 7", value: 3.8 },
+  { label: "Week 8", value: 4.2 },
+];
 
 export function monthlyBars(invoices: Invoice[]) {
   const buckets = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
