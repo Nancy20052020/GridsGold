@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Package, Truck } from "lucide-react";
+import { Package, Truck, X } from "lucide-react";
 import { CustomerShell } from "../../components/CustomerShell";
 import { useStore, formatINR } from "../../lib/store";
 
 export default function OrdersPage() {
-  const { orders } = useStore();
+  const { orders, unreserve } = useStore();
 
   return (
     <CustomerShell>
@@ -36,8 +36,13 @@ export default function OrdersPage() {
                   <strong>{order.name}</strong>
                   <small>{formatINR(order.amount)} · {order.date}</small>
                 </div>
-                <span className={`status-pill ${order.status === "Delivered" ? "success" : order.status === "Reserved" ? "warning" : "warning"}`}>{order.status}</span>
-                <Link href={`/portal/product/${order.itemId}`} className="portal-btn ghost small">View</Link>
+                <span className={`status-pill ${order.status === "Delivered" ? "success" : "warning"}`}>{order.status}</span>
+                <div className="order-actions">
+                  <Link href={`/portal/product/${order.itemId}`} className="portal-btn ghost small">View</Link>
+                  {order.status === "Reserved" ? (
+                    <button type="button" className="portal-btn ghost small danger" onClick={() => unreserve(order.id)}><X size={14} /> Unreserve</button>
+                  ) : null}
+                </div>
               </article>
             ))}
           </div>

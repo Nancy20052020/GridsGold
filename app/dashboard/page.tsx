@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
 import {
   CalendarDays,
   ChevronDown,
@@ -14,44 +18,22 @@ import {
   Wrench,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
-
-const kpis = [
-  { label: "Total Sales", value: "₹ 18,90,45,000", delta: "12.5%", icon: ShoppingCart, tone: "blue" },
-  { label: "Total Profit", value: "₹ 2,46,80,000", delta: "8.7%", icon: WalletCards, tone: "green" },
-  { label: "Transactions", value: "24,540", delta: "9.3%", icon: TrendingUp, tone: "violet" },
-  { label: "Customers", value: "3,254", delta: "11.8%", icon: UserRound, tone: "gold" },
-  { label: "Gold Price (22K)", value: "₹ 7,245 /gm", delta: "1.21%", icon: CircleDollarSign, tone: "gold" },
-];
+import { firstName, formatINR, useStore } from "../lib/store";
 
 const categories = [
-  ["Rings", "32%", "₹ 6.05 Cr", "#f7b839"],
-  ["Necklaces", "28%", "₹ 5.29 Cr", "#1d64d8"],
-  ["Bangles", "18%", "₹ 3.40 Cr", "#6e43d8"],
-  ["Earrings", "12%", "₹ 2.27 Cr", "#2aa868"],
-  ["Others", "10%", "₹ 1.89 Cr", "#88a0c1"],
+  ["Rings", "32%", "6.05 Cr", "#f7b839"],
+  ["Necklaces", "28%", "5.29 Cr", "#1d64d8"],
+  ["Bangles", "18%", "3.40 Cr", "#6e43d8"],
+  ["Earrings", "12%", "2.27 Cr", "#2aa868"],
+  ["Others", "10%", "1.89 Cr", "#88a0c1"],
 ];
 
-const items = [
+const topItems = [
   ["22K Gold Ring", "5.25 Cr", "15.2%", "ring"],
   ["Gold Necklace Set", "4.10 Cr", "12.5%", "necklace"],
   ["Gold Bangle", "3.75 Cr", "9.8%", "bangle"],
   ["Diamond Earrings", "2.15 Cr", "8.1%", "earrings"],
   ["Gold Pendant", "1.65 Cr", "7.3%", "pendant"],
-];
-
-const activities = [
-  ["New order #ORD-1258 received", "10:30 AM"],
-  ["Gold price updated (22K)", "09:15 AM"],
-  ["Payment received from John Smith", "Yesterday"],
-  ["Repair #REP-1023 completed", "Yesterday"],
-  ["Stock transfer to Branch 2", "28 Apr, 2025"],
-];
-
-const stockAlerts = [
-  ["Gold Chain (22K)", "Stock: 3 Pcs"],
-  ["Gold Bangles (22K)", "Stock: 5 Pcs"],
-  ["Diamond Ring", "Stock: 2 Pcs"],
-  ["Gold Earrings (18K)", "Stock: 4 Pcs"],
 ];
 
 const branchRows = [
@@ -68,70 +50,78 @@ const summaryItems = [
   { label: "New Customers", value: "24", delta: "20%", icon: UsersRound },
 ];
 
-const trendPoints = [12, 24, 23, 27, 42, 56, 38, 45, 34, 52, 44, 57, 48, 69, 61, 82, 74, 92];
+const trend = [
+  { label: "1 Apr", value: 12.4 },
+  { label: "5 Apr", value: 13.9 },
+  { label: "9 Apr", value: 12.7 },
+  { label: "13 Apr", value: 15.2 },
+  { label: "17 Apr", value: 14.1 },
+  { label: "21 Apr", value: 16.8 },
+  { label: "25 Apr", value: 18.75 },
+  { label: "30 Apr", value: 18.9 },
+];
+
 const barGroups = [28, 42, 55, 35, 72, 48, 62, 78, 43, 70, 50, 86];
 
-function LineChart() {
-  const points = trendPoints
-    .map((value, index) => `${(index / (trendPoints.length - 1)) * 100},${100 - value}`)
-    .join(" ");
+function TrendChart() {
+  const [hover, setHover] = useState<number | null>(null);
+  const max = Math.max(...trend.map((t) => t.value)) * 1.1;
+  const min = Math.min(...trend.map((t) => t.value)) * 0.9;
+  const x = (i: number) => (i / (trend.length - 1)) * 100;
+  const y = (v: number) => 100 - ((v - min) / (max - min)) * 100;
+  const line = trend.map((t, i) => `${x(i)},${y(t.value)}`).join(" ");
 
   return (
-    <div className="chart line-chart">
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+    <div className="trend">
+      <svg viewBox="0 0 100 100" preserveAspectRatio="none" onMouseLeave={() => setHover(null)}>
         <defs>
-          <linearGradient id="goldFill" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#f5b638" stopOpacity="0.26" />
+          <linearGradient id="tg" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#f5b638" stopOpacity="0.28" />
             <stop offset="100%" stopColor="#f5b638" stopOpacity="0" />
           </linearGradient>
         </defs>
-        <polygon points={`0,100 ${points} 100,100`} fill="url(#goldFill)" />
-        <polyline points={points} fill="none" stroke="#e7a823" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
-      </svg>
-      <div className="chart-tooltip">
-        <span>22 Apr, 2025</span>
-        <strong>₹ 18.75 Cr</strong>
-      </div>
-      <div className="axis-labels">
-        <span>1 Apr</span>
-        <span>8 Apr</span>
-        <span>15 Apr</span>
-        <span>22 Apr</span>
-        <span>30 Apr</span>
-      </div>
-    </div>
-  );
-}
-
-function DonutChart() {
-  return (
-    <div className="donut-wrap">
-      <div className="donut" />
-      <div className="category-list">
-        {categories.map(([name, percent, value, color]) => (
-          <div className="category-row" key={name}>
-            <span className="dot" style={{ background: color }} />
-            <span>{name}</span>
-            <strong>{percent}</strong>
-            <small>{value}</small>
-          </div>
+        <polygon points={`0,100 ${line} 100,100`} fill="url(#tg)" />
+        <polyline points={line} fill="none" stroke="#e7a823" strokeWidth="2.5" vectorEffect="non-scaling-stroke" />
+        {trend.map((t, i) => (
+          <circle
+            key={t.label}
+            className="dot"
+            cx={x(i)}
+            cy={y(t.value)}
+            r={hover === i ? 3.4 : 2.2}
+            fill={hover === i ? "#e7a823" : "#fff"}
+            stroke="#e7a823"
+            strokeWidth="1.6"
+            vectorEffect="non-scaling-stroke"
+            onMouseEnter={() => setHover(i)}
+          />
         ))}
+      </svg>
+      {hover !== null ? (
+        <div className="trend-tip" style={{ left: `${x(hover)}%`, top: `${(y(trend[hover].value) / 100) * 190}px` }}>
+          <span>{trend[hover].label}</span>
+          <strong>₹ {trend[hover].value.toFixed(2)} Cr</strong>
+        </div>
+      ) : null}
+      <div className="trend-axis">
+        {trend.filter((_, i) => i % 2 === 0).map((t) => <span key={t.label}>{t.label}</span>)}
       </div>
-    </div>
-  );
-}
-
-function BarChart() {
-  return (
-    <div className="bars" aria-hidden="true">
-      {barGroups.map((height, index) => (
-        <span key={index} style={{ height: `${height}%` }} />
-      ))}
     </div>
   );
 }
 
 export default function DashboardPage() {
+  const { rates, currentUser, invoices, customers } = useStore();
+  const name = firstName(currentUser) || "Admin";
+
+  const kpis = [
+    { label: "Total Sales", value: "₹ 18,90,45,000", delta: "12.5%", icon: ShoppingCart, tone: "blue" },
+    { label: "Total Profit", value: "₹ 2,46,80,000", delta: "8.7%", icon: WalletCards, tone: "green" },
+    { label: "Transactions", value: "24,540", delta: "9.3%", icon: TrendingUp, tone: "violet" },
+    { label: "Customers", value: customers.length.toLocaleString("en-IN"), delta: "11.8%", icon: UserRound, tone: "gold" },
+    { label: "Gold Price (22K)", value: `${formatINR(rates["22K"])} /gm`, delta: "1.21%", icon: CircleDollarSign, tone: "gold" },
+  ];
+
   return (
     <AppShell>
       <section className="dashboard page-content">
@@ -140,14 +130,12 @@ export default function DashboardPage() {
             <Crown size={28} />
             <div>
               <h1>Executive Overview</h1>
-              <p>Welcome back, Admin</p>
+              <p>Welcome back, {name}</p>
             </div>
           </div>
           <div className="heading-actions">
-            <button className="date-button" type="button">
-              30 Apr, 2025 <CalendarDays size={16} />
-            </button>
-            <button className="export-button" type="button">Export Report</button>
+            <Link className="date-button" href="/gold-rates">Today &middot; {rates["22K"].toLocaleString("en-IN")}/g <CalendarDays size={16} /></Link>
+            <Link className="export-button" href="/reports">Reports</Link>
           </div>
         </div>
 
@@ -161,9 +149,7 @@ export default function DashboardPage() {
                   <strong>{kpi.value}</strong>
                   <p>↑ {kpi.delta} <small>vs last month</small></p>
                 </div>
-                <div className={`kpi-icon ${kpi.tone}`}>
-                  <Icon size={24} />
-                </div>
+                <div className={`kpi-icon ${kpi.tone}`}><Icon size={22} /></div>
               </article>
             );
           })}
@@ -173,9 +159,9 @@ export default function DashboardPage() {
           <article className="panel panel-wide">
             <div className="panel-head">
               <h2>Sales Trend</h2>
-              <button type="button">This Month <ChevronDown size={14} /></button>
+              <span className="muted" style={{ fontSize: 13 }}>Hover points for detail</span>
             </div>
-            <LineChart />
+            <TrendChart />
           </article>
 
           <article className="panel">
@@ -183,20 +169,32 @@ export default function DashboardPage() {
               <h2>Sales by Category</h2>
               <button type="button">This Month <ChevronDown size={14} /></button>
             </div>
-            <DonutChart />
+            <div className="donut-wrap">
+              <div className="donut" />
+              <div className="category-list">
+                {categories.map(([name, percent, value, color]) => (
+                  <div className="category-row" key={name}>
+                    <span className="dot" style={{ background: color }} />
+                    <span>{name}</span>
+                    <strong>{percent}</strong>
+                    <small>₹ {value}</small>
+                  </div>
+                ))}
+              </div>
+            </div>
           </article>
 
           <article className="panel">
             <div className="panel-head">
               <h2>Top Selling Items</h2>
-              <button type="button">This Month <ChevronDown size={14} /></button>
+              <Link className="link-button" href="/reports" style={{ width: "auto", margin: 0 }}>View report</Link>
             </div>
             <div className="item-list">
-              {items.map(([name, value, delta, icon]) => (
-                <div className="item-row" key={name}>
+              {topItems.map(([n, value, delta, icon]) => (
+                <div className="item-row" key={n}>
                   <span className={`jewel-icon ${icon}`} />
-                  <span>{name}</span>
-                  <strong>{value}</strong>
+                  <span>{n}</span>
+                  <strong>₹ {value}</strong>
                   <em>↑ {delta}</em>
                 </div>
               ))}
@@ -204,9 +202,7 @@ export default function DashboardPage() {
           </article>
 
           <article className="panel summary-panel">
-            <div className="panel-head">
-              <h2>Today&apos;s Summary</h2>
-            </div>
+            <div className="panel-head"><h2>Today&apos;s Summary</h2></div>
             <div className="summary-grid">
               {summaryItems.map(({ label, value, delta, icon: Icon }) => (
                 <div className="summary-card" key={label}>
@@ -228,52 +224,44 @@ export default function DashboardPage() {
               <div><span>Total Profit</span><strong>₹ 2,46,80,000</strong><p>↑ 8.7% vs last month</p></div>
               <div><span>Gross Profit</span><strong>₹ 3,12,40,000</strong><span>Expenses ₹ 65,60,000</span></div>
             </div>
-            <BarChart />
+            <div className="bars" aria-hidden="true">
+              {barGroups.map((height, index) => <span key={index} style={{ height: `${height}%` }} />)}
+            </div>
           </article>
 
           <article className="panel">
-            <div className="panel-head">
-              <h2>Branch Comparison</h2>
-              <button type="button">This Month <ChevronDown size={14} /></button>
-            </div>
+            <div className="panel-head"><h2>Branch Comparison</h2></div>
             <table className="branch-table">
-              <thead>
-                <tr><th>Branch</th><th>Sales</th><th>Profit</th><th>Orders</th></tr>
-              </thead>
+              <thead><tr><th>Branch</th><th>Sales</th><th>Profit</th><th>Orders</th></tr></thead>
               <tbody>
                 {branchRows.map((row) => (
-                  <tr key={row[0]}>{row.map((cell) => <td key={cell}>{cell}</td>)}</tr>
+                  <tr key={row[0]}><td>{row[0]}</td><td>₹ {row[1]}</td><td>₹ {row[2]}</td><td>{row[3]}</td></tr>
                 ))}
               </tbody>
             </table>
-            <button className="link-button" type="button">View All Branches</button>
+            <Link className="link-button" href="/reports">View All Branches</Link>
           </article>
 
           <article className="panel">
-            <div className="panel-head">
-              <h2>Recent Activities</h2>
-            </div>
+            <div className="panel-head"><h2>Recent Invoices</h2><Link className="link-button" href="/sales/invoices" style={{ width: "auto", margin: 0 }}>View all</Link></div>
             <div className="activity-list">
-              {activities.map(([text, time], index) => (
-                <div className="activity-row" key={text}>
+              {invoices.slice(0, 5).map((inv, index) => (
+                <div className="activity-row" key={inv.id}>
                   <span>{index + 1}</span>
-                  <p>{text}</p>
-                  <time>{time}</time>
+                  <p>{inv.number} · {inv.customer}</p>
+                  <time>{formatINR(inv.total)}</time>
                 </div>
               ))}
             </div>
           </article>
 
           <article className="panel">
-            <div className="panel-head">
-              <h2>Low Stock Alerts</h2>
-              <button type="button">View All</button>
-            </div>
+            <div className="panel-head"><h2>Low Stock Alerts</h2><Link className="link-button" href="/inventory" style={{ width: "auto", margin: 0 }}>View all</Link></div>
             <div className="stock-list">
-              {stockAlerts.map(([name, stock], index) => (
-                <div className="stock-row" key={name}>
+              {["Gold Chain (22K)", "Gold Bangles (22K)", "Diamond Ring", "Gold Earrings (18K)"].map((n, index) => (
+                <div className="stock-row" key={n}>
                   <span className={`jewel-icon ${index % 2 ? "bangle" : "chain"}`} />
-                  <div><strong>{name}</strong><small>{stock}</small></div>
+                  <div><strong>{n}</strong><small>Stock: {5 - index} Pcs</small></div>
                   <em>Low Stock</em>
                 </div>
               ))}
@@ -281,9 +269,7 @@ export default function DashboardPage() {
           </article>
 
           <article className="panel">
-            <div className="panel-head">
-              <h2><Sparkles size={19} /> Insights</h2>
-            </div>
+            <div className="panel-head"><h2><Sparkles size={19} /> Insights</h2></div>
             <div className="insights">
               <p>Bangles category sales are expected to increase by 28% before Akshaya Tritiya.</p>
               <p>Customer demand for lightweight jewelry is trending up in your region.</p>

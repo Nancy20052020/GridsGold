@@ -10,6 +10,10 @@ const explicitPaths = new Set([
   "/inventory",
   "/inventory/new",
   "/inventory/item-details",
+  "/inventory/movements",
+  "/inventory/transfers",
+  "/inventory/adjustments",
+  "/inventory/cycle-count",
   "/customers",
   "/repairs",
   "/gold-rates",
@@ -17,6 +21,12 @@ const explicitPaths = new Set([
   "/suppliers",
   "/purchase-orders",
   "/sales/invoices",
+  "/finance",
+  "/wholesale",
+  "/reports",
+  "/analytics",
+  "/manufacturing",
+  "/settings",
 ]);
 
 export function generateStaticParams() {

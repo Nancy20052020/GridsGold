@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useStore } from "./lib/store";
 import {
   ArrowRight,
   BadgeCheck,
@@ -39,6 +40,7 @@ const trust = [
 
 export default function AuthLandingPage() {
   const router = useRouter();
+  const { signup, login } = useStore();
   const [role, setRole] = useState<Role>("customer");
   const [mode, setMode] = useState<Mode>("signin");
   const [showPassword, setShowPassword] = useState(false);
@@ -80,6 +82,12 @@ export default function AuthLandingPage() {
         setError("Passwords do not match.");
         return;
       }
+    }
+
+    if (isSignup) {
+      signup({ name: form.fullName.trim(), email: form.email.trim(), mobile: form.mobile.trim(), city: form.company.trim(), role });
+    } else {
+      login(form.email.trim(), role);
     }
 
     router.push(isAdmin ? "/dashboard" : "/portal");

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { ArrowRight, Clock, Heart, Package, ShieldCheck, Sparkles, Truck } from "lucide-react";
 import { CustomerShell } from "../components/CustomerShell";
-import { useStore, itemPrice, itemStatus, formatINR } from "../lib/store";
+import { useStore, itemPrice, itemStatus, formatINR, firstName } from "../lib/store";
 
 const categories = [
   { name: "Rings", icon: "ring" },
@@ -15,15 +15,16 @@ const categories = [
 ];
 
 export default function CustomerPortalHome() {
-  const { items, rates, wishlist, toggleWishlist, reserve, orders } = useStore();
+  const { items, rates, wishlist, toggleWishlist, reserve, orders, currentUser } = useStore();
   const featured = items.filter((i) => itemStatus(i.stock) !== "Out of Stock").slice(0, 4);
+  const greeting = firstName(currentUser);
 
   return (
     <CustomerShell>
       <section className="portal-hero">
         <div className="portal-hero-copy">
           <span className="portal-eyebrow">
-            <Sparkles size={14} /> New Bridal Collection 2026
+            <Sparkles size={14} /> {greeting ? `Welcome back, ${greeting}` : "New Bridal Collection 2026"}
           </span>
           <h1>
             Timeless gold, <span>crafted for you</span>.

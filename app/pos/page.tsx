@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { CheckCircle2, Minus, Plus, ScanBarcode, Search, Trash2, X } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { useStore, itemPrice, itemStatus, formatINR } from "../lib/store";
@@ -8,11 +9,24 @@ import { useStore, itemPrice, itemStatus, formatINR } from "../lib/store";
 const categories = ["All", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Chains"];
 
 export default function PosPage() {
-  const { items, rates, cart, addToCart, setQty, removeFromCart, clearCart, checkout, customers } = useStore();
+  const { items, rates, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, customers } = useStore();
   const [category, setCategory] = useState("All");
   const [query, setQuery] = useState("");
   const [customer, setCustomer] = useState("Walk-in Customer");
   const [receipt, setReceipt] = useState<{ number: string; total: number } | null>(null);
+  const [scanOpen, setScanOpen] = useState(false);
+  const [scanValue, setScanValue] = useState("");
+  const [scanMsg, setScanMsg] = useState("");
+
+  function doScan() {
+    const ok = addToCartBySku(scanValue);
+    if (ok) {
+      setScanMsg(`Added ${scanValue.toUpperCase()} to sale.`);
+      setScanValue("");
+    } else {
+      setScanMsg("No in-stock item with that SKU/barcode.");
+    }
+  }
 
   const visible = useMemo(
     () =>
@@ -58,7 +72,7 @@ export default function PosPage() {
                 <Search size={18} />
                 <input placeholder="Search products..." value={query} onChange={(e) => setQuery(e.target.value)} />
               </div>
-              <button type="button"><ScanBarcode size={17} /> Scan</button>
+              <button type="button" onClick={() => { setScanOpen(true); setScanMsg(""); }}><ScanBarcode size={17} /> Scan</button>
             </div>
             <div className="category-tabs compact-tabs">
               {categories.map((tab) => (
@@ -156,6 +170,29 @@ export default function PosPage() {
         </div>
       </section>
 
+      {scanOpen ? (
+        <div className="modal-backdrop" role="dialog" aria-modal="true">
+          <form className="modal-card wide" onSubmit={(e) => { e.preventDefault(); doScan(); }}>
+            <button className="modal-close" type="button" onClick={() => setScanOpen(false)} aria-label="Close"><X size={18} /></button>
+            <h2>Scan / Enter Barcode</h2>
+            <p className="muted">Type or scan an item SKU / barcode and press Enter to add it to the sale.</p>
+            <label className="field">
+              <span>SKU / Barcode</span>
+              <div className="field-input">
+                <ScanBarcode size={17} />
+                <input autoFocus value={scanValue} onChange={(e) => setScanValue(e.target.value)} placeholder="e.g. RG22K-00124" />
+              </div>
+            </label>
+            <p className="muted" style={{ fontSize: 12 }}>Try: {items.slice(0, 4).map((i) => i.sku).join(", ")}</p>
+            {scanMsg ? <p className={scanMsg.startsWith("Added") ? "banner-success" : "auth-error"}>{scanMsg}</p> : null}
+            <div className="form-actions">
+              <button className="ghost-action" type="button" onClick={() => setScanOpen(false)}>Done</button>
+              <button className="gold-action" type="submit">Add to Sale</button>
+            </div>
+          </form>
+        </div>
+      ) : null}
+
       {receipt ? (
         <div className="modal-backdrop" role="dialog" aria-modal="true">
           <div className="modal-card">
@@ -164,6 +201,7 @@ export default function PosPage() {
             <h2>Payment Successful</h2>
             <p>Invoice <strong>{receipt.number}</strong> created.</p>
             <div className="modal-total">{formatINR(receipt.total)}</div>
+            <Link className="ghost-action" href="/sales/invoices" style={{ width: "100%", justifyContent: "center" }}>View Receipt</Link>
             <button className="gold-action full" type="button" onClick={() => setReceipt(null)}>New Sale</button>
           </div>
         </div>

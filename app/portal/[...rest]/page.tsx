@@ -3,10 +3,6 @@ import { ArrowLeft, Hammer } from "lucide-react";
 import { CustomerShell } from "../../components/CustomerShell";
 
 const titles: Record<string, { title: string; copy: string }> = {
-  repairs: {
-    title: "Repair Tracking",
-    copy: "Follow every repair from intake to ready-for-pickup, with photos and updates.",
-  },
   account: {
     title: "My Account",
     copy: "Manage your profile, addresses, preferences and communication settings.",
