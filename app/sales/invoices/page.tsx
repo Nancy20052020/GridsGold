@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Printer, ReceiptText, ShoppingCart, X } from "lucide-react";
 import { AppShell } from "../../components/AppShell";
+import { BrandMark } from "../../components/BrandMark";
 import { useStore, formatINR, type Invoice } from "../../lib/store";
 
 export default function InvoicesPage() {
@@ -66,7 +67,7 @@ export default function InvoicesPage() {
           <div className="modal-card wide receipt">
             <button className="modal-close" type="button" onClick={() => setSelected(null)} aria-label="Close"><X size={18} /></button>
             <div className="receipt-head">
-              <div className="receipt-brand"><span className="brand-mark">G</span> Grids Gold</div>
+              <div className="receipt-brand"><BrandMark className="brand-mark" /> Grids Gold</div>
               <div>
                 <strong>{selected.number}</strong>
                 <small>{selected.date}</small>

@@ -3,14 +3,17 @@
 import { useState } from "react";
 
 /**
- * Brand logo. If you drop a logo image at `public/images/logo.png` it is shown
- * automatically; otherwise it falls back to the styled gold "G" mark.
+ * Brand logo: gold circle with "G" inside (fallback), or `public/images/logo.png` when provided.
  */
 export function BrandMark({ className }: { className: string }) {
   const [failed, setFailed] = useState(false);
 
   if (failed) {
-    return <span className={className}>G</span>;
+    return (
+      <span className={`${className} logo-mark-g`} aria-hidden="true">
+        G
+      </span>
+    );
   }
 
   return (
@@ -18,7 +21,7 @@ export function BrandMark({ className }: { className: string }) {
     <img
       className={`${className} logo-img`}
       src="/images/logo.png"
-      alt="Grids Gold logo"
+      alt="Grids Gold"
       onError={() => setFailed(true)}
     />
   );
