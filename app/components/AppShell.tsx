@@ -12,12 +12,12 @@ import {
   Menu,
   Moon,
   Plus,
-  Search,
   Sun,
   UserRound,
 } from "lucide-react";
 import { adminNavGroups, adminQuickAddLinks } from "../lib/adminNav";
 import { BRANCHES, firstName, useStore } from "../lib/store";
+import { AdminQuickSearch } from "./AdminQuickSearch";
 import { BrandMark } from "./BrandMark";
 
 type AppShellProps = { children: React.ReactNode; searchPlaceholder?: string };
@@ -168,11 +168,7 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
           <button className="icon-button mobile-menu" aria-label="Open menu" type="button" onClick={() => setMobileNavOpen(true)}>
             <Menu size={21} />
           </button>
-          <div className="search-box">
-            <Search size={18} />
-            <input placeholder={searchPlaceholder} />
-            <kbd>Ctrl K</kbd>
-          </div>
+          <AdminQuickSearch placeholder={searchPlaceholder} />
 
           <div className="menu-wrap">
             <button className="branch-button" type="button" onClick={() => setMenu(menu === "branch" ? null : "branch")}>
