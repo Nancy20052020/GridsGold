@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Gem, Heart, Home, LogOut, Package, Sparkles, UserRound, Wrench } from "lucide-react";
+import { Gem, Heart, Home, LogOut, Menu, Package, Sparkles, UserRound, Wrench } from "lucide-react";
 import { firstName, useStore } from "../lib/store";
 import { BrandMark } from "./BrandMark";
 
@@ -14,11 +15,31 @@ const navLinks = [
   { label: "Wishlist", href: "/portal/wishlist", icon: Heart },
 ];
 
+function isActive(pathname: string, href: string) {
+  return href === "/portal" ? pathname === "/portal" : pathname.startsWith(href);
+}
+
 export function CustomerShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { rates, wishlist, currentUser, logout } = useStore();
   const greeting = firstName(currentUser);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [pathname]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1025px)");
+    const onChange = () => {
+      if (mq.matches) setMobileNavOpen(false);
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   function signOut() {
     logout();
@@ -26,9 +47,67 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="portal-shell">
+    <div className={`portal-shell ${mobileNavOpen ? "portal-nav-open" : ""}`}>
+      {mobileNavOpen ? (
+        <button
+          className="portal-sidebar-backdrop"
+          type="button"
+          aria-label="Close menu"
+          onClick={() => setMobileNavOpen(false)}
+        />
+      ) : null}
+
+      <aside className="portal-sidebar" aria-label="Customer menu">
+        <div className="portal-sidebar-head">
+          <Link className="portal-brand" href="/portal" onClick={() => setMobileNavOpen(false)}>
+            <BrandMark className="portal-brand-mark" />
+            <div>
+              <strong>GRIDS GOLD</strong>
+              <span>FINE JEWELLERY</span>
+            </div>
+          </Link>
+        </div>
+
+        <nav className="portal-sidebar-nav" aria-label="Customer navigation">
+          {navLinks.map(({ label, href, icon: Icon }) => {
+            const active = isActive(pathname, href);
+            return (
+              <Link
+                key={label}
+                href={href}
+                className={active ? "active" : ""}
+                onClick={() => setMobileNavOpen(false)}
+              >
+                <Icon size={18} />
+                <span>{label}</span>
+                {label === "Wishlist" && wishlist.length ? <em className="nav-count">{wishlist.length}</em> : null}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="portal-sidebar-foot">
+          <span className="portal-rate">
+            <Sparkles size={14} /> 22K · ₹ {rates["22K"].toLocaleString("en-IN")}/gm
+          </span>
+          {greeting ? <p className="portal-sidebar-greeting">Hi, {greeting}</p> : null}
+          <div className="portal-sidebar-actions">
+            <Link className="portal-account" href="/portal/account" aria-label="Account" onClick={() => setMobileNavOpen(false)}>
+              <UserRound size={18} /> Account
+            </Link>
+            <button className="portal-logout" type="button" onClick={signOut} aria-label="Sign out">
+              <LogOut size={18} /> Sign out
+            </button>
+          </div>
+        </div>
+      </aside>
+
       <header className="portal-header">
-        <Link className="portal-brand" href="/portal">
+        <button className="portal-menu-btn" type="button" aria-label="Open menu" onClick={() => setMobileNavOpen(true)}>
+          <Menu size={22} />
+        </button>
+
+        <Link className="portal-brand portal-header-brand" href="/portal">
           <BrandMark className="portal-brand-mark" />
           <div>
             <strong>GRIDS GOLD</strong>
@@ -36,9 +115,9 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
           </div>
         </Link>
 
-        <nav className="portal-nav" aria-label="Customer navigation">
+        <nav className="portal-nav portal-nav-desktop" aria-label="Customer navigation">
           {navLinks.map(({ label, href, icon: Icon }) => {
-            const active = href === "/portal" ? pathname === "/portal" : pathname.startsWith(href);
+            const active = isActive(pathname, href);
             return (
               <Link key={label} href={href} className={active ? "active" : ""}>
                 <Icon size={16} /> {label}
@@ -48,7 +127,7 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="portal-actions">
+        <div className="portal-actions portal-actions-desktop">
           <span className="portal-rate">
             <Sparkles size={14} /> 22K · ₹ {rates["22K"].toLocaleString("en-IN")}/gm
           </span>
@@ -60,6 +139,10 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
             <LogOut size={18} />
           </button>
         </div>
+
+        <Link className="portal-account portal-header-account" href="/portal/account" aria-label="Account">
+          <UserRound size={18} />
+        </Link>
       </header>
 
       <main className="portal-main">{children}</main>

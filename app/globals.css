@@ -1978,17 +1978,131 @@ h1 {
 @media (max-width: 960px) {
   .auth-page {
     grid-template-columns: 1fr;
+    background:
+      radial-gradient(circle at 90% -5%, rgba(242, 179, 61, 0.1), transparent 35%),
+      var(--bg);
   }
 
   .auth-brand {
-    display: none;
+    padding: 22px 18px 10px;
+    gap: 18px;
+    min-height: auto;
+  }
+
+  .auth-brand::after {
+    width: 220px;
+    height: 220px;
+    right: -70px;
+    top: 55%;
+    opacity: 0.55;
+  }
+
+  .auth-brand-top {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .auth-brand-hero {
+    margin-top: 0;
+    gap: 14px;
+  }
+
+  .auth-brand-hero h1 {
+    font-size: clamp(22px, 6vw, 28px);
+  }
+
+  .auth-brand-hero p {
+    max-width: none;
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .auth-highlights {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .auth-highlight {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .auth-highlight strong {
+    font-size: 13px;
+  }
+
+  .auth-highlight small {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .auth-trust {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    padding-bottom: 4px;
+  }
+
+  .auth-trust-item {
+    padding: 10px 8px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .auth-trust-item strong {
+    font-size: 13px;
+  }
+
+  .auth-main {
+    padding: 0 16px 28px;
+    margin-top: -12px;
+  }
+
+  .auth-card {
+    box-shadow: 0 18px 40px rgba(16, 24, 40, 0.12);
   }
 }
 
 @media (max-width: 520px) {
+  .auth-brand {
+    padding: 18px 16px 8px;
+  }
+
+  .auth-rate-pill {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .auth-highlights {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+    padding-bottom: 4px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .auth-highlight {
+    flex: 0 0 78%;
+    scroll-snap-align: start;
+  }
+
+  .auth-trust {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-trust-item {
+    flex-direction: row;
+    align-items: center;
+  }
+
   .auth-card {
-    padding: 24px 20px;
-    border-radius: 14px;
+    padding: 22px 18px;
+    border-radius: 16px;
   }
 
   .field-row {
@@ -2006,6 +2120,13 @@ h1 {
   background:
     radial-gradient(circle at 90% -5%, rgba(242, 179, 61, 0.12), transparent 30%),
     var(--bg);
+}
+
+.portal-sidebar-backdrop,
+.portal-menu-btn,
+.portal-header-account,
+.portal-sidebar {
+  display: none;
 }
 
 .portal-header {
@@ -2436,15 +2557,144 @@ h1 {
 }
 
 @media (max-width: 1024px) {
-  .portal-header {
-    flex-wrap: wrap;
-    padding: 12px 18px;
+  .portal-menu-btn,
+  .portal-header-account {
+    display: inline-grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    color: #344054;
   }
 
-  .portal-nav {
-    order: 3;
+  .portal-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+  }
+
+  .portal-header-brand {
+    justify-self: center;
+  }
+
+  .portal-nav-desktop,
+  .portal-actions-desktop {
+    display: none;
+  }
+
+  .portal-sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    border: 0;
+    background: rgba(6, 19, 39, 0.52);
+    backdrop-filter: blur(2px);
+  }
+
+  .portal-sidebar {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    width: min(300px, 88vw);
+    height: 100vh;
+    padding: 20px 16px;
+    gap: 18px;
+    color: #fff;
+    background:
+      linear-gradient(180deg, rgba(6, 19, 39, 0.98), rgba(2, 9, 22, 0.99)),
+      linear-gradient(135deg, rgba(242, 179, 61, 0.14), transparent 45%);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 24px 48px rgba(2, 9, 22, 0.42);
+    transform: translateX(-105%);
+    transition: transform 0.24s ease;
+  }
+
+  .portal-shell.portal-nav-open .portal-sidebar {
+    transform: translateX(0);
+  }
+
+  .portal-sidebar-head .portal-brand strong {
+    color: #ffd069;
+  }
+
+  .portal-sidebar-head .portal-brand span {
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .portal-sidebar-nav {
+    display: grid;
+    gap: 6px;
+    overflow-y: auto;
+  }
+
+  .portal-sidebar-nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.86);
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+  }
+
+  .portal-sidebar-nav a:hover,
+  .portal-sidebar-nav a.active {
+    color: #ffd36c;
+    background: rgba(242, 179, 61, 0.14);
+  }
+
+  .portal-sidebar-foot {
+    margin-top: auto;
+    display: grid;
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .portal-sidebar-greeting {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 14px;
+  }
+
+  .portal-sidebar-actions {
+    display: grid;
+    gap: 8px;
+  }
+
+  .portal-sidebar-actions .portal-account,
+  .portal-sidebar-actions .portal-logout {
     width: 100%;
-    overflow-x: auto;
+    height: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 14px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .portal-sidebar-actions .portal-account {
+    color: #ffd36c;
+    background: rgba(242, 179, 61, 0.12);
+    border-color: rgba(242, 179, 61, 0.28);
+  }
+
+  .portal-sidebar-actions .portal-logout {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
   }
 
   .portal-hero {
