@@ -78,7 +78,6 @@ export function LandingNav() {
             ) : null}
           </div>
 
-          <a href="#demo">How it works</a>
           <a href="#features">Features</a>
           <a href="#pricing">Pricing</a>
           <a href="#about">About</a>
