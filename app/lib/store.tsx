@@ -117,7 +117,7 @@ const seedRates: Rates = { "24K": 7900, "22K": 7245, "18K": 5920, "925": 85, PT9
 const seedItems: Item[] = [
   { id: "it1", name: "22K Gold Ring", sku: "RG22K-00124", category: "Rings", karat: "22K", weight: 5.25, making: 1200, stoneValue: 0, stock: 8, branch: "Main Branch", icon: "ring", image: "ring_1.png" },
   { id: "it2", name: "Heritage Gold Necklace Set", sku: "NK22K-00098", category: "Necklaces", karat: "22K", weight: 18.75, making: 2980, stoneValue: 22000, stock: 5, branch: "Main Branch", icon: "necklace", image: "necklace_1.png" },
-  { id: "it3", name: "Diamond Drop Earrings", sku: "ER18K-00231", category: "Earrings", karat: "18K", weight: 6.12, making: 3200, stoneValue: 28000, stock: 2, branch: "Branch 2", icon: "earrings", image: "earrings_1.png" },
+  { id: "it3", name: "Diamond Drop Earrings", sku: "ER18K-00231", category: "Earrings", karat: "18K", weight: 6.12, making: 3200, stoneValue: 28000, stock: 2, branch: "Branch 2", icon: "earrings", image: "earring_1.png" },
   { id: "it4", name: "Royal Gold Bangle", sku: "BG22K-00112", category: "Bangles", karat: "22K", weight: 15.3, making: 2600, stoneValue: 0, stock: 3, branch: "Main Branch", icon: "bangle", image: "ring_3.png" },
   { id: "it5", name: "Gold Chain", sku: "CH22K-00105", category: "Chains", karat: "22K", weight: 11.85, making: 1800, stoneValue: 0, stock: 0, branch: "Main Branch", icon: "chain", image: "necklace_1.png" },
   { id: "it6", name: "Gold Pendant", sku: "PD22K-00177", category: "Pendants", karat: "22K", weight: 4.76, making: 900, stoneValue: 4500, stock: 6, branch: "Branch 3", icon: "pendant", image: "ring_5.png" },
