@@ -94,11 +94,14 @@ function ScreenTable({ screen }: { screen: ScreenConfig }) {
           <tbody>
             {rows.map((row) => (
               <tr key={row.join("-")}>
-                {row.map((cell, index) => (
-                  <td key={cell + index}>
-                    {index === 5 || (index === 4 && !isInventory) ? <span className={`status-pill ${statusClass(cell)}`}>{cell}</span> : cell}
-                  </td>
-                ))}
+                {row.map((cell, index) => {
+                  const statusIndex = isInventory ? 5 : 4;
+                  return (
+                    <td key={cell + index}>
+                      {index === statusIndex ? <span className={`status-pill ${statusClass(cell)}`}>{cell}</span> : cell}
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
