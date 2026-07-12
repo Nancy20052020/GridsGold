@@ -31,7 +31,7 @@ Optional browser icons: `app/icon.png` (512×512), `app/apple-icon.png` (180×18
 |------|----------|
 | `ring_1.png` … `ring_5.png` | Ring products + category tiles |
 | `necklace_1.png` … `necklace_3.png` | Necklace products + hero banner |
-| `earrings_1.png`, `earrings_2.png` | Earring products + category tile |
+| `earring_1.png`, `earring_2.png` | Earring products + category tile |
 | `anklet_1.png` | Silver Anklet product |
 
 ```
@@ -44,8 +44,8 @@ public/images/
   necklace_1.png
   necklace_2.png
   necklace_3.png
-  earrings_1.png
-  earrings_2.png
+  earring_1.png
+  earring_2.png
   anklet_1.png
 ```
 
