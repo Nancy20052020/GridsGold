@@ -49,14 +49,6 @@ const menuItems = [
   { label: "Settings", icon: Settings, href: "/settings" },
 ];
 
-const mobileItems = [
-  { label: "Dashboard", icon: Home, href: "/dashboard" },
-  { label: "POS", icon: ShoppingCart, href: "/pos" },
-  { label: "Inventory", icon: Boxes, href: "/inventory" },
-  { label: "Jewelry", icon: Gem, href: "/jewelry" },
-  { label: "Customers", icon: UserRound, href: "/customers" },
-];
-
 type AppShellProps = { children: React.ReactNode; searchPlaceholder?: string };
 
 function isActive(pathname: string, href: string) {
@@ -69,8 +61,25 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
   const { rates, selectedBranch, setBranch, currentUser, logout, notifications, markNotificationsRead, theme, toggleTheme } = useStore();
 
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [menu, setMenu] = useState<null | "branch" | "notif" | "calendar" | "profile">(null);
   const shellRef = useRef<HTMLDivElement>(null);
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    setMobileNavOpen(false);
+    setMenu(null);
+  }, [pathname]);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1025px)");
+    const onChange = () => {
+      if (mq.matches) setMobileNavOpen(false);
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   useEffect(() => {
     try {
@@ -100,10 +109,18 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
   }
 
   return (
-    <div className={`app-shell ${collapsed ? "collapsed" : ""}`} ref={shellRef}>
+    <div className={`app-shell ${collapsed ? "collapsed" : ""} ${mobileNavOpen ? "mobile-nav-open" : ""}`} ref={shellRef}>
+      {mobileNavOpen ? (
+        <button
+          className="sidebar-backdrop"
+          aria-label="Close menu"
+          type="button"
+          onClick={() => setMobileNavOpen(false)}
+        />
+      ) : null}
       <aside className="sidebar">
         <div className="brand-row">
-          <Link className="brand" href="/dashboard">
+          <Link className="brand" href="/dashboard" onClick={() => setMobileNavOpen(false)}>
             <BrandMark className="brand-mark" />
             <div className="brand-text">
               <strong>GRIDS GOLD</strong>
@@ -120,7 +137,13 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
             const Icon = item.icon;
             const active = isActive(pathname, item.href);
             return (
-              <Link className={`nav-item ${active ? "active" : ""}`} href={item.href} key={item.label} title={item.label}>
+              <Link
+                className={`nav-item ${active ? "active" : ""}`}
+                href={item.href}
+                key={item.label}
+                title={item.label}
+                onClick={() => setMobileNavOpen(false)}
+              >
                 <Icon size={20} />
                 <span className="nav-label">{item.label}</span>
                 <ChevronRight className="nav-caret" size={15} />
@@ -142,7 +165,7 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
 
       <main className="main">
         <header className="topbar">
-          <button className="icon-button mobile-menu" aria-label="Open menu" type="button" onClick={() => setCollapsed((c) => !c)}>
+          <button className="icon-button mobile-menu" aria-label="Open menu" type="button" onClick={() => setMobileNavOpen(true)}>
             <Menu size={21} />
           </button>
           <div className="search-box">
@@ -220,17 +243,6 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
         {menu ? <button className="menu-backdrop" aria-hidden="true" tabIndex={-1} onClick={() => setMenu(null)} /> : null}
 
         {children}
-
-        <nav className="mobile-tabbar" aria-label="Mobile navigation">
-          {mobileItems.map((item) => {
-            const Icon = item.icon;
-            return (
-              <Link className={isActive(pathname, item.href) ? "active" : ""} href={item.href} key={item.label} aria-label={item.label}>
-                <Icon size={20} />
-              </Link>
-            );
-          })}
-        </nav>
       </main>
     </div>
   );
