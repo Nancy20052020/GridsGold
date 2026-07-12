@@ -1865,6 +1865,7 @@ h1 {
   background: var(--panel);
   border: 1px solid var(--line);
   box-shadow: 0 24px 60px rgba(16, 24, 40, 0.1);
+  color: var(--ink);
 }
 
 .auth-card-head {
@@ -1879,6 +1880,7 @@ h1 {
 .auth-card-head h2 {
   margin-top: 8px;
   font-size: 24px;
+  color: #0d2440;
 }
 
 .auth-card-head p {
@@ -2944,13 +2946,38 @@ h1 {
 .landing-access .auth-card {
   width: 100%;
   max-width: 460px;
-  background: rgba(255, 255, 255, 0.98);
+  background: #fff;
+  color: var(--ink);
   border-color: rgba(242, 179, 61, 0.22);
   box-shadow: 0 28px 56px rgba(2, 9, 22, 0.45);
 }
 
 .landing-access .auth-mobile-brand {
   display: flex;
+}
+
+.landing-access .auth-mobile-brand strong {
+  color: #0d2440;
+}
+
+.landing-access .auth-mobile-brand span {
+  color: var(--muted);
+}
+
+.landing-access .auth-card-head h2 {
+  color: #0d2440;
+}
+
+.landing-access .auth-card-head p {
+  color: var(--muted);
+}
+
+.landing-access .auth-switch {
+  color: var(--muted);
+}
+
+.landing-access .auth-terms {
+  color: var(--muted);
 }
 
 .landing-access .auth-card-head svg {
