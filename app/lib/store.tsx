@@ -219,6 +219,7 @@ type StoreValue = {
   signup: (u: { name: string; email: string; mobile?: string; city?: string; role: Role }) => void;
   login: (email: string, role: Role) => void;
   logout: () => void;
+  updateUser: (patch: Partial<User>) => void;
   items: Item[];
   addItem: (item: Omit<Item, "id">) => void;
   getItem: (id: string) => Item | undefined;
@@ -364,6 +365,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(() => setCurrentUser(null), []);
+  const updateUser = useCallback((patch: Partial<User>) => setCurrentUser((u) => (u ? { ...u, ...patch } : u)), []);
 
   const addItem = useCallback((item: Omit<Item, "id">) => setItems((p) => [{ ...item, id: "it" + Date.now() }, ...p]), []);
   const getItem = useCallback((id: string) => items.find((i) => i.id === id), [items]);
@@ -477,12 +479,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const markNotificationsRead = useCallback(() => setNotifications((p) => p.map((n) => ({ ...n, read: true }))), []);
 
   const value = useMemo<StoreValue>(() => ({
-    ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, currentUser, signup, login, logout,
+    ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, currentUser, signup, login, logout, updateUser,
     items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, suppliers, addSupplier,
     purchaseOrders, addPurchaseOrder, orders, reserve, unreserve, movements, transferStock, adjustStock, cycleCount,
     expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder,
     cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, wishlist, toggleWishlist, notifications, markNotificationsRead,
-  }), [ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, currentUser, signup, login, logout, items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, orders, reserve, unreserve, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, wishlist, toggleWishlist, notifications, markNotificationsRead]);
+  }), [ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, currentUser, signup, login, logout, updateUser, items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, orders, reserve, unreserve, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, wishlist, toggleWishlist, notifications, markNotificationsRead]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

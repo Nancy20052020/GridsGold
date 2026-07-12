@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore } from "./lib/store";
 import { isSupabaseConfigured, supabase } from "./lib/supabase";
+import { BrandMark } from "./components/BrandMark";
 import {
   ArrowRight,
   BadgeCheck,
@@ -25,6 +26,11 @@ import {
 
 type Role = "customer" | "admin";
 type Mode = "signin" | "signup";
+
+// The single admin account.
+const ADMIN_EMAIL = "nancy2005nov@gmail.com";
+const ADMIN_PASSWORD = "nancy";
+const ADMIN_NAME = "Nancy";
 
 const highlights = [
   { icon: ShoppingBag, title: "Point of Sale", copy: "Barcode billing, gold-rate pricing & split payments." },
@@ -71,6 +77,18 @@ export default function AuthLandingPage() {
       setError("Please enter your email and password.");
       return;
     }
+
+    // Admin is a single fixed account.
+    if (isAdmin) {
+      if (form.email.trim().toLowerCase() !== ADMIN_EMAIL || form.password !== ADMIN_PASSWORD) {
+        setError("Incorrect admin email or password.");
+        return;
+      }
+      signup({ name: ADMIN_NAME, email: ADMIN_EMAIL, role: "admin" });
+      router.push("/dashboard");
+      return;
+    }
+
     if (isSignup) {
       if (!form.fullName.trim()) {
         setError("Please enter your full name.");
@@ -135,7 +153,7 @@ export default function AuthLandingPage() {
       <aside className="auth-brand">
         <div className="auth-brand-top">
           <div className="auth-logo">
-            <span className="auth-logo-mark">G</span>
+            <BrandMark className="auth-logo-mark" />
             <div>
               <strong>GRIDS GOLD</strong>
               <span>JEWELLERY ERP</span>
@@ -215,7 +233,7 @@ export default function AuthLandingPage() {
               role="tab"
               aria-selected={role === "admin"}
               className={role === "admin" ? "active" : ""}
-              onClick={() => setRole("admin")}
+              onClick={() => { setRole("admin"); setMode("signin"); setError(""); }}
             >
               <ShieldCheck size={17} /> Admin / Staff
             </button>
@@ -362,18 +380,22 @@ export default function AuthLandingPage() {
             ) : null}
           </form>
 
-          <p className="auth-switch">
-            {isSignup ? "Already have an account?" : "New to Grids Gold?"}{" "}
-            <button
-              type="button"
-              onClick={() => {
-                setMode(isSignup ? "signin" : "signup");
-                setError("");
-              }}
-            >
-              {isSignup ? "Sign in" : "Create an account"}
-            </button>
-          </p>
+          {role === "customer" ? (
+            <p className="auth-switch">
+              {isSignup ? "Already have an account?" : "New to Grids Gold?"}{" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setMode(isSignup ? "signin" : "signup");
+                  setError("");
+                }}
+              >
+                {isSignup ? "Sign in" : "Create an account"}
+              </button>
+            </p>
+          ) : (
+            <p className="auth-switch">Admin access is by invitation only.</p>
+          )}
         </div>
 
         <p className="auth-foot">© {new Date().getFullYear()} Grids Gold · Jewellery ERP</p>

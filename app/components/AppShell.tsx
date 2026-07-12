@@ -30,6 +30,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { BRANCHES, firstName, useStore } from "../lib/store";
+import { BrandMark } from "./BrandMark";
 
 const menuItems = [
   { label: "Dashboard", icon: Home, href: "/dashboard" },
@@ -103,7 +104,7 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
       <aside className="sidebar">
         <div className="brand-row">
           <Link className="brand" href="/dashboard">
-            <div className="brand-mark">G</div>
+            <BrandMark className="brand-mark" />
             <div className="brand-text">
               <strong>GRIDS GOLD</strong>
               <span>JEWELRY ERP</span>
