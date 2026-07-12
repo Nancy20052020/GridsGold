@@ -609,19 +609,25 @@ h1 {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
+.summary-panel {
+  grid-column: 1 / -1;
+}
+
 .summary-card {
-  min-height: 145px;
+  min-height: 132px;
+  min-width: 0;
   display: grid;
   align-content: center;
-  gap: 10px;
+  gap: 8px;
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: linear-gradient(180deg, #fff, #fbfcfe);
+  overflow: hidden;
 }
 
 .summary-card svg {
@@ -633,7 +639,17 @@ h1 {
 }
 
 .summary-card strong {
-  font-size: 28px;
+  font-size: clamp(20px, 2vw, 26px);
+  line-height: 1.1;
+}
+
+.summary-card p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .profit-head {
@@ -748,22 +764,12 @@ h1 {
   color: #344054;
 }
 
-.mobile-tabbar {
+.mobile-menu {
   display: none;
 }
 
-@media (max-width: 1440px) {
-  .app-shell {
-    grid-template-columns: 250px minmax(0, 1fr);
-  }
-
-  .kpi-grid {
-    grid-template-columns: repeat(3, minmax(190px, 1fr));
-  }
-
-  .dashboard-grid {
-    grid-template-columns: repeat(2, minmax(320px, 1fr));
-  }
+.sidebar-backdrop {
+  display: none;
 }
 
 @media (max-width: 1024px) {
@@ -772,7 +778,50 @@ h1 {
   }
 
   .sidebar {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 60;
+    display: flex;
+    width: min(288px, 88vw);
+    height: 100vh;
+    transform: translateX(-105%);
+    transition: transform 0.24s ease;
+    box-shadow: 0 24px 48px rgba(2, 9, 22, 0.42);
+  }
+
+  .app-shell.mobile-nav-open .sidebar {
+    transform: translateX(0);
+  }
+
+  .app-shell.collapsed .brand-text,
+  .app-shell.collapsed .nav-label,
+  .app-shell.collapsed .nav-caret,
+  .app-shell.collapsed .gold-widget {
+    display: revert;
+  }
+
+  .app-shell.collapsed .brand-row {
+    flex-direction: row;
+  }
+
+  .app-shell.collapsed .nav-item {
+    justify-content: flex-start;
+  }
+
+  .app-shell.collapsed .sidebar {
+    width: min(288px, 88vw);
+    padding: 22px 18px;
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 55;
+    border: 0;
+    background: rgba(2, 9, 22, 0.55);
+    backdrop-filter: blur(2px);
   }
 
   .topbar {
@@ -791,7 +840,7 @@ h1 {
   }
 
   .dashboard {
-    padding: 18px 18px 92px;
+    padding: 18px 18px 24px;
   }
 
   .page-heading {
@@ -807,36 +856,21 @@ h1 {
   }
 
   .summary-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1440px) {
+  .app-shell {
+    grid-template-columns: 250px minmax(0, 1fr);
   }
 
-  .mobile-tabbar {
-    position: fixed;
-    z-index: 20;
-    left: 14px;
-    right: 14px;
-    bottom: 14px;
-    height: 64px;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 8px;
-    padding: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    background: rgba(2, 9, 22, 0.94);
-    box-shadow: 0 16px 40px rgba(2, 9, 22, 0.34);
+  .kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .mobile-tabbar button {
-    border: 0;
-    border-radius: 7px;
-    background: transparent;
-    color: rgba(255, 255, 255, 0.75);
-  }
-
-  .mobile-tabbar button.active {
-    color: #ffd36c;
-    background: rgba(242, 179, 61, 0.16);
+  .dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -920,7 +954,6 @@ h1 {
 /* Full ERP screen system */
 .brand,
 .nav-item,
-.mobile-tabbar a,
 .hub-card,
 .screen-group a {
   text-decoration: none;
@@ -972,7 +1005,7 @@ h1 {
 
 .erp-kpis {
   display: grid;
-  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 18px;
 }
@@ -989,11 +1022,13 @@ h1 {
 
 .erp-kpi {
   min-height: 112px;
+  min-width: 0;
   padding: 18px;
   display: grid;
   align-content: center;
   gap: 8px;
   border-left: 4px solid var(--gold);
+  overflow: hidden;
 }
 
 .erp-kpi span,
@@ -1408,18 +1443,6 @@ h1 {
 .jewel-icon.earrings::before { content: "♧"; }
 .jewel-icon.pendant::before { content: "♤"; }
 
-.mobile-tabbar a {
-  display: grid;
-  place-items: center;
-  border-radius: 7px;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.mobile-tabbar a.active {
-  color: #ffd36c;
-  background: rgba(242, 179, 61, 0.16);
-}
-
 @media (max-width: 1280px) {
   .erp-kpis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1450,7 +1473,7 @@ h1 {
 @media (max-width: 1024px) {
   .page-content,
   .erp-page {
-    padding: 18px 18px 92px;
+    padding: 18px 18px 24px;
   }
 
   .topbar {
@@ -4039,7 +4062,7 @@ h1 {
 @media print {
   .sidebar,
   .topbar,
-  .mobile-tabbar,
+  .sidebar-backdrop,
   .menu-backdrop,
   .modal-close,
   .heading-actions {
