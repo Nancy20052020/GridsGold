@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useStore } from "../lib/store";
 import {
   Bell,
   Boxes,
@@ -76,6 +77,7 @@ export function AppShell({
   searchPlaceholder = "Search by item, customer, invoice, or barcode...",
 }: AppShellProps) {
   const pathname = usePathname();
+  const { rates } = useStore();
 
   return (
     <div className="app-shell">
@@ -129,11 +131,11 @@ export function AppShell({
           <div className="gold-visual" />
           <p>Gold Price (22K)</p>
           <strong>
-            ₹ 7,245 <span>/gm</span>
+            ₹ {rates["22K"].toLocaleString("en-IN")} <span>/gm</span>
           </strong>
           <em>↑ 1.21% (₹ 86) vs yesterday</em>
           <div className="mini-spark" />
-          <button type="button">View Gold Rates</button>
+          <Link className="gold-widget-link" href="/gold-rates">View Gold Rates</Link>
         </div>
       </aside>
 

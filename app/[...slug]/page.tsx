@@ -3,9 +3,25 @@ import { AppShell } from "../components/AppShell";
 import { ErpScreen } from "../components/ErpScreen";
 import { getScreen, screenConfigs } from "../data";
 
+// Paths that now have dedicated, fully-built pages (handled outside this
+// catch-all). Excluded here so the catch-all doesn't also try to render them.
+const explicitPaths = new Set([
+  "/pos",
+  "/inventory",
+  "/inventory/new",
+  "/inventory/item-details",
+  "/customers",
+  "/repairs",
+  "/gold-rates",
+  "/jewelry",
+  "/suppliers",
+  "/purchase-orders",
+  "/sales/invoices",
+]);
+
 export function generateStaticParams() {
   return screenConfigs
-    .filter((screen) => screen.path !== "/")
+    .filter((screen) => screen.path !== "/" && !explicitPaths.has(screen.path))
     .map((screen) => ({ slug: screen.path.replace(/^\//, "").split("/") }));
 }
 

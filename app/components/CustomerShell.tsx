@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gem, Heart, LogOut, Package, Sparkles, UserRound, Wrench } from "lucide-react";
+import { Gem, Heart, Home, LogOut, Package, Sparkles, UserRound, Wrench } from "lucide-react";
+import { useStore } from "../lib/store";
 
 const navLinks = [
-  { label: "Shop", href: "/portal", icon: Gem },
+  { label: "Home", href: "/portal", icon: Home },
+  { label: "Collection", href: "/portal/catalog", icon: Gem },
   { label: "My Orders", href: "/portal/orders", icon: Package },
   { label: "Repairs", href: "/portal/repairs", icon: Wrench },
   { label: "Wishlist", href: "/portal/wishlist", icon: Heart },
@@ -13,6 +15,7 @@ const navLinks = [
 
 export function CustomerShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { rates, wishlist } = useStore();
 
   return (
     <div className="portal-shell">
@@ -31,6 +34,7 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
             return (
               <Link key={label} href={href} className={active ? "active" : ""}>
                 <Icon size={16} /> {label}
+                {label === "Wishlist" && wishlist.length ? <em className="nav-count">{wishlist.length}</em> : null}
               </Link>
             );
           })}
@@ -38,7 +42,7 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
 
         <div className="portal-actions">
           <span className="portal-rate">
-            <Sparkles size={14} /> 22K · ₹ 7,245/gm
+            <Sparkles size={14} /> 22K · ₹ {rates["22K"].toLocaleString("en-IN")}/gm
           </span>
           <Link className="portal-account" href="/portal/account" aria-label="Account">
             <UserRound size={18} />
