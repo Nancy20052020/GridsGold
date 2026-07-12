@@ -65,7 +65,7 @@ export function ProductDemo({ variant = "showcase" }: ProductDemoProps) {
                 onPlay={() => setPlaying(true)}
                 onPause={() => setPlaying(false)}
               >
-                <source src="/videos/demo.mp4" type="video/mp4" />
+                <source src="/videos/grids_gold.mp4" type="video/mp4" />
               </video>
               {variant === "showcase" ? (
                 <button
@@ -118,7 +118,7 @@ export function ProductDemo({ variant = "showcase" }: ProductDemoProps) {
         onLoadedData={() => setVideoReady(true)}
         onError={() => setVideoReady(false)}
       >
-        <source src="/videos/demo.mp4" type="video/mp4" />
+        <source src="/videos/grids_gold.mp4" type="video/mp4" />
       </video>
     </div>
   );
