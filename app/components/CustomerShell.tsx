@@ -48,6 +48,13 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className={`portal-shell ${mobileNavOpen ? "portal-nav-open" : ""}`}>
+      <div className="portal-announcement">
+        <span><Sparkles size={13} /> Live 22K · ₹ {rates["22K"].toLocaleString("en-IN")}/gm</span>
+        <span>BIS Hallmarked</span>
+        <span>Insured delivery</span>
+        <span>100% Secure</span>
+      </div>
+
       {mobileNavOpen ? (
         <button
           className="portal-sidebar-backdrop"

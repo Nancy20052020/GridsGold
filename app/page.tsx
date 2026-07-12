@@ -10,23 +10,25 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
-import { HeroShowcase } from "./components/HeroShowcase";
 import { LandingNav } from "./components/LandingNav";
+import { ProductDemo } from "./components/ProductDemo";
 import { ScrollReveal } from "./components/ScrollReveal";
+import { TypewriterText } from "./components/TypewriterText";
 import { moduleHighlights } from "./lib/landingModules";
 
 const stats = [
-  { value: "4", label: "Branches synced" },
-  { value: "22K", label: "Live gold pricing" },
-  { value: "100%", label: "Hallmark ready" },
-  { value: "24/7", label: "Customer portal" },
+  { value: "4", label: "Branches synced", note: "Multi-location inventory" },
+  { value: "22K", label: "Live gold pricing", note: "Updates every counter" },
+  { value: "100%", label: "Hallmark ready", note: "BIS workflows built-in" },
+  { value: "24/7", label: "Customer portal", note: "Orders & repairs online" },
 ];
 
-const flowSteps = [
-  "Sell at POS — stock and invoice update instantly.",
-  "Change gold rate — every tag and catalog price refreshes.",
-  "Customer reserves online — your team sees it in admin.",
-  "Repair is ready — portal notifies them to collect.",
+const trustStrip = [
+  "POS that's fast",
+  "Repairs that track",
+  "Inventory that syncs",
+  "Portal clients love",
+  "Secure & reliable",
 ];
 
 const features = [
@@ -40,7 +42,7 @@ const features = [
   },
   {
     title: "Portal your clients expect",
-    copy: "A polished customer experience for browsing, wishlists, orders and repair tracking — in your brand colours.",
+    copy: "Browse, wishlist, reserve and track repairs — branded in navy and gold, like your showroom.",
   },
 ];
 
@@ -75,17 +77,19 @@ export default function LandingPage() {
     <div className="landing-site">
       <LandingNav />
 
-      <section className="landing-hero">
-        <div className="landing-hero-glow landing-hero-glow-a" aria-hidden="true" />
-        <div className="landing-hero-glow landing-hero-glow-b" aria-hidden="true" />
+      <section className="landing-hero" id="demo">
+        <div className="landing-hero-mesh" aria-hidden="true" />
 
         <div className="landing-hero-inner">
           <ScrollReveal className="landing-hero-copy">
             <span className="landing-eyebrow">
               <Sparkles size={14} /> Built for Indian jewellers
             </span>
-            <h1>
-              Run your jewellery business from <span>one place.</span>
+            <h1 className="display-serif">
+              Run your jewellery business from{" "}
+              <span className="gold-text">
+                <TypewriterText phrases={["one place.", "every branch.", "one platform."]} />
+              </span>
             </h1>
             <p>
               Cut admin in half, catch every repair on time, and know your margin to the gram.
@@ -95,8 +99,8 @@ export default function LandingPage() {
               <Link className="landing-btn-primary" href="/login?signup=1">
                 Start free trial <ArrowRight size={18} />
               </Link>
-              <a className="landing-btn-ghost" href="#modules">
-                Explore modules
+              <a className="landing-btn-ghost" href="#demo">
+                See how it works
               </a>
             </div>
             <ul className="landing-hero-checks">
@@ -107,26 +111,33 @@ export default function LandingPage() {
           </ScrollReveal>
 
           <ScrollReveal className="landing-hero-visual-wrap" delay={120}>
-            <HeroShowcase />
+            <ProductDemo />
           </ScrollReveal>
         </div>
       </section>
 
       <section className="landing-stats" aria-label="Highlights">
-        {stats.map(({ value, label }, i) => (
+        {stats.map(({ value, label, note }, i) => (
           <ScrollReveal key={label} delay={i * 60}>
             <div className="landing-stat">
               <strong>{value}</strong>
               <span>{label}</span>
+              <small>{note}</small>
             </div>
           </ScrollReveal>
+        ))}
+      </section>
+
+      <section className="landing-trust-strip">
+        {trustStrip.map((item) => (
+          <span key={item}><Check size={14} /> {item}</span>
         ))}
       </section>
 
       <section className="landing-section" id="modules">
         <ScrollReveal className="landing-section-head centered">
           <span className="landing-eyebrow light">Modules</span>
-          <h2>Everything your showroom needs</h2>
+          <h2 className="display-serif">Everything your showroom needs</h2>
           <p>From the counter to the workshop, back office and customer portal — one connected platform.</p>
         </ScrollReveal>
 
@@ -145,21 +156,10 @@ export default function LandingPage() {
 
       <section className="landing-section landing-flow-section" id="features">
         <ScrollReveal className="landing-section-head centered">
-          <span className="landing-eyebrow light">How it fits together</span>
-          <h2>The pieces talk to each other</h2>
+          <span className="landing-eyebrow light">Features</span>
+          <h2 className="display-serif">Clean tools that work together</h2>
           <p>Sell a piece, the stock drops. Update a rate, every price changes. No double entry.</p>
         </ScrollReveal>
-
-        <div className="landing-flow">
-          {flowSteps.map((step, i) => (
-            <ScrollReveal key={step} delay={i * 80}>
-              <div className="landing-flow-step">
-                <span>{i + 1}</span>
-                <p>{step}</p>
-              </div>
-            </ScrollReveal>
-          ))}
-        </div>
 
         <div className="landing-feature-cards">
           {features.map(({ title, copy }, i) => (
@@ -176,7 +176,7 @@ export default function LandingPage() {
       <section className="landing-section" id="pricing">
         <ScrollReveal className="landing-section-head centered">
           <span className="landing-eyebrow light">Pricing</span>
-          <h2>Start with software. Grow into a partnership.</h2>
+          <h2 className="display-serif">Start with software. Grow into a partnership.</h2>
           <p>Transparent plans for single-store boutiques to multi-branch chains.</p>
         </ScrollReveal>
 
@@ -211,11 +211,10 @@ export default function LandingPage() {
       <section className="landing-section landing-about" id="about">
         <ScrollReveal className="landing-about-inner centered">
           <span className="landing-eyebrow light">About Grids Gold</span>
-          <h2>Crafted for jewellers who live by weight, purity and trust.</h2>
+          <h2 className="display-serif">Crafted for jewellers who live by weight, purity and trust.</h2>
           <p>
             Grids Gold is jewellery ERP software shaped around Indian showrooms — karat-based pricing,
-            repair tickets, hallmark workflows and multi-branch inventory. Less spreadsheet chaos,
-            more time with customers at the counter.
+            repair tickets, hallmark workflows and multi-branch inventory.
           </p>
           <div className="landing-about-pills">
             <span><ShieldCheck size={15} /> Secure & cloud-ready</span>
@@ -229,14 +228,14 @@ export default function LandingPage() {
       <section className="landing-cta-band">
         <ScrollReveal className="landing-cta-inner">
           <div>
-            <h2>Ready to modernise your showroom?</h2>
+            <h2 className="display-serif">Ready to modernise your showroom?</h2>
             <p>Start a free trial or sign in to your existing account.</p>
           </div>
           <div className="landing-cta-actions">
             <Link className="landing-btn-primary" href="/login?signup=1">
               Get started <ArrowRight size={18} />
             </Link>
-            <Link className="landing-btn-ghost light" href="/login">
+            <Link className="landing-btn-ghost" href="/login">
               Sign in
             </Link>
           </div>
@@ -247,9 +246,8 @@ export default function LandingPage() {
         <span>© {new Date().getFullYear()} Grids Gold · Fine Jewellery ERP</span>
         <div>
           <a href="#modules">Modules</a>
-          <a href="#features">Features</a>
+          <a href="#demo">Tour</a>
           <a href="#pricing">Pricing</a>
-          <a href="#about">About</a>
           <Link href="/login">Sign in</Link>
         </div>
       </footer>
