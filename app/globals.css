@@ -4051,3 +4051,29 @@ h1 {
     max-width: 100%;
   }
 }
+
+/* ---- Fixes: dropdown stacking + dark-theme card surfaces ---- */
+.topbar {
+  z-index: 55;
+}
+
+.menu-backdrop {
+  z-index: 45;
+}
+
+[data-theme="dark"] .erp-kpi,
+[data-theme="dark"] .erp-panel,
+[data-theme="dark"] .hub-card,
+[data-theme="dark"] .workflow-column,
+[data-theme="dark"] .catalog-card,
+[data-theme="dark"] .kpi-card,
+[data-theme="dark"] .panel,
+[data-theme="dark"] .repair-track {
+  background: var(--panel);
+}
+
+[data-theme="dark"] .table-panel,
+[data-theme="dark"] .data-table td,
+[data-theme="dark"] .data-table th {
+  background: transparent;
+}
