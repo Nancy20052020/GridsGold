@@ -141,8 +141,10 @@ const seedCustomers: Customer[] = [
 ];
 
 const seedInvoices: Invoice[] = [
-  { id: "inv1", number: "INV-SA-2026-000015", customer: "John Smith", date: "30 Apr, 2025", lines: [{ name: "Gold Necklace Set", qty: 1, amount: 145280 }], subtotal: 145280, gst: 4358, total: 149638, status: "Paid" },
-  { id: "inv2", number: "INV-SA-2026-000016", customer: "Priya Mehta", date: "01 May, 2025", lines: [{ name: "22K Gold Ring", qty: 1, amount: 38051 }], subtotal: 38051, gst: 1142, total: 39193, status: "Paid" },
+  { id: "inv1", number: "INV-SA-2026-000015", customer: "John Smith", date: "30 Apr, 2025", lines: [{ name: "Heritage Gold Necklace", qty: 1, amount: 145280 }], subtotal: 145280, gst: 4358, total: 149638, status: "Paid" },
+  { id: "inv2", number: "INV-SA-2026-000016", customer: "Priya Mehta", date: "01 May, 2025", lines: [{ name: "Textured Gold Band Ring", qty: 1, amount: 38051 }], subtotal: 38051, gst: 1142, total: 39193, status: "Paid" },
+  { id: "inv3", number: "INV-SA-2026-000017", customer: "Raj Gems (B2B)", date: "05 May, 2025", lines: [{ name: "Royal Gold Bangle", qty: 2, amount: 186400 }], subtotal: 186400, gst: 5592, total: 191992, status: "Paid" },
+  { id: "inv4", number: "INV-SA-2026-000018", customer: "John Smith", date: "12 May, 2025", lines: [{ name: "Gold Hoop Earrings", qty: 1, amount: 64200 }], subtotal: 64200, gst: 1926, total: 66126, status: "Paid" },
 ];
 
 const seedRepairs: Repair[] = [
