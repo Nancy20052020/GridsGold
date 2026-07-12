@@ -6,6 +6,7 @@ import { getScreen, screenConfigs } from "../data";
 // Paths that now have dedicated, fully-built pages (handled outside this
 // catch-all). Excluded here so the catch-all doesn't also try to render them.
 const explicitPaths = new Set([
+  "/login",
   "/pos",
   "/inventory",
   "/inventory/new",

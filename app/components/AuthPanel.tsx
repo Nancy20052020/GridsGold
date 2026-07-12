@@ -27,13 +27,14 @@ const ADMIN_NAME = "Nancy";
 
 type AuthPanelProps = {
   compact?: boolean;
+  initialMode?: Mode;
 };
 
-export function AuthPanel({ compact = false }: AuthPanelProps) {
+export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanelProps) {
   const router = useRouter();
   const { signup, login } = useStore();
   const [role, setRole] = useState<Role>("customer");
-  const [mode, setMode] = useState<Mode>("signin");
+  const [mode, setMode] = useState<Mode>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);

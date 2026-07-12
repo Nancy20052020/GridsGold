@@ -4,31 +4,16 @@ import Link from "next/link";
 import {
   ArrowRight,
   BadgeCheck,
-  BarChart3,
-  Boxes,
   Building2,
   Check,
-  Factory,
-  Gem,
-  Handshake,
   LayoutGrid,
   ShieldCheck,
-  ShoppingBag,
-  ShoppingCart,
   Sparkles,
-  TrendingUp,
-  UsersRound,
-  Wrench,
 } from "lucide-react";
-import { AuthPanel } from "./components/AuthPanel";
-import { BrandMark } from "./components/BrandMark";
+import { HeroShowcase } from "./components/HeroShowcase";
+import { LandingNav } from "./components/LandingNav";
 import { ScrollReveal } from "./components/ScrollReveal";
-
-const navLinks = [
-  { label: "Modules", href: "#modules" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "About", href: "#about" },
-];
+import { moduleHighlights } from "./lib/landingModules";
 
 const stats = [
   { value: "4", label: "Branches synced" },
@@ -37,46 +22,25 @@ const stats = [
   { value: "24/7", label: "Customer portal" },
 ];
 
-const modules = [
-  { icon: ShoppingCart, title: "POS & Billing", copy: "Barcode scan, live gold-rate pricing, split payments and instant invoices." },
-  { icon: Boxes, title: "Inventory", copy: "Weight, purity, stones and stock across every branch — always in sync." },
-  { icon: Wrench, title: "Repairs", copy: "Drop-off to pickup on one ticket. Customers track status in the portal." },
-  { icon: UsersRound, title: "Customers", copy: "Profiles, purchase history, loyalty and a polished self-service portal." },
-  { icon: TrendingUp, title: "Gold Rates", copy: "Update 22K/18K rates once — prices refresh everywhere instantly." },
-  { icon: BarChart3, title: "Reports", copy: "Sales, margins, branch comparison. Export CSV or print to PDF." },
-  { icon: Factory, title: "Manufacturing", copy: "Job cards, bench tracking and metal loss from casting to polish." },
-  { icon: Handshake, title: "Wholesale", copy: "Bulk orders, dealer pricing and B2B invoicing in one flow." },
-];
-
 const flowSteps = [
-  "Sell a piece at POS — stock drops and an invoice is created.",
-  "Gold rate changes — every tag, catalog price and quote updates.",
-  "Customer reserves online — your team sees it in the admin queue.",
-  "Repair moves to Ready — the portal notifies them to collect.",
+  "Sell at POS — stock and invoice update instantly.",
+  "Change gold rate — every tag and catalog price refreshes.",
+  "Customer reserves online — your team sees it in admin.",
+  "Repair is ready — portal notifies them to collect.",
 ];
 
-const spotlights = [
+const features = [
   {
-    badge: "Point of Sale",
-    icon: ShoppingBag,
-    title: "Bill in seconds. Price by the gram.",
-    copy: "Scan barcodes, apply live 22K rates, add making charges and checkout with cash, UPI or split payment. Every sale updates inventory and books automatically.",
-    points: ["Barcode & manual lookup", "Live karat pricing", "Printable receipts"],
+    title: "Built for the counter",
+    copy: "Barcode POS, split payments and receipts tuned for busy showrooms — not generic retail software.",
   },
   {
-    badge: "Repair management",
-    icon: Wrench,
-    title: "From drop-off to pickup on one ticket.",
-    copy: "Log repairs with photos, estimated dates and bench status. Customers follow progress in their portal — fewer phone calls, faster pickups.",
-    points: ["Status stepper", "Customer notifications", "Pickup reminders"],
-    reverse: true,
+    title: "Weight-aware inventory",
+    copy: "Track grams, karat, making charges and stones. Know margin to the gram, not just piece count.",
   },
   {
-    badge: "Customer portal",
-    icon: Gem,
-    title: "A storefront your clients will love.",
-    copy: "Browse collections, wishlist pieces, reserve items and track orders & repairs — branded in navy and gold, just like your showroom.",
-    points: ["Live catalog", "Wishlist & reserve", "Order tracking"],
+    title: "Portal your clients expect",
+    copy: "A polished customer experience for browsing, wishlists, orders and repair tracking — in your brand colours.",
   },
 ];
 
@@ -106,39 +70,10 @@ const plans = [
   },
 ];
 
-function scrollToAccess() {
-  document.getElementById("access")?.scrollIntoView({ behavior: "smooth" });
-}
-
 export default function LandingPage() {
   return (
     <div className="landing-site">
-      <header className="landing-nav">
-        <Link className="landing-nav-brand" href="/">
-          <BrandMark className="auth-logo-mark" />
-          <div>
-            <strong>GRIDS GOLD</strong>
-            <span>JEWELLERY ERP</span>
-          </div>
-        </Link>
-
-        <nav className="landing-nav-links" aria-label="Landing sections">
-          {navLinks.map(({ label, href }) => (
-            <a key={label} href={href}>
-              {label}
-            </a>
-          ))}
-        </nav>
-
-        <div className="landing-nav-actions">
-          <button type="button" className="landing-nav-signin" onClick={scrollToAccess}>
-            Sign in
-          </button>
-          <button type="button" className="landing-nav-cta" onClick={scrollToAccess}>
-            Get started <ArrowRight size={16} />
-          </button>
-        </div>
-      </header>
+      <LandingNav />
 
       <section className="landing-hero">
         <div className="landing-hero-glow landing-hero-glow-a" aria-hidden="true" />
@@ -157,9 +92,9 @@ export default function LandingPage() {
               Retail, repairs, wholesale and manufacturing — with a customer portal your clients will love.
             </p>
             <div className="landing-hero-actions">
-              <button type="button" className="landing-btn-primary" onClick={scrollToAccess}>
+              <Link className="landing-btn-primary" href="/login?signup=1">
                 Start free trial <ArrowRight size={18} />
-              </button>
+              </Link>
               <a className="landing-btn-ghost" href="#modules">
                 Explore modules
               </a>
@@ -171,38 +106,8 @@ export default function LandingPage() {
             </ul>
           </ScrollReveal>
 
-          <ScrollReveal className="landing-hero-preview" delay={120}>
-            <div className="landing-preview-card">
-              <div className="landing-preview-top">
-                <span className="landing-preview-dot" />
-                <span className="landing-preview-dot" />
-                <span className="landing-preview-dot" />
-              </div>
-              <div className="landing-preview-body">
-                <div className="landing-preview-sidebar">
-                  <span className="active">Dashboard</span>
-                  <span>POS</span>
-                  <span>Inventory</span>
-                  <span>Repairs</span>
-                  <span>Customers</span>
-                </div>
-                <div className="landing-preview-main">
-                  <div className="landing-preview-kpis">
-                    <div><small>Sales today</small><strong>₹ 4.2L</strong></div>
-                    <div><small>22K rate</small><strong>₹ 7,245</strong></div>
-                    <div><small>Low stock</small><strong>6 items</strong></div>
-                  </div>
-                  <div className="landing-preview-chart" aria-hidden="true">
-                    <span style={{ height: "42%" }} />
-                    <span style={{ height: "68%" }} />
-                    <span style={{ height: "55%" }} />
-                    <span style={{ height: "82%" }} />
-                    <span style={{ height: "64%" }} />
-                    <span style={{ height: "90%" }} />
-                  </div>
-                </div>
-              </div>
-            </div>
+          <ScrollReveal className="landing-hero-visual-wrap" delay={120}>
+            <HeroShowcase />
           </ScrollReveal>
         </div>
       </section>
@@ -219,14 +124,14 @@ export default function LandingPage() {
       </section>
 
       <section className="landing-section" id="modules">
-        <ScrollReveal className="landing-section-head">
+        <ScrollReveal className="landing-section-head centered">
           <span className="landing-eyebrow light">Modules</span>
           <h2>Everything your showroom needs</h2>
-          <p>One platform for the counter, the workshop, the back office and your customers.</p>
+          <p>From the counter to the workshop, back office and customer portal — one connected platform.</p>
         </ScrollReveal>
 
         <div className="landing-module-grid">
-          {modules.map(({ icon: Icon, title, copy }, i) => (
+          {moduleHighlights.map(({ icon: Icon, title, copy }, i) => (
             <ScrollReveal key={title} delay={(i % 4) * 70}>
               <article className="landing-module-card">
                 <span className="landing-module-icon"><Icon size={20} /></span>
@@ -238,8 +143,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="landing-section landing-flow-section">
-        <ScrollReveal className="landing-section-head">
+      <section className="landing-section landing-flow-section" id="features">
+        <ScrollReveal className="landing-section-head centered">
           <span className="landing-eyebrow light">How it fits together</span>
           <h2>The pieces talk to each other</h2>
           <p>Sell a piece, the stock drops. Update a rate, every price changes. No double entry.</p>
@@ -255,36 +160,21 @@ export default function LandingPage() {
             </ScrollReveal>
           ))}
         </div>
+
+        <div className="landing-feature-cards">
+          {features.map(({ title, copy }, i) => (
+            <ScrollReveal key={title} delay={i * 90}>
+              <article className="landing-feature-card">
+                <h3>{title}</h3>
+                <p>{copy}</p>
+              </article>
+            </ScrollReveal>
+          ))}
+        </div>
       </section>
 
-      {spotlights.map(({ badge, icon: Icon, title, copy, points, reverse }) => (
-        <section className={`landing-spotlight ${reverse ? "reverse" : ""}`} key={badge}>
-          <ScrollReveal className="landing-spotlight-copy">
-            <span className="landing-spotlight-badge"><Icon size={14} /> {badge}</span>
-            <h2>{title}</h2>
-            <p>{copy}</p>
-            <ul>
-              {points.map((point) => (
-                <li key={point}><Check size={15} /> {point}</li>
-              ))}
-            </ul>
-          </ScrollReveal>
-          <ScrollReveal className="landing-spotlight-visual" delay={100}>
-            <div className="landing-spotlight-panel">
-              <div className="landing-spotlight-panel-head">
-                <Icon size={18} />
-                <strong>{badge}</strong>
-              </div>
-              <div className="landing-spotlight-lines">
-                <span /><span /><span /><span />
-              </div>
-            </div>
-          </ScrollReveal>
-        </section>
-      ))}
-
       <section className="landing-section" id="pricing">
-        <ScrollReveal className="landing-section-head">
+        <ScrollReveal className="landing-section-head centered">
           <span className="landing-eyebrow light">Pricing</span>
           <h2>Start with software. Grow into a partnership.</h2>
           <p>Transparent plans for single-store boutiques to multi-branch chains.</p>
@@ -306,9 +196,12 @@ export default function LandingPage() {
                     <li key={f}><Check size={14} /> {f}</li>
                   ))}
                 </ul>
-                <button type="button" className={plan.dark ? "landing-btn-ghost light" : "landing-btn-primary full"} onClick={scrollToAccess}>
+                <Link
+                  className={plan.dark ? "landing-btn-ghost light" : "landing-btn-primary full"}
+                  href={plan.dark ? "/login" : "/login?signup=1"}
+                >
                   {plan.dark ? "Contact sales" : "Get started"}
-                </button>
+                </Link>
               </article>
             </ScrollReveal>
           ))}
@@ -316,31 +209,37 @@ export default function LandingPage() {
       </section>
 
       <section className="landing-section landing-about" id="about">
-        <ScrollReveal className="landing-about-inner">
+        <ScrollReveal className="landing-about-inner centered">
           <span className="landing-eyebrow light">About Grids Gold</span>
-          <h2>Crafted for jewellers, by people who understand the trade.</h2>
+          <h2>Crafted for jewellers who live by weight, purity and trust.</h2>
           <p>
-            Grids Gold is a jewellery ERP built around how Indian showrooms actually work — weight-based
-            pricing, karat rates, repair tickets, hallmark certificates and multi-branch inventory.
-            We help you spend less time on spreadsheets and more time with customers.
+            Grids Gold is jewellery ERP software shaped around Indian showrooms — karat-based pricing,
+            repair tickets, hallmark workflows and multi-branch inventory. Less spreadsheet chaos,
+            more time with customers at the counter.
           </p>
           <div className="landing-about-pills">
             <span><ShieldCheck size={15} /> Secure & cloud-ready</span>
             <span><BadgeCheck size={15} /> BIS hallmark workflows</span>
             <span><Building2 size={15} /> Multi-branch sync</span>
-            <span><LayoutGrid size={15} /> Vercel-deployed frontend</span>
+            <span><LayoutGrid size={15} /> Modern web platform</span>
           </div>
         </ScrollReveal>
       </section>
 
-      <section className="landing-access" id="access">
-        <ScrollReveal className="landing-access-intro">
-          <span className="landing-eyebrow light">Sign in or sign up</span>
-          <h2>Access your account</h2>
-          <p>Customers browse and track orders. Staff manage the full ERP workspace.</p>
-        </ScrollReveal>
-        <ScrollReveal delay={80}>
-          <AuthPanel />
+      <section className="landing-cta-band">
+        <ScrollReveal className="landing-cta-inner">
+          <div>
+            <h2>Ready to modernise your showroom?</h2>
+            <p>Start a free trial or sign in to your existing account.</p>
+          </div>
+          <div className="landing-cta-actions">
+            <Link className="landing-btn-primary" href="/login?signup=1">
+              Get started <ArrowRight size={18} />
+            </Link>
+            <Link className="landing-btn-ghost light" href="/login">
+              Sign in
+            </Link>
+          </div>
         </ScrollReveal>
       </section>
 
@@ -348,9 +247,10 @@ export default function LandingPage() {
         <span>© {new Date().getFullYear()} Grids Gold · Fine Jewellery ERP</span>
         <div>
           <a href="#modules">Modules</a>
+          <a href="#features">Features</a>
           <a href="#pricing">Pricing</a>
           <a href="#about">About</a>
-          <a href="#access">Sign in</a>
+          <Link href="/login">Sign in</Link>
         </div>
       </footer>
     </div>
