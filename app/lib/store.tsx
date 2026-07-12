@@ -8,6 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { isRemovedCategory } from "./categories";
 
 /* ----------------------------- Types ----------------------------- */
 
@@ -266,7 +267,17 @@ type StoreValue = {
 };
 
 const StoreContext = createContext<StoreValue | null>(null);
-const KEY = "gg_state_v3";
+const KEY = "gg_state_v4";
+
+function hydrateItems(saved: Item[] | undefined): Item[] {
+  const savedMap = new Map(saved?.map((item) => [item.id, item]));
+  return seedItems.map((seed) => {
+    const saved = savedMap.get(seed.id);
+    return saved
+      ? { ...saved, name: seed.name, category: seed.category, icon: seed.icon, image: seed.image, sku: seed.sku }
+      : seed;
+  });
+}
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
@@ -292,24 +303,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(KEY);
+      const raw = localStorage.getItem(KEY) ?? localStorage.getItem("gg_state_v3");
       if (raw) {
         const d = JSON.parse(raw);
         if (d.theme) setTheme(d.theme);
         if (d.rates) setRates((p) => ({ ...p, ...d.rates }));
         if (d.selectedBranch) setSelectedBranch(d.selectedBranch);
         if (d.currentUser) setCurrentUser(d.currentUser);
-        if (d.items) {
-          const savedMap = new Map((d.items as Item[]).map((item) => [item.id, item]));
-          setItems(
-            seedItems.map((seed) => {
-              const saved = savedMap.get(seed.id);
-              return saved
-                ? { ...saved, name: seed.name, category: seed.category, icon: seed.icon, image: seed.image, sku: seed.sku }
-                : seed;
-            }),
-          );
-        }
+        if (d.items) setItems(hydrateItems(d.items as Item[]));
         if (d.customers) setCustomers(d.customers);
         if (d.invoices) setInvoices(d.invoices);
         if (d.repairs) setRepairs(d.repairs);

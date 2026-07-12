@@ -3,11 +3,12 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, Minus, Plus, ScanBarcode, Search, Trash2, X } from "lucide-react";
+import { isRemovedCategory, SHOP_CATEGORIES } from "../lib/categories";
 import { AppShell } from "../components/AppShell";
 import { ItemImage } from "../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR } from "../lib/store";
 
-const categories = ["All", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants"];
+const categories = [...SHOP_CATEGORIES];
 
 export default function PosPage() {
   const { items, rates, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, customers } = useStore();
@@ -32,6 +33,7 @@ export default function PosPage() {
   const visible = useMemo(
     () =>
       items.filter((item) => {
+        if (isRemovedCategory(item.category)) return false;
         const inCat = category === "All" || item.category === category;
         const inQuery =
           !query ||

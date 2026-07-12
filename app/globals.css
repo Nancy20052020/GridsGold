@@ -1407,7 +1407,6 @@ h1 {
 .jewel-icon.bangle::before { content: "◉"; }
 .jewel-icon.earrings::before { content: "♧"; }
 .jewel-icon.pendant::before { content: "♤"; }
-.jewel-icon.chain::before { content: "⌁"; }
 
 .mobile-tabbar a {
   display: grid;

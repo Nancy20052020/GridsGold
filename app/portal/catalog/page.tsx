@@ -4,21 +4,29 @@ import { Suspense, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Heart, Search } from "lucide-react";
+import { isRemovedCategory, PORTAL_CATEGORIES } from "../../lib/categories";
 import { CustomerShell } from "../../components/CustomerShell";
 import { ItemImage } from "../../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR } from "../../lib/store";
 
-const cats = ["All", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Others"];
+const cats = ["All", ...PORTAL_CATEGORIES] as const;
 
 function Catalog() {
   const params = useSearchParams();
   const initial = params.get("cat") ?? "All";
   const { items, rates, wishlist, toggleWishlist, reserve } = useStore();
-  const [cat, setCat] = useState(cats.includes(initial) ? initial : "All");
+  const safeInitial = cats.includes(initial as (typeof cats)[number]) && !isRemovedCategory(initial) ? initial : "All";
+  const [cat, setCat] = useState(safeInitial);
   const [query, setQuery] = useState("");
 
   const visible = useMemo(
-    () => items.filter((i) => (cat === "All" || i.category === cat) && (!query || i.name.toLowerCase().includes(query.toLowerCase()))),
+    () =>
+      items.filter(
+        (i) =>
+          !isRemovedCategory(i.category) &&
+          (cat === "All" || i.category === cat) &&
+          (!query || i.name.toLowerCase().includes(query.toLowerCase())),
+      ),
     [items, cat, query],
   );
 

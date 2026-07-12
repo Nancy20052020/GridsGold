@@ -2,22 +2,20 @@
 
 import Link from "next/link";
 import { ArrowRight, Clock, Heart, Package, ShieldCheck, Sparkles, Truck } from "lucide-react";
+import { isRemovedCategory, PORTAL_CATEGORIES } from "../lib/categories";
 import { CustomerShell } from "../components/CustomerShell";
 import { ItemImage, ProductImage } from "../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR, firstName } from "../lib/store";
 import { CATEGORY_IMAGES, HERO_IMAGE } from "../lib/productImages";
 
-const categories = [
-  { name: "Rings", icon: "ring" },
-  { name: "Necklaces", icon: "necklace" },
-  { name: "Bangles", icon: "bangle" },
-  { name: "Earrings", icon: "earrings" },
-  { name: "Pendants", icon: "pendant" },
-];
+const categories = PORTAL_CATEGORIES.filter((name) => name !== "Others").map((name) => ({
+  name,
+  icon: name === "Rings" ? "ring" : name === "Necklaces" ? "necklace" : name === "Bangles" ? "bangle" : name === "Earrings" ? "earrings" : "pendant",
+}));
 
 export default function CustomerPortalHome() {
   const { items, rates, wishlist, toggleWishlist, reserve, orders, currentUser } = useStore();
-  const featured = items.filter((i) => itemStatus(i.stock) !== "Out of Stock").slice(0, 4);
+  const featured = items.filter((i) => itemStatus(i.stock) !== "Out of Stock" && !isRemovedCategory(i.category)).slice(0, 4);
   const greeting = firstName(currentUser);
 
   return (
