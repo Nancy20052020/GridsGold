@@ -1,57 +1,83 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Play } from "lucide-react";
 
 const slides = [
-  {
-    id: "admin",
-    label: "Admin ERP",
-    caption: "Dashboard, POS, inventory & reports in one workspace.",
-  },
-  {
-    id: "portal",
-    label: "Customer portal",
-    caption: "Browse collections, track orders and repairs online.",
-  },
-  {
-    id: "pos",
-    label: "Point of sale",
-    caption: "Bill in seconds with live gold-rate pricing.",
-  },
+  { id: "admin", label: "Admin ERP" },
+  { id: "portal", label: "Customer portal" },
+  { id: "pos", label: "Point of sale" },
 ];
 
-export function ProductDemo() {
+type ProductDemoProps = {
+  variant?: "showcase" | "compact";
+};
+
+export function ProductDemo({ variant = "showcase" }: ProductDemoProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [active, setActive] = useState(0);
   const [videoReady, setVideoReady] = useState(false);
+  const [playing, setPlaying] = useState(true);
 
   useEffect(() => {
+    if (videoReady || variant !== "compact") return;
     const timer = window.setInterval(() => {
       setActive((i) => (i + 1) % slides.length);
     }, 4500);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [videoReady, variant]);
+
+  function togglePlay() {
+    const el = videoRef.current;
+    if (!el) return;
+    if (el.paused) {
+      void el.play();
+      setPlaying(true);
+    } else {
+      el.pause();
+      setPlaying(false);
+    }
+  }
+
+  const frameClass = variant === "showcase" ? "demo-showcase-frame" : "product-demo-browser";
 
   return (
-    <div className="product-demo">
-      <div className="product-demo-browser">
-        <div className="product-demo-chrome">
-          <span /><span /><span />
-          <em>grids-gold.app</em>
-        </div>
+    <div className={`product-demo ${variant === "showcase" ? "product-demo-showcase" : ""}`}>
+      <div className={frameClass}>
+        {variant === "compact" ? (
+          <div className="product-demo-chrome">
+            <span /><span /><span />
+            <em>grids-gold.app</em>
+          </div>
+        ) : null}
 
         <div className="product-demo-stage">
           {videoReady ? (
-            <video
-              className="product-demo-video"
-              autoPlay
-              muted
-              loop
-              playsInline
-              poster="/images/demo-poster.svg"
-            >
-              <source src="/videos/demo.mp4" type="video/mp4" />
-            </video>
+            <>
+              <video
+                ref={videoRef}
+                className="product-demo-video"
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster="/images/demo-poster.svg"
+                onPlay={() => setPlaying(true)}
+                onPause={() => setPlaying(false)}
+              >
+                <source src="/videos/demo.mp4" type="video/mp4" />
+              </video>
+              {variant === "showcase" ? (
+                <button
+                  type="button"
+                  className="demo-showcase-play"
+                  aria-label={playing ? "Pause demo" : "Play demo"}
+                  onClick={togglePlay}
+                >
+                  <Play size={18} />
+                </button>
+              ) : null}
+            </>
           ) : (
             slides.map((slide, index) => (
               <div
@@ -68,26 +94,23 @@ export function ProductDemo() {
         </div>
       </div>
 
-      <div className="product-demo-meta">
-        <div className="product-demo-tabs">
-          {slides.map((slide, index) => (
-            <button
-              key={slide.id}
-              type="button"
-              className={index === active ? "active" : ""}
-              onClick={() => setActive(index)}
-            >
-              {slide.label}
-            </button>
-          ))}
+      {variant === "compact" && !videoReady ? (
+        <div className="product-demo-meta">
+          <div className="product-demo-tabs">
+            {slides.map((slide, index) => (
+              <button
+                key={slide.id}
+                type="button"
+                className={index === active ? "active" : ""}
+                onClick={() => setActive(index)}
+              >
+                {slide.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <p>{slides[active].caption}</p>
-        <span className="product-demo-play-note">
-          <Play size={14} /> Auto tour · drop <code>demo.mp4</code> in <code>public/videos/</code> to use a recording
-        </span>
-      </div>
+      ) : null}
 
-      {/* Probe for optional demo video without breaking build */}
       <video
         className="product-demo-probe"
         muted
