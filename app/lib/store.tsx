@@ -518,3 +518,10 @@ export function firstName(user: User | null): string {
   if (!user) return "";
   return user.name.split(" ")[0];
 }
+
+export function userInitials(user: User | null): string {
+  if (!user?.name) return "";
+  const parts = user.name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 1) return parts[0][0]?.toUpperCase() ?? "";
+  return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
+}

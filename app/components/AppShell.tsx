@@ -17,7 +17,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { adminNavGroups, adminQuickAddLinks } from "../lib/adminNav";
-import { BRANCHES, firstName, useStore } from "../lib/store";
+import { BRANCHES, firstName, useStore, userInitials } from "../lib/store";
 import { BrandMark } from "./BrandMark";
 
 type AppShellProps = { children: React.ReactNode; searchPlaceholder?: string };
@@ -67,7 +67,7 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
   const displayName = currentUser?.name ?? "Store Admin";
   const displayRole = currentUser?.role === "customer" ? "Customer" : "Administrator";
   const greeting = firstName(currentUser);
-  const initials = (greeting || "Store").slice(0, 2).toUpperCase();
+  const initials = userInitials(currentUser) || "GG";
 
   function signOut() {
     logout();
