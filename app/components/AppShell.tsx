@@ -145,7 +145,6 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
         </nav>
 
         <div className="gold-widget">
-          <div className="gold-visual" />
           <p>Gold Price (22K)</p>
           <strong>₹ {rates["22K"].toLocaleString("en-IN")} <span>/gm</span></strong>
           <em>Live rate · updates all prices</em>
