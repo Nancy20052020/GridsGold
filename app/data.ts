@@ -132,18 +132,18 @@ export function getScreen(path: string) {
 }
 
 export const inventoryRows = [
-  ["22K Gold Ring", "RG22K-00124", "Rings", "22K (916)", "5.250 g", "In Stock", "Main Branch", "â‚¹ 38,051"],
-  ["Gold Necklace Set", "NK22K-00098", "Necklaces", "22K (916)", "18.750 g", "In Stock", "Main Branch", "â‚¹ 1,35,919"],
-  ["Diamond Earrings", "ER18K-00231", "Earrings", "18K (750)", "6.120 g", "In Stock", "Branch 2", "â‚¹ 72,031"],
-  ["Gold Bangle", "BG22K-00112", "Bangles", "22K (916)", "15.300 g", "Low Stock", "Main Branch", "â‚¹ 2,21,759"],
+  ["22K Gold Ring", "RG22K-00124", "Rings", "22K (916)", "5.250 g", "In Stock", "Main Branch", "₹ 38,051"],
+  ["Gold Necklace Set", "NK22K-00098", "Necklaces", "22K (916)", "18.750 g", "In Stock", "Main Branch", "₹ 1,35,919"],
+  ["Diamond Earrings", "ER18K-00231", "Earrings", "18K (750)", "6.120 g", "In Stock", "Branch 2", "₹ 72,031"],
+  ["Gold Bangle", "BG22K-00112", "Bangles", "22K (916)", "15.300 g", "Low Stock", "Main Branch", "₹ 2,21,759"],
   ["Gold Pendant", "PD22K-00177", "Pendants", "22K (916)", "4.760 g", "In Stock", "Branch 3", "₹ 48,500"],
-  ["Gold Bar 10g", "GB22K-01003", "Gold Bars", "24K (999)", "10.000 g", "In Stock", "Vault", "â‚¹ 3,47,500"],
+  ["Gold Bar 10g", "GB22K-01003", "Gold Bars", "24K (999)", "10.000 g", "In Stock", "Vault", "₹ 3,47,500"],
 ];
 
 export const sampleRows = [
-  ["INV-10248", "John Smith", "Gold Necklace", "â‚¹ 1,45,280", "Paid", "30 Apr, 2025"],
-  ["REP-1023", "Priya Mehta", "Ring resizing", "â‚¹ 1,200", "At Bench", "02 May, 2025"],
-  ["PO-3301", "Raj Gems", "Diamonds", "â‚¹ 8,75,000", "Received", "29 Apr, 2025"],
+  ["INV-10248", "John Smith", "Gold Necklace", "₹ 1,45,280", "Paid", "30 Apr, 2025"],
+  ["REP-1023", "Priya Mehta", "Ring resizing", "₹ 1,200", "At Bench", "02 May, 2025"],
+  ["PO-3301", "Raj Gems", "Diamonds", "₹ 8,75,000", "Received", "29 Apr, 2025"],
   ["TRF-00145", "Main Branch", "Branch 2", "5 items", "In Transit", "30 Apr, 2025"],
 ];
 
