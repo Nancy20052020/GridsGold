@@ -8,7 +8,7 @@ import { CustomerShell } from "../../components/CustomerShell";
 import { ItemImage } from "../../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR } from "../../lib/store";
 
-const cats = ["All", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Chains", "Others"];
+const cats = ["All", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants", "Others"];
 
 function Catalog() {
   const params = useSearchParams();

@@ -13,7 +13,6 @@ const categories = [
   { name: "Bangles", icon: "bangle" },
   { name: "Earrings", icon: "earrings" },
   { name: "Pendants", icon: "pendant" },
-  { name: "Chains", icon: "chain" },
 ];
 
 export default function CustomerPortalHome() {

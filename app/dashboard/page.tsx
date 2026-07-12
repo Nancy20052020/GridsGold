@@ -258,9 +258,9 @@ export default function DashboardPage() {
           <article className="panel">
             <div className="panel-head"><h2>Low Stock Alerts</h2><Link className="link-button" href="/inventory" style={{ width: "auto", margin: 0 }}>View all</Link></div>
             <div className="stock-list">
-              {["Gold Chain (22K)", "Gold Bangles (22K)", "Diamond Ring", "Gold Earrings (18K)"].map((n, index) => (
+              {["Gold Bangle (22K)", "Gold Pendant (22K)", "Diamond Ring", "Gold Earrings (18K)"].map((n, index) => (
                 <div className="stock-row" key={n}>
-                  <span className={`jewel-icon ${index % 2 ? "bangle" : "chain"}`} />
+                  <span className={`jewel-icon ${index % 2 ? "pendant" : "bangle"}`} />
                   <div><strong>{n}</strong><small>Stock: {5 - index} Pcs</small></div>
                   <em>Low Stock</em>
                 </div>
@@ -273,7 +273,7 @@ export default function DashboardPage() {
             <div className="insights">
               <p>Bangles category sales are expected to increase by 28% before Akshaya Tritiya.</p>
               <p>Customer demand for lightweight jewelry is trending up in your region.</p>
-              <p>Consider reordering Gold Chains (22K) to avoid stockouts.</p>
+              <p>Consider reordering Gold Bangles (22K) to avoid stockouts.</p>
             </div>
           </article>
         </section>

@@ -126,6 +126,10 @@ const seedItems: Item[] = [
   { id: "it9", name: "Diamond Solitaire Ring", sku: "PR950-00021", category: "Rings", karat: "PT950", weight: 6.2, making: 3500, stoneValue: 12000, stock: 2, branch: "Vault", icon: "ring", image: "ring_2.png" },
   { id: "it10", name: "Bridal Filigree Necklace", sku: "NK22K-00301", category: "Necklaces", karat: "22K", weight: 42.4, making: 8500, stoneValue: 65000, stock: 1, branch: "Main Branch", icon: "necklace", image: "necklace_2.png" },
   { id: "it11", name: "Sapphire Drop Earrings", sku: "ER18K-00232", category: "Earrings", karat: "18K", weight: 4.5, making: 2800, stoneValue: 18000, stock: 4, branch: "Main Branch", icon: "earrings", image: "earrings_2.png" },
+  { id: "it12", name: "Royal Gold Bangle", sku: "BG22K-00112", category: "Bangles", karat: "22K", weight: 15.3, making: 2600, stoneValue: 0, stock: 5, branch: "Main Branch", icon: "bangle", image: "bangle_1.png" },
+  { id: "it13", name: "Diamond Bangle", sku: "BG22K-00113", category: "Bangles", karat: "22K", weight: 18.2, making: 3200, stoneValue: 22000, stock: 3, branch: "Branch 2", icon: "bangle", image: "bangle_2.png" },
+  { id: "it14", name: "Gold Pendant", sku: "PD22K-00177", category: "Pendants", karat: "22K", weight: 4.76, making: 900, stoneValue: 4500, stock: 6, branch: "Branch 3", icon: "pendant", image: "pendant_1.png" },
+  { id: "it15", name: "Ruby Pendant", sku: "PD22K-00178", category: "Pendants", karat: "22K", weight: 5.1, making: 1100, stoneValue: 8500, stock: 4, branch: "Main Branch", icon: "pendant", image: "pendant_2.png" },
 ];
 
 const seedCustomers: Customer[] = [
@@ -142,7 +146,7 @@ const seedInvoices: Invoice[] = [
 
 const seedRepairs: Repair[] = [
   { id: "r1", number: "REP-2026-000028", customer: "Priya Mehta", item: "Gold Ring", issue: "Ring resizing", status: "Ready", estimate: 1200, date: "02 May, 2025" },
-  { id: "r2", number: "REP-2026-000029", customer: "John Smith", item: "Gold Chain", issue: "Broken clasp repair", status: "In Progress", estimate: 850, date: "03 May, 2025" },
+  { id: "r2", number: "REP-2026-000029", customer: "John Smith", item: "Gold Bangle", issue: "Resize bangle", status: "In Progress", estimate: 850, date: "03 May, 2025" },
 ];
 
 const seedSuppliers: Supplier[] = [
@@ -162,7 +166,7 @@ const seedOrders: CustomerOrder[] = [
 const seedMovements: Movement[] = [
   { id: "m1", date: "30 Apr, 2025", type: "Sale", item: "Gold Necklace Set", qty: -1, from: "Main Branch", to: "Customer", user: "John Smith" },
   { id: "m2", date: "29 Apr, 2025", type: "Transfer", item: "Diamond Drop Earrings", qty: 2, from: "Main Branch", to: "Branch 2", user: "Admin" },
-  { id: "m3", date: "28 Apr, 2025", type: "Adjustment", item: "Gold Chain", qty: -1, from: "Main Branch", to: "Damaged", user: "Ahmed Khan" },
+  { id: "m3", date: "28 Apr, 2025", type: "Adjustment", item: "Royal Gold Bangle", qty: -1, from: "Main Branch", to: "Damaged", user: "Ahmed Khan" },
 ];
 
 const seedExpenses: Expense[] = [
@@ -178,7 +182,7 @@ const seedBulk: BulkOrder[] = [
 
 const seedWork: WorkOrder[] = [
   { id: "w1", number: "WO-MFG-000010", product: "22K Bangle (custom)", karigar: "Suresh Karigar", qtyPlanned: 20, qtyDone: 12, status: "In Progress", due: "10 May, 2025" },
-  { id: "w2", number: "WO-MFG-000011", product: "Gold Chain 22K", karigar: "Ramesh Workshop", qtyPlanned: 50, qtyDone: 50, status: "Completed", due: "28 Apr, 2025" },
+  { id: "w2", number: "WO-MFG-000011", product: "Gold Bangle 22K", karigar: "Ramesh Workshop", qtyPlanned: 50, qtyDone: 50, status: "Completed", due: "28 Apr, 2025" },
 ];
 
 const seedNotifications: Notification[] = [
