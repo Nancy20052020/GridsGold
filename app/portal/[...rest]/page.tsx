@@ -2,12 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, Hammer } from "lucide-react";
 import { CustomerShell } from "../../components/CustomerShell";
 
-const titles: Record<string, { title: string; copy: string }> = {
-  account: {
-    title: "My Account",
-    copy: "Manage your profile, addresses, preferences and communication settings.",
-  },
-};
+const titles: Record<string, { title: string; copy: string }> = {};
 
 export function generateStaticParams() {
   return Object.keys(titles).map((key) => ({ rest: [key] }));

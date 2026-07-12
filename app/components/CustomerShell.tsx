@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Gem, Heart, Home, LogOut, Package, Sparkles, UserRound, Wrench } from "lucide-react";
 import { firstName, useStore } from "../lib/store";
+import { BrandMark } from "./BrandMark";
 
 const navLinks = [
   { label: "Home", href: "/portal", icon: Home },
@@ -28,7 +29,7 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
     <div className="portal-shell">
       <header className="portal-header">
         <Link className="portal-brand" href="/portal">
-          <span className="portal-brand-mark">G</span>
+          <BrandMark className="portal-brand-mark" />
           <div>
             <strong>GRIDS GOLD</strong>
             <span>FINE JEWELLERY</span>

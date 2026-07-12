@@ -4077,3 +4077,33 @@ h1 {
 [data-theme="dark"] .data-table th {
   background: transparent;
 }
+
+/* ---- Logo image (drop public/images/logo.png) + account page ---- */
+.logo-img {
+  object-fit: contain;
+  border-radius: inherit;
+  background: transparent;
+}
+
+.brand-mark.logo-img,
+.portal-brand-mark.logo-img {
+  object-fit: cover;
+}
+
+.account-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.account-side {
+  display: grid;
+  gap: 18px;
+}
+
+@media (max-width: 900px) {
+  .account-grid {
+    grid-template-columns: 1fr;
+  }
+}
