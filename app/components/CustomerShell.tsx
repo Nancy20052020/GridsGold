@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Gem, Heart, Home, LogOut, Package, Sparkles, UserRound, Wrench } from "lucide-react";
-import { useStore } from "../lib/store";
+import { firstName, useStore } from "../lib/store";
 
 const navLinks = [
   { label: "Home", href: "/portal", icon: Home },
@@ -15,7 +15,14 @@ const navLinks = [
 
 export function CustomerShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { rates, wishlist } = useStore();
+  const router = useRouter();
+  const { rates, wishlist, currentUser, logout } = useStore();
+  const greeting = firstName(currentUser);
+
+  function signOut() {
+    logout();
+    router.push("/");
+  }
 
   return (
     <div className="portal-shell">
@@ -44,12 +51,13 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
           <span className="portal-rate">
             <Sparkles size={14} /> 22K · ₹ {rates["22K"].toLocaleString("en-IN")}/gm
           </span>
+          {greeting ? <span className="portal-greeting">Hi, {greeting}</span> : null}
           <Link className="portal-account" href="/portal/account" aria-label="Account">
             <UserRound size={18} />
           </Link>
-          <Link className="portal-logout" href="/" aria-label="Sign out">
+          <button className="portal-logout" type="button" onClick={signOut} aria-label="Sign out">
             <LogOut size={18} />
-          </Link>
+          </button>
         </div>
       </header>
 

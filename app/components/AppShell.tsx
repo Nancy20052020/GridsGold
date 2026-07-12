@@ -1,12 +1,11 @@
 ﻿"use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useStore } from "../lib/store";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
   Boxes,
-  BrainCircuit,
   CalendarDays,
   ChartNoAxesCombined,
   ChevronDown,
@@ -18,111 +17,113 @@ import {
   LayoutGrid,
   LogOut,
   Menu,
-  PackageCheck,
+  Moon,
+  PanelLeft,
   ReceiptText,
   Search,
   Settings,
   ShoppingCart,
+  Sun,
+  TrendingUp,
   UserRound,
   WalletCards,
   Wrench,
 } from "lucide-react";
+import { BRANCHES, firstName, useStore } from "../lib/store";
 
 const menuItems = [
   { label: "Dashboard", icon: Home, href: "/dashboard" },
   { label: "POS / Sales", icon: ShoppingCart, href: "/pos" },
-  {
-    label: "Inventory",
-    icon: Boxes,
-    href: "/inventory",
-    subItems: ["Stock Overview", "Stock Movements", "Transfers", "Adjustments", "Cycle Counts"],
-  },
+  { label: "Inventory", icon: Boxes, href: "/inventory" },
   { label: "Jewelry", icon: Gem, href: "/jewelry" },
   { label: "Repairs", icon: Wrench, href: "/repairs" },
   { label: "Customers", icon: UserRound, href: "/customers" },
-  { label: "Purchasing", icon: PackageCheck, href: "/purchase-orders" },
+  { label: "Purchasing", icon: ReceiptText, href: "/purchase-orders" },
   { label: "Manufacturing", icon: Factory, href: "/manufacturing" },
   { label: "Wholesale", icon: Handshake, href: "/wholesale" },
   { label: "Finance", icon: WalletCards, href: "/finance" },
-  { label: "Reports", icon: ReceiptText, href: "/reports" },
+  { label: "Reports", icon: LayoutGrid, href: "/reports" },
   { label: "Analytics", icon: ChartNoAxesCombined, href: "/analytics" },
-  { label: "AI Center", icon: BrainCircuit, href: "/screens" },
+  { label: "Gold Rates", icon: TrendingUp, href: "/gold-rates" },
   { label: "Settings", icon: Settings, href: "/settings" },
 ];
 
 const mobileItems = [
   { label: "Dashboard", icon: Home, href: "/dashboard" },
-  { label: "Sales", icon: ShoppingCart, href: "#" },
-  { label: "Inventory", icon: LayoutGrid, href: "/inventory" },
+  { label: "POS", icon: ShoppingCart, href: "/pos" },
+  { label: "Inventory", icon: Boxes, href: "/inventory" },
   { label: "Jewelry", icon: Gem, href: "/jewelry" },
   { label: "Customers", icon: UserRound, href: "/customers" },
 ];
 
-type AppShellProps = {
-  children: React.ReactNode;
-  searchPlaceholder?: string;
-};
+type AppShellProps = { children: React.ReactNode; searchPlaceholder?: string };
 
-function isActive(pathname: string, href?: string) {
-  if (!href || href === "#") {
-    return false;
-  }
-  return href === "/" ? pathname === "/" : pathname.startsWith(href);
+function isActive(pathname: string, href: string) {
+  return href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(href);
 }
 
-const brandHref = "/dashboard";
-
-export function AppShell({
-  children,
-  searchPlaceholder = "Search by item, customer, invoice, or barcode...",
-}: AppShellProps) {
+export function AppShell({ children, searchPlaceholder = "Search item, customer, invoice or barcode..." }: AppShellProps) {
   const pathname = usePathname();
-  const { rates } = useStore();
+  const router = useRouter();
+  const { rates, selectedBranch, setBranch, currentUser, logout, notifications, markNotificationsRead, theme, toggleTheme } = useStore();
+
+  const [collapsed, setCollapsed] = useState(false);
+  const [menu, setMenu] = useState<null | "branch" | "notif" | "calendar" | "profile">(null);
+  const shellRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCollapsed(localStorage.getItem("gg_sidebar") === "1");
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("gg_sidebar", collapsed ? "1" : "0");
+    } catch {
+      /* ignore */
+    }
+  }, [collapsed]);
+
+  const unread = notifications.filter((n) => !n.read).length;
+  const displayName = currentUser?.name ?? "Store Admin";
+  const displayRole = currentUser?.role === "customer" ? "Customer" : "Administrator";
+  const initials = (firstName(currentUser) || "Store").slice(0, 2).toUpperCase();
+
+  function signOut() {
+    logout();
+    router.push("/");
+  }
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${collapsed ? "collapsed" : ""}`} ref={shellRef}>
       <aside className="sidebar">
-        <Link className="brand" href={brandHref}>
-          <div className="brand-mark">G</div>
-          <div>
-            <strong>GRIDS GOLD</strong>
-            <span>JEWELRY ERP</span>
-          </div>
-        </Link>
+        <div className="brand-row">
+          <Link className="brand" href="/dashboard">
+            <div className="brand-mark">G</div>
+            <div className="brand-text">
+              <strong>GRIDS GOLD</strong>
+              <span>JEWELRY ERP</span>
+            </div>
+          </Link>
+          <button className="collapse-btn" type="button" onClick={() => setCollapsed((c) => !c)} aria-label="Toggle sidebar">
+            <PanelLeft size={18} />
+          </button>
+        </div>
 
         <nav className="nav-list" aria-label="Main navigation">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(pathname, item.href);
-            const content = (
-              <>
-                <Icon size={21} />
-                <span>{item.label}</span>
-                <ChevronRight size={16} />
-              </>
-            );
-
             return (
-              <div className="nav-group" key={item.label}>
-                {item.href ? (
-                  <Link className={`nav-item ${active ? "active" : ""}`} href={item.href}>
-                    {content}
-                  </Link>
-                ) : (
-                  <button className="nav-item" type="button">
-                    {content}
-                  </button>
-                )}
-                {active && item.subItems ? (
-                  <div className="subnav">
-                    {item.subItems.map((subItem, index) => (
-                      <button className={index === 0 ? "active" : ""} key={subItem} type="button">
-                        {subItem}
-                      </button>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
+              <Link className={`nav-item ${active ? "active" : ""}`} href={item.href} key={item.label} title={item.label}>
+                <Icon size={20} />
+                <span className="nav-label">{item.label}</span>
+                <ChevronRight className="nav-caret" size={15} />
+              </Link>
             );
           })}
         </nav>
@@ -133,15 +134,14 @@ export function AppShell({
           <strong>
             ₹ {rates["22K"].toLocaleString("en-IN")} <span>/gm</span>
           </strong>
-          <em>↑ 1.21% (₹ 86) vs yesterday</em>
-          <div className="mini-spark" />
+          <em>↑ 1.21% vs yesterday</em>
           <Link className="gold-widget-link" href="/gold-rates">View Gold Rates</Link>
         </div>
       </aside>
 
       <main className="main">
         <header className="topbar">
-          <button className="icon-button mobile-menu" aria-label="Open menu" type="button">
+          <button className="icon-button mobile-menu" aria-label="Open menu" type="button" onClick={() => setCollapsed((c) => !c)}>
             <Menu size={21} />
           </button>
           <div className="search-box">
@@ -149,41 +149,82 @@ export function AppShell({
             <input placeholder={searchPlaceholder} />
             <kbd>Ctrl K</kbd>
           </div>
-          <button className="branch-button" type="button">
-            Main Branch <ChevronDown size={16} />
-          </button>
-          <div className="top-actions">
-            <button className="icon-button badge" aria-label="Notifications" type="button">
-              <Bell size={20} />
+
+          <div className="menu-wrap">
+            <button className="branch-button" type="button" onClick={() => setMenu(menu === "branch" ? null : "branch")}>
+              {selectedBranch} <ChevronDown size={16} />
             </button>
-            <button className="icon-button" aria-label="Calendar" type="button">
-              <CalendarDays size={20} />
-            </button>
-            <button className="icon-button" aria-label="Settings" type="button">
-              <Settings size={20} />
-            </button>
-            <Link className="icon-button" aria-label="Sign out" href="/">
-              <LogOut size={20} />
-            </Link>
+            {menu === "branch" ? (
+              <div className="dropdown">
+                {BRANCHES.map((b) => (
+                  <button key={b} type="button" className={b === selectedBranch ? "active" : ""} onClick={() => { setBranch(b); setMenu(null); }}>
+                    {b}
+                  </button>
+                ))}
+              </div>
+            ) : null}
           </div>
-          <div className="profile">
-            <div className="avatar">JS</div>
-            <div>
-              <strong>John Smith</strong>
-              <span>Administrator</span>
+
+          <div className="top-actions">
+            <button className="icon-button" aria-label="Toggle theme" type="button" onClick={toggleTheme}>
+              {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+            </button>
+
+            <div className="menu-wrap">
+              <button className="icon-button" aria-label="Notifications" type="button" onClick={() => { setMenu(menu === "notif" ? null : "notif"); if (menu !== "notif") markNotificationsRead(); }}>
+                <Bell size={20} />
+                {unread ? <em className="badge-count">{unread}</em> : null}
+              </button>
+              {menu === "notif" ? (
+                <div className="dropdown wide">
+                  <div className="dropdown-head">Notifications</div>
+                  {notifications.map((n) => (
+                    <div className="dropdown-row" key={n.id}>
+                      <strong>{n.text}</strong>
+                      <small>{n.time}</small>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
             </div>
-            <ChevronDown size={16} />
+
+            <div className="menu-wrap">
+              <button className="icon-button" aria-label="Calendar" type="button" onClick={() => setMenu(menu === "calendar" ? null : "calendar")}>
+                <CalendarDays size={20} />
+              </button>
+              {menu === "calendar" ? <div className="dropdown"><MiniCalendar /></div> : null}
+            </div>
+
+            <Link className="icon-button" aria-label="Settings" href="/settings"><Settings size={20} /></Link>
+          </div>
+
+          <div className="menu-wrap">
+            <button className="profile" type="button" onClick={() => setMenu(menu === "profile" ? null : "profile")}>
+              <div className="avatar">{initials}</div>
+              <div className="profile-text">
+                <strong>{displayName}</strong>
+                <span>{displayRole}</span>
+              </div>
+              <ChevronDown size={16} />
+            </button>
+            {menu === "profile" ? (
+              <div className="dropdown right">
+                <Link href="/settings" onClick={() => setMenu(null)}>Settings</Link>
+                <button type="button" onClick={signOut}><LogOut size={15} /> Sign out</button>
+              </div>
+            ) : null}
           </div>
         </header>
+
+        {menu ? <button className="menu-backdrop" aria-hidden="true" tabIndex={-1} onClick={() => setMenu(null)} /> : null}
 
         {children}
 
         <nav className="mobile-tabbar" aria-label="Mobile navigation">
           {mobileItems.map((item) => {
             const Icon = item.icon;
-            const active = isActive(pathname, item.href);
             return (
-              <Link className={active ? "active" : ""} href={item.href} key={item.label} aria-label={item.label}>
+              <Link className={isActive(pathname, item.href) ? "active" : ""} href={item.href} key={item.label} aria-label={item.label}>
                 <Icon size={20} />
               </Link>
             );
@@ -194,3 +235,22 @@ export function AppShell({
   );
 }
 
+function MiniCalendar() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const first = new Date(year, month, 1).getDay();
+  const days = new Date(year, month + 1, 0).getDate();
+  const cells: (number | null)[] = [...Array(first).fill(null), ...Array.from({ length: days }, (_, i) => i + 1)];
+  return (
+    <div className="mini-cal">
+      <div className="mini-cal-head">{now.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</div>
+      <div className="mini-cal-grid">
+        {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => <span className="dow" key={i}>{d}</span>)}
+        {cells.map((c, i) => (
+          <span key={i} className={c === now.getDate() ? "day today" : "day"}>{c ?? ""}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
