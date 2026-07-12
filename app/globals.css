@@ -320,8 +320,8 @@ a.export-button {
 
 .profile {
   display: grid;
-  grid-template-columns: 42px auto 16px;
-  gap: 10px;
+  grid-template-columns: auto 16px;
+  gap: 8px;
   align-items: center;
 }
 
@@ -5386,8 +5386,9 @@ a.ghost-action {
 .profile {
   border: 1px solid transparent;
   background: transparent;
-  padding: 4px 6px;
+  padding: 6px 10px;
   border-radius: 10px;
+  cursor: pointer;
 }
 
 .profile:hover {
@@ -6392,17 +6393,6 @@ a.ghost-action {
 .sidebar-rich button.sidebar-logout:hover {
   background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.16);
-}
-
-.profile-avatar {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(242, 179, 61, 0.22), rgba(6, 19, 39, 0.92));
-  border: 1px solid rgba(242, 179, 61, 0.35);
-  color: #ffd36c;
 }
 
 /* ---- Sales workspace (Gem Logic style POS) ---- */

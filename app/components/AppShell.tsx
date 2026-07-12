@@ -227,9 +227,6 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
 
             <div className="menu-wrap">
               <button className="profile" type="button" onClick={() => setMenu(menu === "profile" ? null : "profile")}>
-                <span className="profile-avatar" aria-hidden="true">
-                  <UserRound size={17} strokeWidth={2.2} />
-                </span>
                 <span className="profile-text">
                   <strong>{displayName}</strong>
                   <span>{displayRole}</span>
