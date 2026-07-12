@@ -11,7 +11,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import { LandingNav } from "./components/LandingNav";
-import { ProductDemo } from "./components/ProductDemo";
 import { ScrollReveal } from "./components/ScrollReveal";
 import { TypewriterText } from "./components/TypewriterText";
 import { moduleHighlights } from "./lib/landingModules";
@@ -99,7 +98,7 @@ export default function LandingPage() {
             <Link className="landing-btn-primary" href="/login?signup=1">
               Start free trial <ArrowRight size={18} />
             </Link>
-            <a className="landing-btn-ghost light" href="#demo">
+            <a className="landing-btn-ghost light" href="#features">
               See how it works
             </a>
           </div>
@@ -127,18 +126,6 @@ export default function LandingPage() {
         {trustStrip.map((item) => (
           <span key={item}><Check size={14} /> {item}</span>
         ))}
-      </section>
-
-      <section className="landing-action-section" id="demo">
-        <ScrollReveal className="landing-action-head">
-          <h2 className="display-serif">See it in action</h2>
-          <p>
-            POS, inventory, repairs and your customer portal — connected and priced at today&apos;s live gold rate.
-          </p>
-        </ScrollReveal>
-        <ScrollReveal delay={100}>
-          <ProductDemo variant="showcase" />
-        </ScrollReveal>
       </section>
 
       <section className="landing-section" id="modules">
@@ -253,7 +240,7 @@ export default function LandingPage() {
         <span>© {new Date().getFullYear()} Grids Gold · Fine Jewellery ERP</span>
         <div>
           <a href="#modules">Modules</a>
-          <a href="#demo">Tour</a>
+          <a href="#features">Features</a>
           <a href="#pricing">Pricing</a>
           <Link href="/login">Sign in</Link>
         </div>
