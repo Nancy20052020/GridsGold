@@ -77,43 +77,38 @@ export default function LandingPage() {
     <div className="landing-site">
       <LandingNav />
 
-      <section className="landing-hero" id="demo">
-        <div className="landing-hero-mesh" aria-hidden="true" />
+      <section className="landing-hero">
+        <div className="landing-hero-glow landing-hero-glow-a" aria-hidden="true" />
+        <div className="landing-hero-glow landing-hero-glow-b" aria-hidden="true" />
 
-        <div className="landing-hero-inner">
-          <ScrollReveal className="landing-hero-copy">
-            <span className="landing-eyebrow">
-              <Sparkles size={14} /> Built for Indian jewellers
+        <ScrollReveal className="landing-hero-centered">
+          <span className="landing-eyebrow">
+            <Sparkles size={14} /> Built for Indian jewellers
+          </span>
+          <h1 className="display-serif">
+            Run your jewellery business from{" "}
+            <span className="gold-text">
+              <TypewriterText phrases={["one place.", "every branch.", "one platform."]} />
             </span>
-            <h1 className="display-serif">
-              Run your jewellery business from{" "}
-              <span className="gold-text">
-                <TypewriterText phrases={["one place.", "every branch.", "one platform."]} />
-              </span>
-            </h1>
-            <p>
-              Cut admin in half, catch every repair on time, and know your margin to the gram.
-              Retail, repairs, wholesale and manufacturing — with a customer portal your clients will love.
-            </p>
-            <div className="landing-hero-actions">
-              <Link className="landing-btn-primary" href="/login?signup=1">
-                Start free trial <ArrowRight size={18} />
-              </Link>
-              <a className="landing-btn-ghost" href="#demo">
-                See how it works
-              </a>
-            </div>
-            <ul className="landing-hero-checks">
-              <li><Check size={16} /> No credit card</li>
-              <li><Check size={16} /> Live gold-rate pricing</li>
-              <li><Check size={16} /> BIS hallmark ready</li>
-            </ul>
-          </ScrollReveal>
-
-          <ScrollReveal className="landing-hero-visual-wrap" delay={120}>
-            <ProductDemo />
-          </ScrollReveal>
-        </div>
+          </h1>
+          <p>
+            Cut admin in half, catch every repair on time, and know your margin to the gram.
+            Retail, repairs, wholesale and manufacturing — with a customer portal your clients will love.
+          </p>
+          <div className="landing-hero-actions">
+            <Link className="landing-btn-primary" href="/login?signup=1">
+              Start free trial <ArrowRight size={18} />
+            </Link>
+            <a className="landing-btn-ghost light" href="#demo">
+              See how it works
+            </a>
+          </div>
+          <ul className="landing-hero-checks">
+            <li><Check size={16} /> No credit card</li>
+            <li><Check size={16} /> Live gold-rate pricing</li>
+            <li><Check size={16} /> BIS hallmark ready</li>
+          </ul>
+        </ScrollReveal>
       </section>
 
       <section className="landing-stats" aria-label="Highlights">
@@ -132,6 +127,18 @@ export default function LandingPage() {
         {trustStrip.map((item) => (
           <span key={item}><Check size={14} /> {item}</span>
         ))}
+      </section>
+
+      <section className="landing-action-section" id="demo">
+        <ScrollReveal className="landing-action-head">
+          <h2 className="display-serif">See it in action</h2>
+          <p>
+            POS, inventory, repairs and your customer portal — connected and priced at today&apos;s live gold rate.
+          </p>
+        </ScrollReveal>
+        <ScrollReveal delay={100}>
+          <ProductDemo variant="showcase" />
+        </ScrollReveal>
       </section>
 
       <section className="landing-section" id="modules">
@@ -232,10 +239,10 @@ export default function LandingPage() {
             <p>Start a free trial or sign in to your existing account.</p>
           </div>
           <div className="landing-cta-actions">
-            <Link className="landing-btn-primary" href="/login?signup=1">
+            <Link className="landing-btn-primary gold" href="/login?signup=1">
               Get started <ArrowRight size={18} />
             </Link>
-            <Link className="landing-btn-ghost" href="/login">
+            <Link className="landing-btn-ghost light" href="/login">
               Sign in
             </Link>
           </div>

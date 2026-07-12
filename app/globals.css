@@ -2213,10 +2213,7 @@ h1 {
 
 .landing-site {
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 85% 5%, rgba(242, 179, 61, 0.14), transparent 38%),
-    radial-gradient(circle at 10% 90%, rgba(242, 179, 61, 0.08), transparent 40%),
-    linear-gradient(180deg, #fdf8f0 0%, #f7f2ea 100%);
+  background: #fff;
   color: var(--ink);
 }
 
@@ -2235,9 +2232,9 @@ h1 {
   padding: 8px 16px;
   font-size: 12px;
   font-weight: 700;
-  color: #7a4f06;
-  background: linear-gradient(90deg, #fff6df, #fff9ec, #fff6df);
-  border-bottom: 1px solid rgba(242, 179, 61, 0.28);
+  color: #ffd884;
+  background: linear-gradient(90deg, #061327, #0a2038, #061327);
+  border-bottom: 1px solid rgba(242, 179, 61, 0.22);
 }
 
 .landing-announcement span,
@@ -2253,10 +2250,9 @@ h1 {
   align-items: center;
   gap: 20px;
   padding: 14px 28px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(234, 223, 206, 0.9);
-  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.04);
+  background: #fff;
+  border-bottom: 1px solid #e8edf3;
+  box-shadow: 0 4px 18px rgba(6, 19, 39, 0.04);
 }
 
 .landing-nav-brand {
@@ -2296,8 +2292,8 @@ h1 {
 .landing-nav-links a:hover,
 .landing-nav-dropdown-trigger:hover,
 .landing-nav-dropdown-trigger.open {
-  color: #7a4f06;
-  background: #fff6df;
+  color: #061327;
+  background: #f4f6f9;
 }
 
 .landing-nav-actions {
@@ -2435,7 +2431,17 @@ h1 {
 .landing-nav-cta:hover,
 .landing-btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 14px 28px rgba(230, 165, 32, 0.34);
+  box-shadow: 0 14px 28px rgba(6, 19, 39, 0.28);
+}
+
+.landing-btn-primary.gold {
+  color: #3a2a05;
+  background: linear-gradient(135deg, #ffd76d, #e6a520);
+  box-shadow: 0 10px 24px rgba(230, 165, 32, 0.32);
+}
+
+.landing-btn-primary.gold:hover {
+  box-shadow: 0 14px 28px rgba(230, 165, 32, 0.4);
 }
 
 .landing-btn-primary.full {
@@ -2473,45 +2479,54 @@ h1 {
   box-shadow: none;
 }
 
+.landing-btn-ghost.light:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(242, 179, 61, 0.55);
+  color: #ffd884;
+}
+
 .landing-hero {
   position: relative;
   overflow: hidden;
-  padding: 56px 28px 48px;
-}
-
-.landing-hero-mesh {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
+  padding: 72px 28px 80px;
+  color: #fff;
+  text-align: center;
   background:
-    radial-gradient(ellipse 70% 55% at 88% 18%, rgba(242, 179, 61, 0.14), transparent),
-    radial-gradient(circle at 6% 88%, rgba(242, 179, 61, 0.07), transparent 45%);
+    radial-gradient(circle at 78% 12%, rgba(242, 179, 61, 0.18), transparent 42%),
+    radial-gradient(circle at 12% 88%, rgba(242, 179, 61, 0.08), transparent 40%),
+    linear-gradient(165deg, #0a2038 0%, #061327 55%, #020916 100%);
 }
 
-.landing-hero-mesh::before,
-.landing-hero-mesh::after {
-  content: "";
+.landing-hero-glow {
   position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(242, 179, 61, 0.14);
   pointer-events: none;
+  filter: blur(70px);
+  animation: landing-float 9s ease-in-out infinite alternate;
 }
 
-.landing-hero-mesh::before {
-  right: 8%;
-  top: 12%;
-  width: min(420px, 52vw);
-  height: min(420px, 52vw);
-  animation: landing-float 10s ease-in-out infinite alternate;
+.landing-hero-glow-a {
+  width: 420px;
+  height: 420px;
+  top: -100px;
+  right: -60px;
+  background: rgba(242, 179, 61, 0.16);
 }
 
-.landing-hero-mesh::after {
-  right: 18%;
-  top: 24%;
-  width: min(280px, 38vw);
-  height: min(280px, 38vw);
-  border-color: rgba(242, 179, 61, 0.08);
-  animation: landing-float 8s ease-in-out infinite alternate-reverse;
+.landing-hero-glow-b {
+  width: 300px;
+  height: 300px;
+  bottom: -80px;
+  left: -40px;
+  background: rgba(242, 179, 61, 0.1);
+  animation-delay: -3s;
+}
+
+.landing-hero-centered {
+  position: relative;
+  z-index: 1;
+  width: min(760px, 100%);
+  margin: 0 auto;
 }
 
 @keyframes landing-float {
@@ -2540,33 +2555,37 @@ h1 {
   font-weight: 800;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: #7a4f06;
-  background: #fff6df;
-  border: 1px solid rgba(242, 179, 61, 0.32);
+  color: #ffd884;
+  background: rgba(242, 179, 61, 0.12);
+  border: 1px solid rgba(242, 179, 61, 0.28);
 }
 
 .landing-eyebrow.light {
   color: #7a4f06;
-  background: #fff6df;
+  background: rgba(242, 179, 61, 0.1);
+  border-color: rgba(242, 179, 61, 0.28);
 }
 
-.landing-hero-copy h1 {
+.landing-hero-copy h1,
+.landing-hero-centered h1 {
   margin-top: 14px;
   font-size: clamp(34px, 5vw, 54px);
   line-height: 1.06;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: #0d2440;
+  color: #fff;
 }
 
-.landing-hero-copy h1 .gold-text {
-  color: var(--gold-strong);
+.landing-hero-copy h1 .gold-text,
+.landing-hero-centered h1 .gold-text {
+  color: #ffd36c;
 }
 
-.landing-hero-copy p {
-  margin-top: 16px;
-  max-width: 520px;
-  color: #667085;
+.landing-hero-copy p,
+.landing-hero-centered p {
+  margin: 16px auto 0;
+  max-width: 580px;
+  color: rgba(255, 255, 255, 0.78);
   font-size: 16px;
   line-height: 1.65;
 }
@@ -2574,18 +2593,20 @@ h1 {
 .landing-hero-actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 12px;
-  margin-top: 24px;
+  margin-top: 28px;
 }
 
 .landing-hero-checks {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 16px 22px;
   margin: 22px 0 0;
   padding: 0;
   list-style: none;
-  color: #475467;
+  color: rgba(255, 255, 255, 0.82);
   font-size: 14px;
 }
 
@@ -2596,7 +2617,7 @@ h1 {
 }
 
 .landing-hero-checks svg {
-  color: #e6a520;
+  color: #ffd36c;
 }
 
 .landing-hero-visual-wrap {
@@ -2625,6 +2646,88 @@ h1 {
 }
 
 /* Product demo browser frame */
+/* Product demo — Gem Logic style showcase */
+.product-demo-showcase {
+  width: min(980px, 100%);
+  margin: 0 auto;
+}
+
+.demo-showcase-frame {
+  border-radius: 20px;
+  overflow: hidden;
+  background: #f4f6f9;
+  border: 1px solid #e8edf3;
+  box-shadow:
+    0 4px 6px rgba(6, 19, 39, 0.04),
+    0 24px 48px rgba(6, 19, 39, 0.12);
+}
+
+.product-demo-showcase .product-demo-stage {
+  aspect-ratio: 16 / 9;
+  background: #eef2f7;
+  position: relative;
+}
+
+.product-demo-showcase .product-demo-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.demo-showcase-play {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: #061327;
+  background: linear-gradient(135deg, #ffd76d, #e6a520);
+  box-shadow: 0 8px 20px rgba(6, 19, 39, 0.2);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.15s ease;
+}
+
+.demo-showcase-frame:hover .demo-showcase-play,
+.demo-showcase-play:focus-visible {
+  opacity: 1;
+}
+
+.demo-showcase-play:hover {
+  transform: scale(1.06);
+}
+
+.landing-action-section {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 72px 28px 80px;
+  background: #fff;
+}
+
+.landing-action-head {
+  max-width: 640px;
+  margin: 0 auto 36px;
+  text-align: center;
+}
+
+.landing-action-head h2 {
+  font-size: clamp(32px, 4.5vw, 48px);
+  line-height: 1.08;
+  color: #061327;
+  letter-spacing: -0.02em;
+}
+
+.landing-action-head p {
+  margin-top: 14px;
+  color: #667085;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
 .product-demo {
   width: min(480px, 100%);
 }
@@ -2939,9 +3042,10 @@ h1 {
   gap: 14px;
   width: min(1180px, 100%);
   margin: 0 auto;
-  padding: 0 28px 8px;
+  padding: 48px 28px 8px;
   position: relative;
   z-index: 2;
+  background: #fff;
 }
 
 .landing-stat {
@@ -2962,7 +3066,7 @@ h1 {
 .landing-stat strong {
   display: block;
   font-size: 26px;
-  color: #b8770c;
+  color: #061327;
 }
 
 .landing-stat span {
@@ -2987,10 +3091,12 @@ h1 {
   gap: 14px 28px;
   width: min(1180px, 100%);
   margin: 0 auto;
-  padding: 8px 28px 32px;
+  padding: 8px 28px 48px;
   color: #667085;
   font-size: 13px;
   font-weight: 600;
+  background: #fff;
+  border-bottom: 1px solid #eef2f7;
 }
 
 .landing-trust-strip span {
@@ -3007,6 +3113,7 @@ h1 {
   width: min(1180px, 100%);
   margin: 0 auto;
   padding: 72px 28px;
+  background: #fff;
 }
 
 .landing-section-head {
@@ -3024,7 +3131,7 @@ h1 {
   font-size: clamp(28px, 4vw, 38px);
   line-height: 1.12;
   letter-spacing: -0.02em;
-  color: #0d2440;
+  color: #061327;
 }
 
 .landing-section-head p {
@@ -3067,14 +3174,14 @@ h1 {
   place-items: center;
   border-radius: 12px;
   color: #b8770c;
-  background: #fff6df;
+  background: rgba(242, 179, 61, 0.12);
   border: 1px solid rgba(242, 179, 61, 0.24);
 }
 
 .landing-module-card h3 {
   margin-top: 14px;
   font-size: 16px;
-  color: #0d2440;
+  color: #061327;
 }
 
 .landing-module-card p {
@@ -3085,10 +3192,8 @@ h1 {
 }
 
 .landing-flow-section {
-  background:
-    radial-gradient(circle at 50% 0%, rgba(242, 179, 61, 0.08), transparent 55%),
-    #f7f2ea;
-  border-block: 1px solid rgba(242, 179, 61, 0.12);
+  background: #f8fafc;
+  border-block: 1px solid #eef2f7;
 }
 
 .landing-flow {
@@ -3149,7 +3254,7 @@ h1 {
 .landing-feature-card h3 {
   font-size: 17px;
   margin-bottom: 8px;
-  color: #0d2440;
+  color: #061327;
 }
 
 .landing-feature-card p {
@@ -3360,10 +3465,8 @@ h1 {
 }
 
 .landing-about {
-  background:
-    radial-gradient(circle at 20% 50%, rgba(242, 179, 61, 0.08), transparent 45%),
-    #f7f2ea;
-  border-block: 1px solid rgba(242, 179, 61, 0.12);
+  background: #f8fafc;
+  border-block: 1px solid #eef2f7;
 }
 
 .landing-about-inner {
@@ -3379,7 +3482,7 @@ h1 {
   margin-top: 10px;
   font-size: clamp(26px, 3.5vw, 36px);
   line-height: 1.15;
-  color: #0d2440;
+  color: #061327;
 }
 
 .landing-about-inner p {
@@ -3417,9 +3520,10 @@ h1 {
 .landing-cta-band {
   padding: 56px 28px;
   background:
-    radial-gradient(circle at 50% 0%, rgba(242, 179, 61, 0.12), transparent 55%),
-    #fff;
-  border-block: 1px solid rgba(242, 179, 61, 0.14);
+    radial-gradient(circle at 50% 0%, rgba(242, 179, 61, 0.14), transparent 55%),
+    linear-gradient(165deg, #0a2038 0%, #061327 100%);
+  border-block: 0;
+  color: #fff;
 }
 
 .landing-cta-inner {
@@ -3435,11 +3539,11 @@ h1 {
 .landing-cta-inner h2 {
   font-size: clamp(24px, 3vw, 32px);
   margin-bottom: 6px;
-  color: #0d2440;
+  color: #fff;
 }
 
 .landing-cta-inner p {
-  color: #667085;
+  color: rgba(255, 255, 255, 0.72);
   margin: 0;
 }
 
@@ -3580,7 +3684,8 @@ h1 {
   justify-content: space-between;
   gap: 16px;
   padding: 22px 28px 28px;
-  border-top: 1px solid rgba(242, 179, 61, 0.14);
+  border-top: 1px solid #eef2f7;
+  background: #fff;
   color: #667085;
   font-size: 13px;
 }
@@ -3597,7 +3702,7 @@ h1 {
 }
 
 .landing-footer a:hover {
-  color: #b8770c;
+  color: #061327;
 }
 
 @media (max-width: 1024px) {
