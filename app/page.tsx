@@ -1,413 +1,358 @@
 ﻿"use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useStore } from "./lib/store";
-import { isSupabaseConfigured, supabase } from "./lib/supabase";
-import { BrandMark } from "./components/BrandMark";
+import Link from "next/link";
 import {
   ArrowRight,
   BadgeCheck,
+  BarChart3,
   Boxes,
   Building2,
-  Eye,
-  EyeOff,
+  Check,
+  Factory,
   Gem,
-  Lock,
-  Mail,
-  Phone,
+  Handshake,
+  LayoutGrid,
   ShieldCheck,
   ShoppingBag,
+  ShoppingCart,
   Sparkles,
   TrendingUp,
-  UserRound,
+  UsersRound,
   Wrench,
 } from "lucide-react";
+import { AuthPanel } from "./components/AuthPanel";
+import { BrandMark } from "./components/BrandMark";
+import { ScrollReveal } from "./components/ScrollReveal";
 
-type Role = "customer" | "admin";
-type Mode = "signin" | "signup";
-
-// The single admin account.
-const ADMIN_EMAIL = "nancy2005nov@gmail.com";
-const ADMIN_PASSWORD = "nancy";
-const ADMIN_NAME = "Nancy";
-
-const highlights = [
-  { icon: ShoppingBag, title: "Point of Sale", copy: "Barcode billing, gold-rate pricing & split payments." },
-  { icon: Boxes, title: "Live Inventory", copy: "Track weight, purity & stones across every branch." },
-  { icon: Wrench, title: "Repairs & Orders", copy: "Book jobs and follow them from intake to pickup." },
-  { icon: BadgeCheck, title: "Certificates", copy: "Store hallmark & lab certificates with every item." },
+const navLinks = [
+  { label: "Modules", href: "#modules" },
+  { label: "Pricing", href: "#pricing" },
+  { label: "About", href: "#about" },
 ];
 
-const trust = [
-  { icon: TrendingUp, label: "Live Gold Rate", value: "₹ 7,245 /gm" },
-  { icon: Building2, label: "Branches", value: "4 synced" },
-  { icon: ShieldCheck, label: "Secure", value: "2FA ready" },
+const stats = [
+  { value: "4", label: "Branches synced" },
+  { value: "22K", label: "Live gold pricing" },
+  { value: "100%", label: "Hallmark ready" },
+  { value: "24/7", label: "Customer portal" },
 ];
 
-export default function AuthLandingPage() {
-  const router = useRouter();
-  const { signup, login } = useStore();
-  const [role, setRole] = useState<Role>("customer");
-  const [mode, setMode] = useState<Mode>("signin");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    mobile: "",
-    company: "",
-    password: "",
-    confirm: "",
-  });
+const modules = [
+  { icon: ShoppingCart, title: "POS & Billing", copy: "Barcode scan, live gold-rate pricing, split payments and instant invoices." },
+  { icon: Boxes, title: "Inventory", copy: "Weight, purity, stones and stock across every branch — always in sync." },
+  { icon: Wrench, title: "Repairs", copy: "Drop-off to pickup on one ticket. Customers track status in the portal." },
+  { icon: UsersRound, title: "Customers", copy: "Profiles, purchase history, loyalty and a polished self-service portal." },
+  { icon: TrendingUp, title: "Gold Rates", copy: "Update 22K/18K rates once — prices refresh everywhere instantly." },
+  { icon: BarChart3, title: "Reports", copy: "Sales, margins, branch comparison. Export CSV or print to PDF." },
+  { icon: Factory, title: "Manufacturing", copy: "Job cards, bench tracking and metal loss from casting to polish." },
+  { icon: Handshake, title: "Wholesale", copy: "Bulk orders, dealer pricing and B2B invoicing in one flow." },
+];
 
-  const [busy, setBusy] = useState(false);
-  const isSignup = mode === "signup";
-  const isAdmin = role === "admin";
+const flowSteps = [
+  "Sell a piece at POS — stock drops and an invoice is created.",
+  "Gold rate changes — every tag, catalog price and quote updates.",
+  "Customer reserves online — your team sees it in the admin queue.",
+  "Repair moves to Ready — the portal notifies them to collect.",
+];
 
-  function update(field: keyof typeof form, value: string) {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    if (error) setError("");
-  }
+const spotlights = [
+  {
+    badge: "Point of Sale",
+    icon: ShoppingBag,
+    title: "Bill in seconds. Price by the gram.",
+    copy: "Scan barcodes, apply live 22K rates, add making charges and checkout with cash, UPI or split payment. Every sale updates inventory and books automatically.",
+    points: ["Barcode & manual lookup", "Live karat pricing", "Printable receipts"],
+  },
+  {
+    badge: "Repair management",
+    icon: Wrench,
+    title: "From drop-off to pickup on one ticket.",
+    copy: "Log repairs with photos, estimated dates and bench status. Customers follow progress in their portal — fewer phone calls, faster pickups.",
+    points: ["Status stepper", "Customer notifications", "Pickup reminders"],
+    reverse: true,
+  },
+  {
+    badge: "Customer portal",
+    icon: Gem,
+    title: "A storefront your clients will love.",
+    copy: "Browse collections, wishlist pieces, reserve items and track orders & repairs — branded in navy and gold, just like your showroom.",
+    points: ["Live catalog", "Wishlist & reserve", "Order tracking"],
+  },
+];
 
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
+const plans = [
+  {
+    name: "Essential",
+    price: "₹ 24,999",
+    period: "/month",
+    note: "Single store getting started",
+    features: ["1 branch", "3 staff users", "POS + Inventory", "Customer portal", "Email support"],
+  },
+  {
+    name: "Growth",
+    price: "₹ 49,999",
+    period: "/month",
+    note: "Multi-branch retailers",
+    popular: true,
+    features: ["Up to 4 branches", "15 staff users", "Repairs + Manufacturing", "Analytics & reports", "Priority onboarding"],
+  },
+  {
+    name: "Enterprise",
+    price: "Custom",
+    period: "",
+    note: "Large chains & partners",
+    dark: true,
+    features: ["Unlimited branches", "Unlimited users", "Wholesale + API access", "Dedicated success manager", "Custom integrations"],
+  },
+];
 
-    if (!form.email.trim() || !form.password) {
-      setError("Please enter your email and password.");
-      return;
-    }
+function scrollToAccess() {
+  document.getElementById("access")?.scrollIntoView({ behavior: "smooth" });
+}
 
-    // Admin is a single fixed account.
-    if (isAdmin) {
-      if (form.email.trim().toLowerCase() !== ADMIN_EMAIL || form.password !== ADMIN_PASSWORD) {
-        setError("Incorrect admin email or password.");
-        return;
-      }
-      signup({ name: ADMIN_NAME, email: ADMIN_EMAIL, role: "admin" });
-      router.push("/dashboard");
-      return;
-    }
-
-    if (isSignup) {
-      if (!form.fullName.trim()) {
-        setError("Please enter your full name.");
-        return;
-      }
-      if (form.password.length < 6) {
-        setError("Password must be at least 6 characters.");
-        return;
-      }
-      if (form.password !== form.confirm) {
-        setError("Passwords do not match.");
-        return;
-      }
-    }
-
-    // When Supabase (PostgreSQL) is configured, authenticate against it.
-    if (isSupabaseConfigured && supabase) {
-      setBusy(true);
-      try {
-        if (isSignup) {
-          const { error: err } = await supabase.auth.signUp({
-            email: form.email.trim(),
-            password: form.password,
-            options: { data: { full_name: form.fullName.trim(), role, mobile: form.mobile.trim(), city: form.company.trim() } },
-          });
-          if (err) {
-            setError(err.message);
-            setBusy(false);
-            return;
-          }
-        } else {
-          const { error: err } = await supabase.auth.signInWithPassword({
-            email: form.email.trim(),
-            password: form.password,
-          });
-          if (err) {
-            setError(err.message);
-            setBusy(false);
-            return;
-          }
-        }
-      } catch {
-        setError("Could not reach the authentication service. Please try again.");
-        setBusy(false);
-        return;
-      }
-      setBusy(false);
-    }
-
-    // Reflect the signed-in user in the app (name shows across the UI).
-    if (isSignup) {
-      signup({ name: form.fullName.trim(), email: form.email.trim(), mobile: form.mobile.trim(), city: form.company.trim(), role });
-    } else {
-      login(form.email.trim(), role);
-    }
-
-    router.push(isAdmin ? "/dashboard" : "/portal");
-  }
-
+export default function LandingPage() {
   return (
-    <div className="auth-page">
-      <aside className="auth-brand">
-        <div className="auth-brand-top">
-          <div className="auth-logo">
-            <BrandMark className="auth-logo-mark" />
-            <div>
-              <strong>GRIDS GOLD</strong>
-              <span>JEWELLERY ERP</span>
-            </div>
+    <div className="landing-site">
+      <header className="landing-nav">
+        <Link className="landing-nav-brand" href="/">
+          <BrandMark className="auth-logo-mark" />
+          <div>
+            <strong>GRIDS GOLD</strong>
+            <span>JEWELLERY ERP</span>
           </div>
-          <span className="auth-rate-pill">
-            <Sparkles size={14} /> Gold 22K · ₹ 7,245/gm
-          </span>
+        </Link>
+
+        <nav className="landing-nav-links" aria-label="Landing sections">
+          {navLinks.map(({ label, href }) => (
+            <a key={label} href={href}>
+              {label}
+            </a>
+          ))}
+        </nav>
+
+        <div className="landing-nav-actions">
+          <button type="button" className="landing-nav-signin" onClick={scrollToAccess}>
+            Sign in
+          </button>
+          <button type="button" className="landing-nav-cta" onClick={scrollToAccess}>
+            Get started <ArrowRight size={16} />
+          </button>
         </div>
+      </header>
 
-        <div className="auth-brand-hero">
-          <span className="auth-eyebrow">Retail · Repairs · Wholesale · Manufacturing</span>
-          <h1>
-            The complete operating system for modern <span>jewellers</span>.
-          </h1>
-          <p>
-            Manage inventory, billing, repairs, customers and branches in one elegant
-            platform — and give your customers a beautiful self-service portal.
-          </p>
+      <section className="landing-hero">
+        <div className="landing-hero-glow landing-hero-glow-a" aria-hidden="true" />
+        <div className="landing-hero-glow landing-hero-glow-b" aria-hidden="true" />
 
-          <div className="auth-highlights">
-            {highlights.map(({ icon: Icon, title, copy }) => (
-              <div className="auth-highlight" key={title}>
-                <span>
-                  <Icon size={18} />
-                </span>
-                <div>
-                  <strong>{title}</strong>
-                  <small>{copy}</small>
+        <div className="landing-hero-inner">
+          <ScrollReveal className="landing-hero-copy">
+            <span className="landing-eyebrow">
+              <Sparkles size={14} /> Built for Indian jewellers
+            </span>
+            <h1>
+              Run your jewellery business from <span>one place.</span>
+            </h1>
+            <p>
+              Cut admin in half, catch every repair on time, and know your margin to the gram.
+              Retail, repairs, wholesale and manufacturing — with a customer portal your clients will love.
+            </p>
+            <div className="landing-hero-actions">
+              <button type="button" className="landing-btn-primary" onClick={scrollToAccess}>
+                Start free trial <ArrowRight size={18} />
+              </button>
+              <a className="landing-btn-ghost" href="#modules">
+                Explore modules
+              </a>
+            </div>
+            <ul className="landing-hero-checks">
+              <li><Check size={16} /> No credit card</li>
+              <li><Check size={16} /> Live gold-rate pricing</li>
+              <li><Check size={16} /> BIS hallmark ready</li>
+            </ul>
+          </ScrollReveal>
+
+          <ScrollReveal className="landing-hero-preview" delay={120}>
+            <div className="landing-preview-card">
+              <div className="landing-preview-top">
+                <span className="landing-preview-dot" />
+                <span className="landing-preview-dot" />
+                <span className="landing-preview-dot" />
+              </div>
+              <div className="landing-preview-body">
+                <div className="landing-preview-sidebar">
+                  <span className="active">Dashboard</span>
+                  <span>POS</span>
+                  <span>Inventory</span>
+                  <span>Repairs</span>
+                  <span>Customers</span>
+                </div>
+                <div className="landing-preview-main">
+                  <div className="landing-preview-kpis">
+                    <div><small>Sales today</small><strong>₹ 4.2L</strong></div>
+                    <div><small>22K rate</small><strong>₹ 7,245</strong></div>
+                    <div><small>Low stock</small><strong>6 items</strong></div>
+                  </div>
+                  <div className="landing-preview-chart" aria-hidden="true">
+                    <span style={{ height: "42%" }} />
+                    <span style={{ height: "68%" }} />
+                    <span style={{ height: "55%" }} />
+                    <span style={{ height: "82%" }} />
+                    <span style={{ height: "64%" }} />
+                    <span style={{ height: "90%" }} />
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="auth-trust">
-          {trust.map(({ icon: Icon, label, value }) => (
-            <div className="auth-trust-item" key={label}>
-              <Icon size={16} />
-              <div>
-                <small>{label}</small>
-                <strong>{value}</strong>
-              </div>
             </div>
+          </ScrollReveal>
+        </div>
+      </section>
+
+      <section className="landing-stats" aria-label="Highlights">
+        {stats.map(({ value, label }, i) => (
+          <ScrollReveal key={label} delay={i * 60}>
+            <div className="landing-stat">
+              <strong>{value}</strong>
+              <span>{label}</span>
+            </div>
+          </ScrollReveal>
+        ))}
+      </section>
+
+      <section className="landing-section" id="modules">
+        <ScrollReveal className="landing-section-head">
+          <span className="landing-eyebrow light">Modules</span>
+          <h2>Everything your showroom needs</h2>
+          <p>One platform for the counter, the workshop, the back office and your customers.</p>
+        </ScrollReveal>
+
+        <div className="landing-module-grid">
+          {modules.map(({ icon: Icon, title, copy }, i) => (
+            <ScrollReveal key={title} delay={(i % 4) * 70}>
+              <article className="landing-module-card">
+                <span className="landing-module-icon"><Icon size={20} /></span>
+                <h3>{title}</h3>
+                <p>{copy}</p>
+              </article>
+            </ScrollReveal>
           ))}
         </div>
-      </aside>
+      </section>
 
-      <main className="auth-main">
-        <div className="auth-card">
-          <div className="auth-mobile-brand">
-            <BrandMark className="auth-logo-mark" />
-            <div>
-              <strong>GRIDS GOLD</strong>
-              <span>FINE JEWELLERY</span>
-            </div>
-          </div>
+      <section className="landing-section landing-flow-section">
+        <ScrollReveal className="landing-section-head">
+          <span className="landing-eyebrow light">How it fits together</span>
+          <h2>The pieces talk to each other</h2>
+          <p>Sell a piece, the stock drops. Update a rate, every price changes. No double entry.</p>
+        </ScrollReveal>
 
-          <div className="auth-card-head">
-            <Gem size={26} />
-            <h2>{isSignup ? "Create your account" : "Welcome back"}</h2>
-            <p>
-              {isSignup
-                ? isAdmin
-                  ? "Set up your store team access."
-                  : "Join to track orders, repairs & wishlists."
-                : isAdmin
-                ? "Sign in to your store workspace."
-                : "Sign in to your customer account."}
-            </p>
-          </div>
-
-          <div className="role-toggle" role="tablist" aria-label="Account type">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={role === "customer"}
-              className={role === "customer" ? "active" : ""}
-              onClick={() => setRole("customer")}
-            >
-              <UserRound size={17} /> Customer
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={role === "admin"}
-              className={role === "admin" ? "active" : ""}
-              onClick={() => { setRole("admin"); setMode("signin"); setError(""); }}
-            >
-              <ShieldCheck size={17} /> Admin / Staff
-            </button>
-          </div>
-
-          <form className="auth-form" onSubmit={handleSubmit} noValidate>
-            {isSignup ? (
-              <label className="field">
-                <span>Full name</span>
-                <div className="field-input">
-                  <UserRound size={17} />
-                  <input
-                    type="text"
-                    placeholder="e.g. Priya Mehta"
-                    value={form.fullName}
-                    onChange={(event) => update("fullName", event.target.value)}
-                    autoComplete="name"
-                  />
-                </div>
-              </label>
-            ) : null}
-
-            <label className="field">
-              <span>Email address</span>
-              <div className="field-input">
-                <Mail size={17} />
-                <input
-                  type="email"
-                  placeholder="you@example.com"
-                  value={form.email}
-                  onChange={(event) => update("email", event.target.value)}
-                  autoComplete="email"
-                />
+        <div className="landing-flow">
+          {flowSteps.map((step, i) => (
+            <ScrollReveal key={step} delay={i * 80}>
+              <div className="landing-flow-step">
+                <span>{i + 1}</span>
+                <p>{step}</p>
               </div>
-            </label>
-
-            {isSignup ? (
-              <div className="field-row">
-                <label className="field">
-                  <span>Mobile</span>
-                  <div className="field-input">
-                    <Phone size={17} />
-                    <input
-                      type="tel"
-                      placeholder="+91 98765 43210"
-                      value={form.mobile}
-                      onChange={(event) => update("mobile", event.target.value)}
-                      autoComplete="tel"
-                    />
-                  </div>
-                </label>
-                {isAdmin ? (
-                  <label className="field">
-                    <span>Store / Company</span>
-                    <div className="field-input">
-                      <Building2 size={17} />
-                      <input
-                        type="text"
-                        placeholder="Grids Gold — MG Road"
-                        value={form.company}
-                        onChange={(event) => update("company", event.target.value)}
-                        autoComplete="organization"
-                      />
-                    </div>
-                  </label>
-                ) : (
-                  <label className="field">
-                    <span>City</span>
-                    <div className="field-input">
-                      <Building2 size={17} />
-                      <input
-                        type="text"
-                        placeholder="Bengaluru"
-                        value={form.company}
-                        onChange={(event) => update("company", event.target.value)}
-                        autoComplete="address-level2"
-                      />
-                    </div>
-                  </label>
-                )}
-              </div>
-            ) : null}
-
-            <label className="field">
-              <span>Password</span>
-              <div className="field-input">
-                <Lock size={17} />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder={isSignup ? "Create a password" : "Enter your password"}
-                  value={form.password}
-                  onChange={(event) => update("password", event.target.value)}
-                  autoComplete={isSignup ? "new-password" : "current-password"}
-                />
-                <button
-                  type="button"
-                  className="field-toggle"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
-                </button>
-              </div>
-            </label>
-
-            {isSignup ? (
-              <label className="field">
-                <span>Confirm password</span>
-                <div className="field-input">
-                  <Lock size={17} />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Re-enter your password"
-                    value={form.confirm}
-                    onChange={(event) => update("confirm", event.target.value)}
-                    autoComplete="new-password"
-                  />
-                </div>
-              </label>
-            ) : null}
-
-            {!isSignup ? (
-              <div className="auth-row-between">
-                <label className="checkbox">
-                  <input type="checkbox" defaultChecked /> <span>Remember me</span>
-                </label>
-                <button type="button" className="link-plain">
-                  Forgot password?
-                </button>
-              </div>
-            ) : null}
-
-            {error ? <p className="auth-error">{error}</p> : null}
-
-            <button type="submit" className="auth-submit" disabled={busy}>
-              {busy ? "Please wait…" : isSignup ? "Create account" : "Sign in"}
-              <ArrowRight size={18} />
-            </button>
-
-            {isSignup ? (
-              <p className="auth-terms">
-                By creating an account you agree to the Terms of Service and Privacy Policy.
-              </p>
-            ) : null}
-          </form>
-
-          {role === "customer" ? (
-            <p className="auth-switch">
-              {isSignup ? "Already have an account?" : "New to Grids Gold?"}{" "}
-              <button
-                type="button"
-                onClick={() => {
-                  setMode(isSignup ? "signin" : "signup");
-                  setError("");
-                }}
-              >
-                {isSignup ? "Sign in" : "Create an account"}
-              </button>
-            </p>
-          ) : (
-            <p className="auth-switch">Admin access is by invitation only.</p>
-          )}
+            </ScrollReveal>
+          ))}
         </div>
+      </section>
 
-        <p className="auth-foot">© {new Date().getFullYear()} Grids Gold · Jewellery ERP</p>
-      </main>
+      {spotlights.map(({ badge, icon: Icon, title, copy, points, reverse }) => (
+        <section className={`landing-spotlight ${reverse ? "reverse" : ""}`} key={badge}>
+          <ScrollReveal className="landing-spotlight-copy">
+            <span className="landing-spotlight-badge"><Icon size={14} /> {badge}</span>
+            <h2>{title}</h2>
+            <p>{copy}</p>
+            <ul>
+              {points.map((point) => (
+                <li key={point}><Check size={15} /> {point}</li>
+              ))}
+            </ul>
+          </ScrollReveal>
+          <ScrollReveal className="landing-spotlight-visual" delay={100}>
+            <div className="landing-spotlight-panel">
+              <div className="landing-spotlight-panel-head">
+                <Icon size={18} />
+                <strong>{badge}</strong>
+              </div>
+              <div className="landing-spotlight-lines">
+                <span /><span /><span /><span />
+              </div>
+            </div>
+          </ScrollReveal>
+        </section>
+      ))}
+
+      <section className="landing-section" id="pricing">
+        <ScrollReveal className="landing-section-head">
+          <span className="landing-eyebrow light">Pricing</span>
+          <h2>Start with software. Grow into a partnership.</h2>
+          <p>Transparent plans for single-store boutiques to multi-branch chains.</p>
+        </ScrollReveal>
+
+        <div className="landing-pricing-grid">
+          {plans.map((plan, i) => (
+            <ScrollReveal key={plan.name} delay={i * 90}>
+              <article className={`landing-price-card ${plan.popular ? "popular" : ""} ${plan.dark ? "dark" : ""}`}>
+                {plan.popular ? <em className="landing-price-badge">Most popular</em> : null}
+                <h3>{plan.name}</h3>
+                <p className="landing-price-note">{plan.note}</p>
+                <div className="landing-price-amount">
+                  <strong>{plan.price}</strong>
+                  {plan.period ? <span>{plan.period}</span> : null}
+                </div>
+                <ul>
+                  {plan.features.map((f) => (
+                    <li key={f}><Check size={14} /> {f}</li>
+                  ))}
+                </ul>
+                <button type="button" className={plan.dark ? "landing-btn-ghost light" : "landing-btn-primary full"} onClick={scrollToAccess}>
+                  {plan.dark ? "Contact sales" : "Get started"}
+                </button>
+              </article>
+            </ScrollReveal>
+          ))}
+        </div>
+      </section>
+
+      <section className="landing-section landing-about" id="about">
+        <ScrollReveal className="landing-about-inner">
+          <span className="landing-eyebrow light">About Grids Gold</span>
+          <h2>Crafted for jewellers, by people who understand the trade.</h2>
+          <p>
+            Grids Gold is a jewellery ERP built around how Indian showrooms actually work — weight-based
+            pricing, karat rates, repair tickets, hallmark certificates and multi-branch inventory.
+            We help you spend less time on spreadsheets and more time with customers.
+          </p>
+          <div className="landing-about-pills">
+            <span><ShieldCheck size={15} /> Secure & cloud-ready</span>
+            <span><BadgeCheck size={15} /> BIS hallmark workflows</span>
+            <span><Building2 size={15} /> Multi-branch sync</span>
+            <span><LayoutGrid size={15} /> Vercel-deployed frontend</span>
+          </div>
+        </ScrollReveal>
+      </section>
+
+      <section className="landing-access" id="access">
+        <ScrollReveal className="landing-access-intro">
+          <span className="landing-eyebrow light">Sign in or sign up</span>
+          <h2>Access your account</h2>
+          <p>Customers browse and track orders. Staff manage the full ERP workspace.</p>
+        </ScrollReveal>
+        <ScrollReveal delay={80}>
+          <AuthPanel />
+        </ScrollReveal>
+      </section>
+
+      <footer className="landing-footer">
+        <span>© {new Date().getFullYear()} Grids Gold · Fine Jewellery ERP</span>
+        <div>
+          <a href="#modules">Modules</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#about">About</a>
+          <a href="#access">Sign in</a>
+        </div>
+      </footer>
     </div>
   );
 }
