@@ -93,7 +93,7 @@ export default function PurchaseOrdersPage() {
               </table>
             </div>
             <p className="muted" style={{ padding: "12px 16px", fontSize: 13 }}>
-              PO lifecycle: {PO_STATUSES.map((s) => srsLabel(s)).join(" → ")}
+              PO lifecycle (FR-PUR-002): {PO_STATUSES.map((s) => srsLabel(s)).join(" → ")}
             </p>
           </article>
         ) : null}

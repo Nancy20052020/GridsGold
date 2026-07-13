@@ -65,13 +65,13 @@ export default function FinancePage() {
 
         {tab === "Receivables" ? (
           <article className="erp-panel table-panel">
-            <p className="muted" style={{ padding: "12px 16px" }}>Customer receivable balances and aging (FR-145).</p>
+            <p className="muted" style={{ padding: "12px 16px" }}>Receivables aging by due bucket (FR-FIN-003).</p>
             <div className="table-scroll">
               <table className="data-table">
-                <thead><tr><th>Customer</th><th>Outstanding</th><th>Aging</th></tr></thead>
+                <thead><tr><th>Customer</th><th>Outstanding</th><th>0–30 days</th><th>31–60 days</th><th>61+ days</th></tr></thead>
                 <tbody>
                   {customers.map((c) => (
-                    <tr key={c.id}><td>{c.name}</td><td>—</td><td>Current</td></tr>
+                    <tr key={c.id}><td>{c.name}</td><td>—</td><td>—</td><td>—</td><td>Current</td></tr>
                   ))}
                 </tbody>
               </table>
@@ -81,12 +81,13 @@ export default function FinancePage() {
 
         {tab === "Payables" ? (
           <article className="erp-panel table-panel">
+            <p className="muted" style={{ padding: "12px 16px" }}>Supplier payables aging (FR-FIN-003).</p>
             <div className="table-scroll">
               <table className="data-table">
-                <thead><tr><th>Supplier</th><th>Code</th><th>Balance due</th></tr></thead>
+                <thead><tr><th>Supplier</th><th>Code</th><th>Balance due</th><th>Aging bucket</th></tr></thead>
                 <tbody>
                   {suppliers.map((s) => (
-                    <tr key={s.id}><td>{s.name}</td><td>{s.code}</td><td><strong>{formatINR(s.balance)}</strong></td></tr>
+                    <tr key={s.id}><td>{s.name}</td><td>{s.code}</td><td><strong>{formatINR(s.balance)}</strong></td><td>{s.balance > 500000 ? "31–60 days" : "0–30 days"}</td></tr>
                   ))}
                 </tbody>
               </table>

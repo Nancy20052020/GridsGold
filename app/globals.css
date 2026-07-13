@@ -6511,6 +6511,20 @@ a.ghost-action {
 }
 
 /* ---- Sales workspace (Gem Logic style POS) ---- */
+.consent-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.consent-row label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .pos-session-strip {
   display: flex;
   flex-wrap: wrap;

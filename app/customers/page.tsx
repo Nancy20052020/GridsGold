@@ -19,6 +19,9 @@ export default function CustomersPage() {
     city: "",
     type: "retail" as const,
     preferredLanguage: "en",
+    consentSms: false,
+    consentWhatsapp: true,
+    consentEmail: false,
   });
   const [error, setError] = useState("");
 
@@ -52,8 +55,11 @@ export default function CustomersPage() {
       city: form.city.trim(),
       type: form.type,
       preferredLanguage: form.preferredLanguage,
+      consentSms: form.consentSms,
+      consentWhatsapp: form.consentWhatsapp,
+      consentEmail: form.consentEmail,
     });
-    setForm({ name: "", mobile: "", whatsapp: "", email: "", city: "", type: "retail", preferredLanguage: "en" });
+    setForm({ name: "", mobile: "", whatsapp: "", email: "", city: "", type: "retail", preferredLanguage: "en", consentSms: false, consentWhatsapp: true, consentEmail: false });
     setError("");
     setOpen(false);
   }
@@ -65,7 +71,7 @@ export default function CustomersPage() {
           <div className="heading-copy">
             <UsersRound size={28} />
             <div>
-              <span className="eyebrow">CRM · SCR-05</span>
+              <span className="eyebrow">CRM · FR-CRM-001</span>
               <h1>Customers</h1>
               <p>Unified profiles for retail, wholesale, walk-in and VIP customers.</p>
             </div>
@@ -126,6 +132,14 @@ export default function CustomersPage() {
               <label className="field"><span>City</span><div className="field-input"><input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="Bengaluru" /></div></label>
               <label className="field"><span>Customer type</span><div className="field-input"><select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as typeof form.type })}>{CUSTOMER_TYPES.map((t) => <option key={t} value={t}>{srsLabel(t)}</option>)}</select></div></label>
               <label className="field"><span>Preferred language</span><div className="field-input"><select value={form.preferredLanguage} onChange={(e) => setForm({ ...form, preferredLanguage: e.target.value })}><option value="en">English</option><option value="ar">Arabic</option></select></div></label>
+              <div className="field" style={{ gridColumn: "1 / -1" }}>
+                <span>Communication consent (FR-CRM-002)</span>
+                <div className="consent-row">
+                  <label><input type="checkbox" checked={form.consentSms} onChange={(e) => setForm({ ...form, consentSms: e.target.checked })} /> SMS</label>
+                  <label><input type="checkbox" checked={form.consentWhatsapp} onChange={(e) => setForm({ ...form, consentWhatsapp: e.target.checked })} /> WhatsApp</label>
+                  <label><input type="checkbox" checked={form.consentEmail} onChange={(e) => setForm({ ...form, consentEmail: e.target.checked })} /> Email</label>
+                </div>
+              </div>
             </div>
             {error ? <p className="auth-error">{error}</p> : null}
             <div className="form-actions">
@@ -147,6 +161,7 @@ export default function CustomersPage() {
               <div className="field"><span>Email</span><strong>{detail.email || "—"}</strong></div>
               <div className="field"><span>City</span><strong>{detail.city || "—"}</strong></div>
               <div className="field"><span>Lifetime spend</span><strong>{spend(detail.name) ? formatINR(spend(detail.name)) : "—"}</strong></div>
+              <div className="field"><span>Consent</span><strong>{[detail.consentSms && "SMS", detail.consentWhatsapp && "WhatsApp", detail.consentEmail && "Email"].filter(Boolean).join(", ") || "—"}</strong></div>
             </div>
             <h3 style={{ marginTop: 20, marginBottom: 10 }}>Transaction timeline</h3>
             <div className="table-scroll">
