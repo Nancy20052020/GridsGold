@@ -12,7 +12,6 @@ import {
   Minus,
   Percent,
   Plus,
-  Printer,
   RotateCcw,
   ScanBarcode,
   Search,
@@ -695,9 +694,6 @@ export default function PosPage() {
               </div>
             ) : null}
             <div className="pos-v2-bill-actions">
-              <button className="gold-action full" type="button" onClick={() => window.print()}>
-                <Printer size={16} /> Print bill
-              </button>
               <Link className="ghost-action full" href={`/sales/invoices?id=${receipt.invoice.id}`} style={{ justifyContent: "center" }}>
                 Open in Sales Invoices
               </Link>

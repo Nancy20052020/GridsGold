@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Printer, ReceiptText, ShoppingCart, X } from "lucide-react";
+import { ReceiptText, ShoppingCart, X } from "lucide-react";
 import { AppShell } from "../../components/AppShell";
 import { BrandMark } from "../../components/BrandMark";
 import { srsLabel, srsPillTone } from "../../lib/srs";
@@ -109,7 +109,7 @@ function InvoicesContent() {
               <div><span>GST (3%)</span><strong>{formatINR(selected.gst)}</strong></div>
               <div className="grand"><span>Total</span><strong>{formatINR(selected.total)}</strong></div>
             </div>
-            <button className="gold-action full" type="button" onClick={() => window.print()}><Printer size={16} /> Print Receipt</button>
+            <button className="ghost-action full" type="button" onClick={closeInvoice}>Close</button>
             <button className="ghost-action full" type="button" disabled title="FR-RET-001 — return workflow">Create Return</button>
           </div>
         </div>
