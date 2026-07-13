@@ -87,6 +87,15 @@ export const DEMO_SALES_TREND = [
   { label: "Week 8", value: 4.2 },
 ];
 
+/** Demo category mix for dashboard when live invoice data is sparse. */
+export const DEMO_SALES_BY_CATEGORY = [
+  { name: "Necklaces", percent: 34, value: 624000, color: CATEGORY_COLORS.Necklaces },
+  { name: "Rings", percent: 28, value: 514000, color: CATEGORY_COLORS.Rings },
+  { name: "Bangles", percent: 18, value: 330000, color: CATEGORY_COLORS.Bangles },
+  { name: "Earrings", percent: 12, value: 220000, color: CATEGORY_COLORS.Earrings },
+  { name: "Pendants", percent: 8, value: 147000, color: CATEGORY_COLORS.Pendants },
+];
+
 export function monthlyBars(invoices: Invoice[]) {
   const buckets = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const totals = new Array(12).fill(0);

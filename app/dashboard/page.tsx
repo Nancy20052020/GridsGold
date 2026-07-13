@@ -23,7 +23,7 @@ import {
   lowStockItems,
   monthlyBars,
   recentTransactions,
-  salesByCategory,
+  DEMO_SALES_BY_CATEGORY,
   sumInvoices,
   todaySummary,
   topSellingItems,
@@ -88,7 +88,7 @@ export default function DashboardPage() {
 
   const totalSales = sumInvoices(invoices);
   const profit = estimateProfit(totalSales, expenses);
-  const categories = useMemo(() => salesByCategory(invoices, items), [invoices, items]);
+  const categories = DEMO_SALES_BY_CATEGORY;
   const topItems = useMemo(() => topSellingItems(invoices, items, rates), [invoices, items, rates]);
   const trend = DEMO_SALES_TREND;
   const bars = useMemo(() => monthlyBars(invoices), [invoices]);
@@ -158,7 +158,7 @@ export default function DashboardPage() {
           <article className="panel">
             <div className="panel-head">
               <h2>Sales by Category</h2>
-              <button type="button">Live <ChevronDown size={14} /></button>
+              <span className="muted" style={{ fontSize: 13 }}>Category mix · demo</span>
             </div>
             <div className="analytics-shares">
               {categories.length ? categories.map((c) => (
