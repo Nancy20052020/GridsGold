@@ -43,16 +43,17 @@ export function salesByCategory(invoices: Invoice[], items: Item[]) {
 }
 
 export function topSellingItems(invoices: Invoice[], items: Item[], rates: Rates, limit = 5) {
-  const qtyMap = new Map<string, { name: string; amount: number; qty: number; icon: string }>();
+  const qtyMap = new Map<string, { name: string; amount: number; qty: number; icon: string; image?: string }>();
 
   for (const inv of invoices) {
     for (const line of inv.lines) {
       const item = items.find((i) => i.name === line.name);
-      const prev = qtyMap.get(line.name) ?? { name: line.name, amount: 0, qty: 0, icon: item?.icon ?? "ring" };
+      const prev = qtyMap.get(line.name) ?? { name: line.name, amount: 0, qty: 0, icon: item?.icon ?? "ring", image: item?.image };
       qtyMap.set(line.name, {
         ...prev,
         amount: prev.amount + line.amount,
         qty: prev.qty + line.qty,
+        image: item?.image ?? prev.image,
       });
     }
   }

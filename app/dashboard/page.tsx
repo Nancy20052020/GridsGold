@@ -22,6 +22,7 @@ import {
   topSellingItems,
 } from "../lib/analytics";
 import { AppShell } from "../components/AppShell";
+import { ItemImage, ProductImage } from "../components/ProductImage";
 import { firstName, formatINR, itemStatus, useStore } from "../lib/store";
 
 type TrendPoint = { label: string; value: number };
@@ -222,13 +223,24 @@ export default function DashboardPage() {
           })}
         </section>
 
-        <article className="dash-card dash-chart-card">
-          <div className="dash-card-head">
-            <h2>Revenue Overview</h2>
-            <Link href="/reports">Full report</Link>
+        <div className="dash-hero-row">
+          <div className="dash-featured-visual" aria-hidden="true">
+            <div className="dash-featured-frame primary">
+              <ProductImage image="ring_3.png" icon="ring" className="product-img dash-featured-img" alt="" />
+            </div>
+            <div className="dash-featured-frame secondary">
+              <ProductImage image="necklace_2.png" icon="necklace" className="product-img dash-featured-img" alt="" />
+            </div>
           </div>
-          <SmoothSalesChart points={trend} />
-        </article>
+
+          <article className="dash-card dash-chart-card">
+            <div className="dash-card-head">
+              <h2>Revenue Overview</h2>
+              <Link href="/reports">Full report</Link>
+            </div>
+            <SmoothSalesChart points={trend} />
+          </article>
+        </div>
 
         <div className="dash-layout">
           <div className="dash-main">
@@ -300,17 +312,20 @@ export default function DashboardPage() {
               </div>
               <ul className="dash-list">
                 {(topItems.length ? topItems.slice(0, 4) : [
-                  { name: "Gold Necklace Set", amount: 145280, icon: "necklace" },
-                  { name: "22K Gold Ring", amount: 38500, icon: "ring" },
-                ]).map((row) => (
+                  { name: "Gold Necklace Set", amount: 145280, icon: "necklace", image: "necklace_1.png" },
+                  { name: "22K Gold Ring", amount: 38500, icon: "ring", image: "ring_1.png" },
+                ]).map((row) => {
+                  const match = items.find((i) => i.name === row.name);
+                  return (
                   <li key={row.name}>
-                    <span className={`jewel-icon ${row.icon}`} />
+                    <ItemImage item={match ?? row} className="product-img tile-img" />
                     <div>
                       <strong>{row.name}</strong>
                       <small>{row.amount ? formatINR(row.amount) : "—"}</small>
                     </div>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             </article>
 
@@ -322,7 +337,7 @@ export default function DashboardPage() {
               <ul className="dash-list">
                 {(lowStock.length ? lowStock : items.slice(0, 4)).map((item) => (
                   <li key={item.id}>
-                    <span className={`jewel-icon ${item.icon || "ring"}`} />
+                    <ItemImage item={item} className="product-img tile-img" />
                     <div>
                       <strong>{item.name}</strong>
                       <small>{item.karat} · {item.weight}g</small>

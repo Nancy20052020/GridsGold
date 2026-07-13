@@ -57,6 +57,11 @@ export default function PosPage() {
     [items, query],
   );
 
+  const catalogItems = useMemo(
+    () => (query ? filteredBrowse : items.filter((i) => i.image).slice(0, 9)),
+    [items, query, filteredBrowse],
+  );
+
   function doScan() {
     if (!scanValue.trim()) return;
     addToCartBySku(scanValue);
@@ -90,12 +95,27 @@ export default function PosPage() {
           <div className="sales-workspace-toolbar">
             <button type="button" className="gold-action" onClick={() => setAddOpen(true)}>+ Add item</button>
             <Link className="export-button subtle" href="/sales/invoices">Invoices</Link>
-            <button type="button" className="ghost-action" disabled title="Phase 1 — quotation flow">Quotation</button>
           </div>
         </div>
 
         <div className="sales-workspace">
           <article className="sales-main erp-panel">
+            <div className="sales-catalog-head">
+              <h3>{query ? "Search results" : "Quick add from catalog"}</h3>
+              <span className="muted">{catalogItems.length} items</span>
+            </div>
+
+            <div className="sales-catalog-grid">
+              {catalogItems.map((item) => (
+                <button key={item.id} type="button" className="sales-catalog-tile" onClick={() => addToCart(item.id)}>
+                  <ItemImage item={item} className="product-img tile-img" />
+                  <strong>{item.name}</strong>
+                  <small>{item.sku}</small>
+                  <em>{formatINR(itemPrice(item, rates))}</em>
+                </button>
+              ))}
+            </div>
+
             {lines.length === 0 ? (
               <div className="sales-empty">
                 <ShoppingCart size={42} />
@@ -137,10 +157,11 @@ export default function PosPage() {
               <button type="button" className="ghost-action" onClick={doScan}>Add</button>
             </div>
 
-            {query ? (
+            {query && filteredBrowse.length > 0 ? (
               <div className="sales-quick-picks">
                 {filteredBrowse.map((item) => (
                   <button key={item.id} type="button" className="sale-item-pick compact" onClick={() => addToCart(item.id)}>
+                    <ItemImage item={item} className="product-img cell-img" />
                     <strong>{item.name}</strong>
                     <em>{formatINR(itemPrice(item, rates))}</em>
                   </button>
