@@ -10556,3 +10556,301 @@ a.ghost-action {
     grid-column: 2;
   }
 }
+
+/* ============================================================
+   Welcome card + dark-mode contrast fixes (POS + dashboard)
+   ============================================================ */
+.dash-welcome {
+  position: relative;
+  overflow: hidden;
+  min-height: 210px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  background: #f7f1e8;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  padding: 28px;
+}
+
+.dash-welcome-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  transform: scale(1.04);
+  animation: dash-welcome-ken 18s ease-in-out infinite alternate;
+}
+
+.dash-welcome-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      105deg,
+      rgba(255, 250, 244, 0.94) 0%,
+      rgba(255, 250, 244, 0.82) 38%,
+      rgba(255, 250, 244, 0.28) 68%,
+      rgba(255, 250, 244, 0.05) 100%
+    );
+  pointer-events: none;
+}
+
+@keyframes dash-welcome-ken {
+  from { transform: scale(1.02) translateX(0); }
+  to { transform: scale(1.07) translateX(-1%); }
+}
+
+.dash-welcome-copy {
+  position: relative;
+  z-index: 1;
+  max-width: 520px;
+}
+
+.dash-welcome-eyebrow {
+  display: inline-flex;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #7a4f06;
+  background: rgba(242, 179, 61, 0.16);
+  border: 1px solid rgba(242, 179, 61, 0.35);
+}
+
+.dash-welcome-copy h1 {
+  margin-top: 12px;
+  font-size: clamp(26px, 3vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #061327;
+}
+
+.dash-welcome-copy p {
+  margin-top: 8px;
+  color: #475467;
+  font-size: 14.5px;
+  line-height: 1.5;
+}
+
+.dash-welcome-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+[data-theme="dark"] .dash-welcome {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: #0c1b2e;
+}
+
+[data-theme="dark"] .dash-welcome-veil {
+  background:
+    linear-gradient(
+      105deg,
+      rgba(6, 19, 39, 0.92) 0%,
+      rgba(6, 19, 39, 0.78) 42%,
+      rgba(6, 19, 39, 0.35) 72%,
+      rgba(6, 19, 39, 0.12) 100%
+    );
+}
+
+[data-theme="dark"] .dash-welcome-copy h1 {
+  color: #f5f7fb;
+}
+
+[data-theme="dark"] .dash-welcome-copy p {
+  color: #c9d4e3;
+}
+
+/* Dashboard dark: amounts, lists, donut SVG fills, KPIs */
+[data-theme="dark"] .dash-kpi span,
+[data-theme="dark"] .dash-kpi small,
+[data-theme="dark"] .dash-pro-kpi small,
+[data-theme="dark"] .dash-card-head h2,
+[data-theme="dark"] .dash-list strong,
+[data-theme="dark"] .dash-table th,
+[data-theme="dark"] .dash-table td,
+[data-theme="dark"] .dash-chart-summary small,
+[data-theme="dark"] .dash-donut-legend small,
+[data-theme="dark"] .dash-pro-seller-copy small,
+[data-theme="dark"] .dash-pro-summary-grid span {
+  color: #b7c2d2;
+}
+
+[data-theme="dark"] .dash-kpi strong,
+[data-theme="dark"] .dash-chart-summary strong,
+[data-theme="dark"] .dash-list strong,
+[data-theme="dark"] .dash-table td.num,
+[data-theme="dark"] .dash-donut-legend strong,
+[data-theme="dark"] .dash-pro-seller-amt,
+[data-theme="dark"] .dash-pro-summary-grid strong,
+[data-theme="dark"] .dash-pro-ai-card strong {
+  color: #f5f7fb !important;
+}
+
+[data-theme="dark"] .dash-donut-center-label {
+  fill: #98a2b3;
+}
+
+[data-theme="dark"] .dash-donut-center-value {
+  fill: #f5f7fb !important;
+  color: #f5f7fb !important;
+}
+
+[data-theme="dark"] .dash-pro-ai-card p {
+  color: #b7c2d2;
+}
+
+[data-theme="dark"] .dash-pro-summary-grid div {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* POS dark: readable text over moment_image / glass */
+[data-theme="dark"] .pos-v2-bg-veil {
+  background:
+    linear-gradient(120deg, rgba(6, 19, 39, 0.94) 0%, rgba(6, 19, 39, 0.88) 45%, rgba(6, 19, 39, 0.72) 100%) !important;
+}
+
+[data-theme="dark"] .pos-glass {
+  background: rgba(10, 22, 38, 0.88) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #e8eef7;
+}
+
+[data-theme="dark"] .pos-v2-promo {
+  background: linear-gradient(90deg, rgba(242, 179, 61, 0.22), rgba(29, 100, 216, 0.18));
+  color: #ffe7b0;
+  border-color: rgba(242, 179, 61, 0.35);
+}
+
+[data-theme="dark"] .pos-v2-top h1,
+[data-theme="dark"] .pos-v2-section-head h2,
+[data-theme="dark"] .pos-v2-tile strong,
+[data-theme="dark"] .pos-v2-ai-card strong,
+[data-theme="dark"] .pos-v2-customer-card strong,
+[data-theme="dark"] .pos-v2-cart-copy strong,
+[data-theme="dark"] .pos-v2-cart-amt strong,
+[data-theme="dark"] .pos-v2-rates strong,
+[data-theme="dark"] .pos-v2-pay-summary strong,
+[data-theme="dark"] .pos-v2-totals .grand,
+[data-theme="dark"] .pos-v2-totals .grand strong,
+[data-theme="dark"] .pos-v2-empty strong,
+[data-theme="dark"] .pos-v2-qty span,
+[data-theme="dark"] .pos-v2-history-row strong,
+[data-theme="dark"] .pos-v2-pay-list strong {
+  color: #f5f7fb !important;
+}
+
+[data-theme="dark"] .pos-v2-top p,
+[data-theme="dark"] .pos-v2-section-head span,
+[data-theme="dark"] .pos-v2-tile small,
+[data-theme="dark"] .pos-v2-ai-card small,
+[data-theme="dark"] .pos-v2-customer-card small,
+[data-theme="dark"] .pos-v2-customer-card span,
+[data-theme="dark"] .pos-v2-cart-copy small,
+[data-theme="dark"] .pos-v2-field,
+[data-theme="dark"] .pos-v2-rates span,
+[data-theme="dark"] .pos-v2-pay-summary span,
+[data-theme="dark"] .pos-v2-totals > div,
+[data-theme="dark"] .pos-v2-empty,
+[data-theme="dark"] .pos-v2-history-head,
+[data-theme="dark"] .pos-v2-adjust label {
+  color: #b7c2d2 !important;
+}
+
+[data-theme="dark"] .pos-v2-tile-price {
+  color: #ffd76d !important;
+}
+
+[data-theme="dark"] .pos-v2-search,
+[data-theme="dark"] .pos-v2-scan,
+[data-theme="dark"] .pos-v2-tile,
+[data-theme="dark"] .pos-v2-ai-card,
+[data-theme="dark"] .pos-v2-cart-line,
+[data-theme="dark"] .pos-v2-field input,
+[data-theme="dark"] .pos-v2-field select,
+[data-theme="dark"] .pos-v2-rates > div,
+[data-theme="dark"] .pos-v2-adjust label,
+[data-theme="dark"] .pos-v2-pay-summary > div,
+[data-theme="dark"] .pos-v2-history-row,
+[data-theme="dark"] .pos-v2-held-row,
+[data-theme="dark"] .pos-v2-pay-list > div,
+[data-theme="dark"] .pos-v2-customer-card,
+[data-theme="dark"] .pos-v2-btn.ghost {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #e8eef7 !important;
+}
+
+[data-theme="dark"] .pos-v2-search input,
+[data-theme="dark"] .pos-v2-scan input,
+[data-theme="dark"] .pos-v2-field input,
+[data-theme="dark"] .pos-v2-field select,
+[data-theme="dark"] .pos-v2-adjust input {
+  color: #f5f7fb !important;
+  caret-color: #f5f7fb;
+}
+
+[data-theme="dark"] .pos-v2-search input::placeholder,
+[data-theme="dark"] .pos-v2-scan input::placeholder,
+[data-theme="dark"] .pos-v2-field input::placeholder {
+  color: #8b98ab;
+}
+
+[data-theme="dark"] .pos-v2-chips button,
+[data-theme="dark"] .pos-v2-pay-methods button:not(.active),
+[data-theme="dark"] .pos-v2-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #d5deea;
+}
+
+[data-theme="dark"] .pos-v2-chips button.active,
+[data-theme="dark"] .pos-v2-pay-methods button.active {
+  background: linear-gradient(135deg, #f2b33d, #e6a520);
+  color: #2a1c04;
+  border-color: transparent;
+}
+
+[data-theme="dark"] .pos-v2-qty {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .pos-v2-qty button,
+[data-theme="dark"] .pos-v2-cart-amt button,
+[data-theme="dark"] .pos-v2-pay-list button {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f5f7fb;
+}
+
+[data-theme="dark"] .pos-v2-tile-media {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+[data-theme="dark"] .pos-v2-link {
+  color: #93c5fd;
+}
+
+[data-theme="dark"] .pos-v2-totals > div strong {
+  color: #f5f7fb;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dash-welcome-bg {
+    animation: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .dash-welcome {
+    min-height: auto;
+    padding: 20px 16px;
+  }
+}
