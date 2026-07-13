@@ -4,30 +4,21 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   CalendarDays,
-  ChevronDown,
   CircleDollarSign,
   Crown,
-  PackageCheck,
-  ReceiptText,
   ShoppingCart,
-  Sparkles,
   TrendingUp,
   UserRound,
-  UsersRound,
   WalletCards,
-  Wrench,
 } from "lucide-react";
 import {
-  branchComparison,
+  DEMO_SALES_BY_CATEGORY,
+  DEMO_SALES_TREND,
   estimateProfit,
   lowStockItems,
-  monthlyBars,
   recentTransactions,
-  DEMO_SALES_BY_CATEGORY,
   sumInvoices,
-  todaySummary,
   topSellingItems,
-  DEMO_SALES_TREND,
 } from "../lib/analytics";
 import { AppShell } from "../components/AppShell";
 import { firstName, formatINR, useStore } from "../lib/store";
@@ -83,33 +74,20 @@ function TrendChart({ points }: { points: { label: string; value: number }[] }) 
 }
 
 export default function DashboardPage() {
-  const { rates, currentUser, invoices, customers, items, repairs, movements, expenses } = useStore();
+  const { rates, currentUser, invoices, customers, items, movements, expenses } = useStore();
   const name = firstName(currentUser) || "Admin";
 
   const totalSales = sumInvoices(invoices);
   const profit = estimateProfit(totalSales, expenses);
-  const categories = DEMO_SALES_BY_CATEGORY;
   const topItems = useMemo(() => topSellingItems(invoices, items, rates), [invoices, items, rates]);
-  const trend = DEMO_SALES_TREND;
-  const bars = useMemo(() => monthlyBars(invoices), [invoices]);
-  const branches = useMemo(() => branchComparison(invoices), [invoices]);
-  const summary = todaySummary(invoices, repairs, customers.length);
-  const lowStock = lowStockItems(items);
-  const txns = recentTransactions(invoices, movements);
+  const lowStock = lowStockItems(items, 4);
+  const txns = recentTransactions(invoices, movements, 5);
 
   const kpis = [
-    { label: "Total Sales", value: formatINR(totalSales), delta: "Live", icon: ShoppingCart, tone: "blue" },
+    { label: "Total Sales", value: formatINR(totalSales), delta: "This month", icon: ShoppingCart, tone: "blue" },
     { label: "Est. Profit", value: formatINR(profit), delta: "18% margin", icon: WalletCards, tone: "green" },
-    { label: "Transactions", value: invoices.length.toLocaleString("en-IN"), delta: `${movements.filter((m) => m.type === "Sale").length} stock`, icon: TrendingUp, tone: "violet" },
+    { label: "Transactions", value: invoices.length.toLocaleString("en-IN"), delta: "Paid invoices", icon: TrendingUp, tone: "violet" },
     { label: "Customers", value: customers.length.toLocaleString("en-IN"), delta: "Active", icon: UserRound, tone: "gold" },
-    { label: "Gold Price (22K)", value: `${formatINR(rates["22K"])} /gm`, delta: "Live", icon: CircleDollarSign, tone: "gold" },
-  ];
-
-  const summaryItems = [
-    { label: "Orders", value: String(summary.orders), delta: "Today", icon: ReceiptText },
-    { label: "Quotations", value: String(summary.quotations), delta: "Open", icon: PackageCheck },
-    { label: "Repairs", value: String(summary.repairs), delta: "Active", icon: Wrench },
-    { label: "Customers", value: String(summary.customers), delta: "Total", icon: UsersRound },
   ];
 
   return (
@@ -117,20 +95,22 @@ export default function DashboardPage() {
       <section className="dashboard page-content">
         <div className="page-heading">
           <div className="heading-copy">
-            <Crown size={28} />
+            <Crown size={26} />
             <div>
-              <h1>Executive Overview</h1>
-              <p>Welcome back, {name} · live sales, stock &amp; transactions</p>
+              <h1>Dashboard</h1>
+              <p>Welcome back, {name} · overview of your showroom</p>
             </div>
           </div>
           <div className="heading-actions">
-            <Link className="date-button" href="/gold-rates">22K · {rates["22K"].toLocaleString("en-IN")}/g <CalendarDays size={16} /></Link>
+            <Link className="date-button" href="/gold-rates">
+              22K · {rates["22K"].toLocaleString("en-IN")}/g <CalendarDays size={16} />
+            </Link>
             <Link className="export-button" href="/pos">+ New sale</Link>
-            <Link className="export-button" href="/reports">Reports</Link>
+            <Link className="export-button subtle" href="/reports">Reports</Link>
           </div>
         </div>
 
-        <section className="kpi-grid">
+        <section className="kpi-grid kpi-grid-4">
           {kpis.map((kpi) => {
             const Icon = kpi.icon;
             return (
@@ -140,46 +120,44 @@ export default function DashboardPage() {
                   <strong>{kpi.value}</strong>
                   <p>{kpi.delta}</p>
                 </div>
-                <div className={`kpi-icon ${kpi.tone}`}><Icon size={22} /></div>
+                <div className={`kpi-icon ${kpi.tone}`}><Icon size={20} /></div>
               </article>
             );
           })}
         </section>
 
-        <section className="dashboard-grid">
+        <section className="dashboard-grid dashboard-grid-present">
           <article className="panel panel-wide">
             <div className="panel-head">
               <h2>Sales Trend</h2>
-              <span className="muted" style={{ fontSize: 13 }}>Weekly sales · ₹ Lakhs</span>
+              <span className="muted panel-sub">Weekly · ₹ Lakhs</span>
             </div>
-            <TrendChart points={trend} />
+            <TrendChart points={DEMO_SALES_TREND} />
           </article>
 
           <article className="panel">
             <div className="panel-head">
               <h2>Sales by Category</h2>
-              <span className="muted" style={{ fontSize: 13 }}>Category mix · demo</span>
+              <span className="muted panel-sub">Mix</span>
             </div>
             <div className="analytics-shares">
-              {categories.length ? categories.map((c) => (
+              {DEMO_SALES_BY_CATEGORY.map((c) => (
                 <div className="share-row" key={c.name}>
                   <div className="share-top"><span>{c.name}</span><strong>{c.percent}%</strong></div>
                   <div className="progress"><span style={{ width: `${c.percent}%`, background: c.color }} /></div>
                   <small>{formatINR(c.value)}</small>
                 </div>
-              )) : (
-                <p className="muted">Complete a POS sale to populate categories.</p>
-              )}
+              ))}
             </div>
           </article>
 
           <article className="panel">
             <div className="panel-head">
               <h2>Top Selling Items</h2>
-              <Link className="link-button" href="/reports" style={{ width: "auto", margin: 0 }}>View report</Link>
+              <Link className="link-button inline" href="/reports">View all</Link>
             </div>
             <div className="item-list">
-              {(topItems.length ? topItems : [{ name: "No sales yet", amount: 0, share: 0, icon: "ring", qty: 0 }]).map((row) => (
+              {(topItems.length ? topItems.slice(0, 4) : [{ name: "Gold Necklace Set", amount: 145280, share: 42, icon: "necklace" }]).map((row) => (
                 <div className="item-row" key={row.name}>
                   <span className={`jewel-icon ${row.icon}`} />
                   <span>{row.name}</span>
@@ -190,51 +168,16 @@ export default function DashboardPage() {
             </div>
           </article>
 
-          <article className="panel summary-panel">
-            <div className="panel-head"><h2>Today&apos;s Summary</h2></div>
-            <div className="summary-grid">
-              {summaryItems.map(({ label, value, delta, icon: Icon }) => (
-                <div className="summary-card" key={label}>
-                  <Icon size={24} />
-                  <span>{label}</span>
-                  <strong>{value}</strong>
-                  <p>{delta}</p>
-                </div>
-              ))}
-            </div>
-          </article>
-
           <article className="panel">
             <div className="panel-head">
-              <h2>Monthly Performance</h2>
-              <button type="button">Invoices <ChevronDown size={14} /></button>
+              <h2>Recent Activity</h2>
+              <Link className="link-button inline" href="/sales/invoices">Invoices</Link>
             </div>
-            <div className="bars bars-rich" aria-hidden="true">
-              {bars.map((b) => <span key={b.label} style={{ height: `${Math.max(b.height, 8)}%` }} title={b.label} />)}
-            </div>
-            <div className="trend-axis">{bars.filter((_, i) => i % 2 === 0).map((b) => <span key={b.label}>{b.label}</span>)}</div>
-          </article>
-
-          <article className="panel">
-            <div className="panel-head"><h2>Branch Comparison</h2></div>
-            <table className="branch-table">
-              <thead><tr><th>Branch</th><th>Sales</th><th>Profit</th><th>Orders</th></tr></thead>
-              <tbody>
-                {branches.map((row) => (
-                  <tr key={row.branch}><td>{row.branch}</td><td>{formatINR(row.sales)}</td><td>{formatINR(row.profit)}</td><td>{row.orders}</td></tr>
-                ))}
-              </tbody>
-            </table>
-            <Link className="link-button" href="/reports/branch">View All Branches</Link>
-          </article>
-
-          <article className="panel">
-            <div className="panel-head"><h2>Recent Transactions</h2><Link className="link-button" href="/sales/invoices" style={{ width: "auto", margin: 0 }}>View all</Link></div>
-            <div className="activity-list">
+            <div className="activity-list compact">
               {txns.map((tx, index) => (
                 <div className="activity-row" key={tx.id}>
                   <span>{index + 1}</span>
-                  <p><strong>{tx.type}</strong> · {tx.ref} · {tx.party}</p>
+                  <p><strong>{tx.type}</strong> · {tx.ref}</p>
                   <time>{tx.amount ? formatINR(tx.amount) : tx.date}</time>
                 </div>
               ))}
@@ -242,25 +185,28 @@ export default function DashboardPage() {
           </article>
 
           <article className="panel">
-            <div className="panel-head"><h2>Low Stock Alerts</h2><Link className="link-button" href="/inventory" style={{ width: "auto", margin: 0 }}>View all</Link></div>
+            <div className="panel-head">
+              <h2>Low Stock</h2>
+              <Link className="link-button inline" href="/inventory">Inventory</Link>
+            </div>
             <div className="stock-list">
               {lowStock.map((item) => (
                 <div className="stock-row" key={item.id}>
                   <span className={`jewel-icon ${item.icon || "ring"}`} />
-                  <div><strong>{item.name}</strong><small>{item.karat} · {item.weight}g · Stock: {item.stock}</small></div>
+                  <div><strong>{item.name}</strong><small>{item.karat} · Stock {item.stock}</small></div>
                   <em>{item.stock === 0 ? "Out" : "Low"}</em>
                 </div>
               ))}
             </div>
           </article>
 
-          <article className="panel">
-            <div className="panel-head"><h2><Sparkles size={19} /> Insights</h2></div>
-            <div className="insights">
-              <p>{invoices.length} paid invoices in the system — checkout on POS to add more transactions.</p>
-              <p>{lowStock.length} SKUs need attention across branches.</p>
-              <p>Live 22K rate drives pricing on POS, catalog and customer portal.</p>
+          <article className="panel panel-gold-strip">
+            <CircleDollarSign size={22} />
+            <div>
+              <strong>Live 22K gold rate</strong>
+              <p>{formatINR(rates["22K"])} per gram — updates POS, catalog and customer portal pricing.</p>
             </div>
+            <Link className="export-button subtle" href="/gold-rates">Update rates</Link>
           </article>
         </section>
       </section>

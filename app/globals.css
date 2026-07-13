@@ -55,10 +55,8 @@ button {
 .app-shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
-  background:
-    radial-gradient(circle at 18% 8%, rgba(6, 19, 39, 0.04), transparent 28%),
-    linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  grid-template-columns: 248px minmax(0, 1fr);
+  background: var(--bg);
 }
 
 .sidebar {
@@ -480,11 +478,21 @@ h1 {
   padding: 0 22px;
 }
 
+.export-button.subtle {
+  background: var(--gold-soft);
+  border: 1px solid rgba(230, 165, 32, 0.35);
+  color: #92400e;
+}
+
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(170px, 1fr));
   gap: 18px;
   margin-bottom: 18px;
+}
+
+.kpi-grid-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .kpi-card,
@@ -6826,6 +6834,181 @@ a.ghost-action {
   }
 
   .sale-item-picks {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Flat SRS sidebar (presentation) ---- */
+.sidebar-flat {
+  gap: 10px;
+  padding: 16px 14px;
+  overflow: hidden;
+}
+
+.sidebar-nav-flat {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-right: 2px;
+}
+
+.sidebar-flat .nav-item {
+  grid-template-columns: 20px 1fr;
+  min-height: 38px;
+  padding: 0 10px;
+  font-size: 13px;
+  text-decoration: none;
+  border-radius: 7px;
+}
+
+.sidebar-flat .nav-item.active {
+  background: rgba(242, 179, 61, 0.18);
+  border-color: rgba(242, 179, 61, 0.28);
+}
+
+.sidebar-flat .gold-widget {
+  flex-shrink: 0;
+  margin-top: 0;
+  padding: 10px 12px;
+}
+
+.sidebar-flat .gold-widget em {
+  display: none;
+}
+
+.sidebar-flat .gold-widget strong {
+  font-size: 14px;
+}
+
+.sidebar-flat .gold-widget-link {
+  min-height: 28px;
+  line-height: 28px;
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+.sidebar-flat .sidebar-foot {
+  display: grid;
+  flex-shrink: 0;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-flat .sidebar-greeting {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+}
+
+.sidebar-flat .sidebar-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sidebar-flat a.sidebar-account,
+.sidebar-flat button.sidebar-logout {
+  box-sizing: border-box;
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sidebar-flat a.sidebar-account {
+  color: #ffd36c;
+  background: rgba(242, 179, 61, 0.1);
+  border: 1px solid rgba(242, 179, 61, 0.2);
+}
+
+.sidebar-flat button.sidebar-logout {
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-flat .sidebar-quickadd {
+  min-height: 34px;
+  font-size: 12px;
+}
+
+/* Presentation dashboard */
+.dashboard-grid-present {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.panel-sub {
+  font-size: 12px;
+}
+
+.panel-head .link-button.inline {
+  width: auto;
+  margin: 0;
+  min-height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.panel-gold-strip {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, rgba(242, 179, 61, 0.12), rgba(255, 255, 255, 0.98));
+  border-color: rgba(242, 179, 61, 0.28);
+}
+
+.panel-gold-strip svg {
+  color: #b88215;
+  flex-shrink: 0;
+}
+
+.panel-gold-strip strong {
+  display: block;
+  font-size: 15px;
+}
+
+.panel-gold-strip p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.activity-list.compact .activity-row {
+  padding: 10px 0;
+}
+
+.page-heading h1 {
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.topbar {
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+  box-shadow: none;
+}
+
+@media (max-width: 1200px) {
+  .kpi-grid-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-grid-present {
     grid-template-columns: 1fr;
   }
 }

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -15,7 +15,7 @@ import {
   Sun,
   UserRound,
 } from "lucide-react";
-import { adminNavGroups, adminQuickAddLinks } from "../lib/adminNav";
+import { adminNavItems, adminQuickAddLinks } from "../lib/adminNav";
 import { BRANCHES, firstName, useStore } from "../lib/store";
 import { AdminQuickSearch } from "./AdminQuickSearch";
 import { BrandMark } from "./BrandMark";
@@ -28,24 +28,13 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-function groupActive(pathname: string, group: (typeof adminNavGroups)[number]) {
-  return group.items.some((item) => isActive(pathname, item.href));
-}
-
-export function AppShell({ children, searchPlaceholder = "Search item, customer, invoice or barcode..." }: AppShellProps) {
+export function AppShell({ children, searchPlaceholder = "Search item, customer, invoice or page..." }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { rates, selectedBranch, setBranch, currentUser, logout, notifications, markNotificationsRead, theme, toggleTheme } = useStore();
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [menu, setMenu] = useState<null | "branch" | "notif" | "calendar" | "profile" | "quickadd">(null);
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
-  const shellRef = useRef<HTMLDivElement>(null);
-
-  function isGroupOpen(group: (typeof adminNavGroups)[number]) {
-    if (openGroups[group.label] !== undefined) return openGroups[group.label];
-    return groupActive(pathname, group);
-  }
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
@@ -73,26 +62,20 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
     router.push("/");
   }
 
-  function toggleGroup(label: string) {
-    setOpenGroups((prev) => ({ ...prev, [label]: !prev[label] }));
-  }
-
   return (
-    <div className={`app-shell ${mobileNavOpen ? "mobile-nav-open" : ""}`} ref={shellRef}>
+    <div className={`app-shell ${mobileNavOpen ? "mobile-nav-open" : ""}`}>
       {mobileNavOpen ? (
         <button className="sidebar-backdrop" aria-label="Close menu" type="button" onClick={() => setMobileNavOpen(false)} />
       ) : null}
 
-      <aside className="sidebar sidebar-rich">
-        <div className="brand-row">
-          <Link className="brand" href="/dashboard" onClick={() => setMobileNavOpen(false)}>
-            <BrandMark className="brand-mark" />
-            <div className="brand-text">
-              <strong>GRIDS GOLD</strong>
-              <span>JEWELRY ERP</span>
-            </div>
-          </Link>
-        </div>
+      <aside className="sidebar sidebar-flat">
+        <Link className="brand" href="/dashboard" onClick={() => setMobileNavOpen(false)}>
+          <BrandMark className="brand-mark" />
+          <div className="brand-text">
+            <strong>GRIDS GOLD</strong>
+            <span>JEWELRY ERP</span>
+          </div>
+        </Link>
 
         <div className="sidebar-quickadd-wrap menu-wrap">
           <button className="sidebar-quickadd" type="button" onClick={() => setMenu(menu === "quickadd" ? null : "quickadd")}>
@@ -109,36 +92,21 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
           ) : null}
         </div>
 
-        <nav className="sidebar-nav-scroll" aria-label="Main navigation">
-          {adminNavGroups.map((group) => {
-            const open = isGroupOpen(group);
+        <nav className="sidebar-nav-flat" aria-label="SRS modules">
+          {adminNavItems.map((item) => {
+            const Icon = item.icon;
+            const active = isActive(pathname, item.href);
             return (
-              <div className="sidebar-group" key={group.label}>
-                <button type="button" className="sidebar-group-head" onClick={() => toggleGroup(group.label)}>
-                  <span>{group.label}</span>
-                  <ChevronDown size={14} className={open ? "open" : ""} />
-                </button>
-                {open ? (
-                  <div className="sidebar-group-items">
-                    {group.items.map((item) => {
-                      const Icon = item.icon;
-                      const active = isActive(pathname, item.href);
-                      return (
-                        <Link
-                          className={`nav-item ${active ? "active" : ""}`}
-                          href={item.href}
-                          key={item.href}
-                          title={item.label}
-                          onClick={() => setMobileNavOpen(false)}
-                        >
-                          <Icon size={18} />
-                          <span className="nav-label">{item.label}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                ) : null}
-              </div>
+              <Link
+                className={`nav-item ${active ? "active" : ""}`}
+                href={item.href}
+                key={item.href}
+                title={item.label}
+                onClick={() => setMobileNavOpen(false)}
+              >
+                <Icon size={17} />
+                <span className="nav-label">{item.label}</span>
+              </Link>
             );
           })}
         </nav>
@@ -146,18 +114,17 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
         <div className="gold-widget">
           <p>Gold Price (22K)</p>
           <strong>₹ {rates["22K"].toLocaleString("en-IN")} <span>/gm</span></strong>
-          <em>Live rate · updates all prices</em>
-          <Link className="gold-widget-link" href="/gold-rates">View Gold Rates</Link>
+          <Link className="gold-widget-link" href="/gold-rates">View rates</Link>
         </div>
 
         <div className="sidebar-foot">
           {greeting ? <p className="sidebar-greeting">Hi, {greeting}</p> : null}
           <div className="sidebar-actions">
             <Link className="sidebar-account" href="/settings" onClick={() => setMobileNavOpen(false)}>
-              <UserRound size={18} /> Account &amp; Settings
+              <UserRound size={16} /> Settings
             </Link>
             <button className="sidebar-logout" type="button" onClick={signOut}>
-              <LogOut size={18} /> Sign out
+              <LogOut size={16} /> Sign out
             </button>
           </div>
         </div>
@@ -215,8 +182,8 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
               {menu === "calendar" ? (
                 <div className="dropdown">
                   <div className="dropdown-head">Today</div>
-                  <div className="dropdown-row"><strong>POS sessions</strong><small>3 active counters</small></div>
                   <div className="dropdown-row"><strong>Repairs due</strong><small>2 pickups today</small></div>
+                  <div className="dropdown-row"><strong>POS sessions</strong><small>3 counters active</small></div>
                 </div>
               ) : null}
             </div>

@@ -27,41 +27,42 @@ export type LandingModuleGroup = {
   items: LandingModuleItem[];
 };
 
+/** SRS v1 modules — linked to real admin routes for demo */
 export const moduleGroups: LandingModuleGroup[] = [
   {
     label: "Daily operations",
     items: [
-      { icon: ShoppingCart, title: "POS & Sales", copy: "Barcode billing, split payments, receipts.", href: "#modules" },
-      { icon: Wrench, title: "Repairs", copy: "Tickets from drop-off to pickup.", href: "#modules" },
-      { icon: UserRound, title: "Customers", copy: "Profiles, history and follow-ups.", href: "#modules" },
-      { icon: TrendingUp, title: "Gold rates", copy: "Live 22K/18K pricing everywhere.", href: "#modules" },
+      { icon: ShoppingCart, title: "POS & Sales", copy: "Barcode billing, split payments, receipts.", href: "/pos" },
+      { icon: Wrench, title: "Repairs", copy: "Tickets from drop-off to pickup.", href: "/repairs" },
+      { icon: UserRound, title: "Customers", copy: "Profiles, history and follow-ups.", href: "/customers" },
+      { icon: TrendingUp, title: "Gold rates", copy: "Live 22K/18K pricing everywhere.", href: "/gold-rates" },
     ],
   },
   {
     label: "Inventory & catalog",
     items: [
-      { icon: Boxes, title: "Inventory", copy: "Weight, purity, stones and stock.", href: "#modules" },
-      { icon: Gem, title: "Jewelry catalog", copy: "Collections with live-rate tags.", href: "#modules" },
-      { icon: ReceiptText, title: "Purchasing", copy: "Supplier POs and goods inward.", href: "#modules" },
-      { icon: Gem, title: "Customer portal", copy: "Browse, wishlist and reserve online.", href: "#modules" },
+      { icon: Boxes, title: "Inventory", copy: "Weight, purity, stones and stock.", href: "/inventory" },
+      { icon: Gem, title: "Jewelry catalog", copy: "Collections with live-rate tags.", href: "/jewelry" },
+      { icon: ReceiptText, title: "Purchasing", copy: "Supplier POs and goods inward.", href: "/purchase-orders" },
+      { icon: Gem, title: "Customer portal", copy: "Browse, wishlist and reserve online.", href: "/portal" },
     ],
   },
   {
     label: "Money & reports",
     items: [
-      { icon: WalletCards, title: "Finance", copy: "Expenses, margins and ledgers.", href: "#modules" },
-      { icon: LayoutGrid, title: "Reports", copy: "Sales, stock and branch KPIs.", href: "#modules" },
-      { icon: ChartNoAxesCombined, title: "Analytics", copy: "Trends and category mix.", href: "#modules" },
-      { icon: ReceiptText, title: "Invoices", copy: "Printable bills and tax-ready exports.", href: "#modules" },
+      { icon: WalletCards, title: "Finance", copy: "Expenses, margins and ledgers.", href: "/finance" },
+      { icon: LayoutGrid, title: "Reports", copy: "Sales, stock and branch KPIs.", href: "/reports" },
+      { icon: ChartNoAxesCombined, title: "Analytics", copy: "Trends and category mix.", href: "/analytics" },
+      { icon: ReceiptText, title: "Invoices", copy: "Printable bills and tax-ready exports.", href: "/sales/invoices" },
     ],
   },
   {
     label: "Workshop & scale",
     items: [
-      { icon: Factory, title: "Manufacturing", copy: "Job cards and bench tracking.", href: "#modules" },
-      { icon: Handshake, title: "Wholesale", copy: "Dealer orders and bulk pricing.", href: "#modules" },
-      { icon: BarChart3, title: "Multi-branch", copy: "Sync stock across showrooms.", href: "#modules" },
-      { icon: LayoutGrid, title: "Settings", copy: "Users, branches and preferences.", href: "#modules" },
+      { icon: Factory, title: "Manufacturing", copy: "Job cards and bench tracking.", href: "/manufacturing" },
+      { icon: Handshake, title: "Wholesale", copy: "Dealer orders and bulk pricing.", href: "/wholesale" },
+      { icon: BarChart3, title: "Multi-branch", copy: "Sync stock across showrooms.", href: "/dashboard" },
+      { icon: LayoutGrid, title: "Settings", copy: "Users, branches and preferences.", href: "/settings" },
     ],
   },
 ];
