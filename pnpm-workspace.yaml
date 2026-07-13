@@ -1,0 +1,4 @@
+# pnpm 11+ — allow native build scripts required by Next.js
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
