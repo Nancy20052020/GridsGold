@@ -43,7 +43,7 @@ export const moduleGroups: LandingModuleGroup[] = [
       { icon: Boxes, title: "Inventory", copy: "Weight, purity, stones and stock.", href: "/inventory" },
       { icon: Gem, title: "Jewelry catalog", copy: "Collections with live-rate tags.", href: "/jewelry" },
       { icon: ReceiptText, title: "Purchasing", copy: "Supplier POs and goods inward.", href: "/purchase-orders" },
-      { icon: Gem, title: "Customer portal", copy: "Browse, wishlist and reserve online.", href: "/portal" },
+      { icon: ReceiptText, title: "Analytics", copy: "Sales trends and branch KPIs.", href: "/analytics" },
     ],
   },
   {
