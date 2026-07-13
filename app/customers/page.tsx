@@ -3,17 +3,37 @@
 import { useMemo, useState } from "react";
 import { Search, UserPlus, UsersRound, X } from "lucide-react";
 import { AppShell } from "../components/AppShell";
-import { useStore } from "../lib/store";
+import { CUSTOMER_TYPES, srsLabel, srsPillTone } from "../lib/srs";
+import { useStore, formatINR, type Customer } from "../lib/store";
 
 export default function CustomersPage() {
   const { customers, addCustomer, invoices } = useStore();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", mobile: "", email: "", city: "", type: "Retail" as const });
+  const [detail, setDetail] = useState<Customer | null>(null);
+  const [form, setForm] = useState({
+    name: "",
+    mobile: "",
+    whatsapp: "",
+    email: "",
+    city: "",
+    type: "retail" as const,
+    preferredLanguage: "en",
+    consentSms: false,
+    consentWhatsapp: true,
+    consentEmail: false,
+  });
   const [error, setError] = useState("");
 
   const visible = useMemo(
-    () => customers.filter((c) => !query || c.name.toLowerCase().includes(query.toLowerCase()) || c.mobile.includes(query)),
+    () =>
+      customers.filter(
+        (c) =>
+          !query ||
+          c.name.toLowerCase().includes(query.toLowerCase()) ||
+          c.mobile.includes(query) ||
+          c.code.toLowerCase().includes(query.toLowerCase()),
+      ),
     [customers, query],
   );
 
@@ -24,11 +44,22 @@ export default function CustomersPage() {
   function submit(event: React.FormEvent) {
     event.preventDefault();
     if (!form.name.trim() || !form.mobile.trim()) {
-      setError("Name and mobile are required.");
+      setError("Name and mobile are required (FR-032).");
       return;
     }
-    addCustomer({ name: form.name.trim(), mobile: form.mobile.trim(), email: form.email.trim(), city: form.city.trim(), type: form.type });
-    setForm({ name: "", mobile: "", email: "", city: "", type: "Retail" });
+    addCustomer({
+      name: form.name.trim(),
+      mobile: form.mobile.trim(),
+      whatsapp: form.whatsapp.trim() || form.mobile.trim(),
+      email: form.email.trim(),
+      city: form.city.trim(),
+      type: form.type,
+      preferredLanguage: form.preferredLanguage,
+      consentSms: form.consentSms,
+      consentWhatsapp: form.consentWhatsapp,
+      consentEmail: form.consentEmail,
+    });
+    setForm({ name: "", mobile: "", whatsapp: "", email: "", city: "", type: "retail", preferredLanguage: "en", consentSms: false, consentWhatsapp: true, consentEmail: false });
     setError("");
     setOpen(false);
   }
@@ -40,9 +71,9 @@ export default function CustomersPage() {
           <div className="heading-copy">
             <UsersRound size={28} />
             <div>
-              <span className="eyebrow">CRM</span>
+              <span className="eyebrow">CRM · FR-CRM-001</span>
               <h1>Customers</h1>
-              <p>Retail, wholesale and VIP customers with purchase history.</p>
+              <p>Unified profiles for retail, wholesale, walk-in and VIP customers.</p>
             </div>
           </div>
           <div className="heading-actions">
@@ -52,35 +83,36 @@ export default function CustomersPage() {
 
         <section className="erp-kpis">
           <article className="erp-kpi gold"><span>Total Customers</span><strong>{customers.length}</strong></article>
-          <article className="erp-kpi violet"><span>VIP</span><strong>{customers.filter((c) => c.type === "VIP").length}</strong></article>
-          <article className="erp-kpi blue"><span>Wholesale</span><strong>{customers.filter((c) => c.type === "Wholesale").length}</strong></article>
-          <article className="erp-kpi green"><span>Retail</span><strong>{customers.filter((c) => c.type === "Retail").length}</strong></article>
+          <article className="erp-kpi violet"><span>VIP</span><strong>{customers.filter((c) => c.type === "vip").length}</strong></article>
+          <article className="erp-kpi blue"><span>Wholesale</span><strong>{customers.filter((c) => c.type === "wholesale").length}</strong></article>
+          <article className="erp-kpi green"><span>Retail</span><strong>{customers.filter((c) => c.type === "retail").length}</strong></article>
         </section>
 
         <article className="erp-panel table-panel">
           <div className="table-toolbar">
             <div className="filter-search">
               <Search size={18} />
-              <input placeholder="Search by name or mobile..." value={query} onChange={(e) => setQuery(e.target.value)} />
+              <input placeholder="Search by name, mobile or customer code..." value={query} onChange={(e) => setQuery(e.target.value)} />
             </div>
           </div>
           <div className="table-scroll">
             <table className="data-table">
               <thead>
-                <tr><th>Code</th><th>Name</th><th>Mobile</th><th>City</th><th>Type</th><th>Total Spend</th></tr>
+                <tr><th>Code</th><th>Name</th><th>Mobile / WhatsApp</th><th>City</th><th>Type</th><th>Language</th><th>Total Spend</th></tr>
               </thead>
               <tbody>
                 {visible.map((c) => (
-                  <tr key={c.id}>
+                  <tr key={c.id} className="clickable" onClick={() => setDetail(c)}>
                     <td>{c.code}</td>
                     <td><strong>{c.name}</strong><br /><small className="muted">{c.email || "—"}</small></td>
-                    <td>{c.mobile}</td>
+                    <td>{c.mobile}{c.whatsapp && c.whatsapp !== c.mobile ? <><br /><small className="muted">WA: {c.whatsapp}</small></> : null}</td>
                     <td>{c.city || "—"}</td>
-                    <td><span className={`status-pill ${c.type === "VIP" ? "warning" : c.type === "Wholesale" ? "success" : "success"}`}>{c.type}</span></td>
-                    <td>{spend(c.name) ? "₹ " + spend(c.name).toLocaleString("en-IN") : "—"}</td>
+                    <td><span className={`status-pill ${c.type === "vip" ? "warning" : "success"}`}>{srsLabel(c.type)}</span></td>
+                    <td>{(c.preferredLanguage ?? "en").toUpperCase()}</td>
+                    <td>{spend(c.name) ? formatINR(spend(c.name)) : "—"}</td>
                   </tr>
                 ))}
-                {visible.length === 0 ? <tr><td colSpan={6} className="empty-note">No customers found.</td></tr> : null}
+                {visible.length === 0 ? <tr><td colSpan={7} className="empty-note">No customers found.</td></tr> : null}
               </tbody>
             </table>
           </div>
@@ -91,13 +123,23 @@ export default function CustomersPage() {
         <div className="modal-backdrop" role="dialog" aria-modal="true">
           <form className="modal-card wide" onSubmit={submit}>
             <button className="modal-close" type="button" onClick={() => setOpen(false)} aria-label="Close"><X size={18} /></button>
-            <h2>Add Customer</h2>
+            <h2>Customer Intake</h2>
             <div className="form-grid">
               <label className="field"><span>Full name *</span><div className="field-input"><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Aisha Khan" /></div></label>
               <label className="field"><span>Mobile *</span><div className="field-input"><input value={form.mobile} onChange={(e) => setForm({ ...form, mobile: e.target.value })} placeholder="+91 98765 43210" /></div></label>
+              <label className="field"><span>WhatsApp</span><div className="field-input"><input value={form.whatsapp} onChange={(e) => setForm({ ...form, whatsapp: e.target.value })} placeholder="Same as mobile if blank" /></div></label>
               <label className="field"><span>Email</span><div className="field-input"><input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="name@example.com" /></div></label>
               <label className="field"><span>City</span><div className="field-input"><input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} placeholder="Bengaluru" /></div></label>
-              <label className="field"><span>Type</span><div className="field-input"><select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as typeof form.type })}><option>Retail</option><option>Wholesale</option><option>VIP</option></select></div></label>
+              <label className="field"><span>Customer type</span><div className="field-input"><select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as typeof form.type })}>{CUSTOMER_TYPES.map((t) => <option key={t} value={t}>{srsLabel(t)}</option>)}</select></div></label>
+              <label className="field"><span>Preferred language</span><div className="field-input"><select value={form.preferredLanguage} onChange={(e) => setForm({ ...form, preferredLanguage: e.target.value })}><option value="en">English</option><option value="ar">Arabic</option></select></div></label>
+              <div className="field" style={{ gridColumn: "1 / -1" }}>
+                <span>Communication consent (FR-CRM-002)</span>
+                <div className="consent-row">
+                  <label><input type="checkbox" checked={form.consentSms} onChange={(e) => setForm({ ...form, consentSms: e.target.checked })} /> SMS</label>
+                  <label><input type="checkbox" checked={form.consentWhatsapp} onChange={(e) => setForm({ ...form, consentWhatsapp: e.target.checked })} /> WhatsApp</label>
+                  <label><input type="checkbox" checked={form.consentEmail} onChange={(e) => setForm({ ...form, consentEmail: e.target.checked })} /> Email</label>
+                </div>
+              </div>
             </div>
             {error ? <p className="auth-error">{error}</p> : null}
             <div className="form-actions">
@@ -105,6 +147,42 @@ export default function CustomersPage() {
               <button className="gold-action" type="submit">Save Customer</button>
             </div>
           </form>
+        </div>
+      ) : null}
+
+      {detail ? (
+        <div className="modal-backdrop" role="dialog" aria-modal="true">
+          <div className="modal-card wide">
+            <button className="modal-close" type="button" onClick={() => setDetail(null)} aria-label="Close"><X size={18} /></button>
+            <h2>{detail.name}</h2>
+            <p className="muted" style={{ marginBottom: 16 }}>{detail.code} · {srsLabel(detail.type)} · {srsLabel(detail.status ?? "active")}</p>
+            <div className="form-grid">
+              <div className="field"><span>Mobile</span><strong>{detail.mobile}</strong></div>
+              <div className="field"><span>Email</span><strong>{detail.email || "—"}</strong></div>
+              <div className="field"><span>City</span><strong>{detail.city || "—"}</strong></div>
+              <div className="field"><span>Lifetime spend</span><strong>{spend(detail.name) ? formatINR(spend(detail.name)) : "—"}</strong></div>
+              <div className="field"><span>Consent</span><strong>{[detail.consentSms && "SMS", detail.consentWhatsapp && "WhatsApp", detail.consentEmail && "Email"].filter(Boolean).join(", ") || "—"}</strong></div>
+            </div>
+            <h3 style={{ marginTop: 20, marginBottom: 10 }}>Transaction timeline</h3>
+            <div className="table-scroll">
+              <table className="data-table compact">
+                <thead><tr><th>Document</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+                <tbody>
+                  {invoices.filter((i) => i.customer === detail.name).map((i) => (
+                    <tr key={i.id}>
+                      <td>{i.number}</td>
+                      <td>{formatINR(i.total)}</td>
+                      <td><span className={`status-pill ${srsPillTone(i.status)}`}>{srsLabel(i.status)}</span></td>
+                      <td>{i.date}</td>
+                    </tr>
+                  ))}
+                  {invoices.filter((i) => i.customer === detail.name).length === 0 ? (
+                    <tr><td colSpan={4} className="empty-note">No invoices yet.</td></tr>
+                  ) : null}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       ) : null}
     </AppShell>

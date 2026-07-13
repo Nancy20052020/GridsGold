@@ -15,12 +15,13 @@ import {
 import { AddSaleItemModal } from "../components/AddSaleItemModal";
 import { AppShell } from "../components/AppShell";
 import { ItemImage } from "../components/ProductImage";
+import { PAYMENT_METHODS } from "../lib/srs";
 import { useStore, itemPrice, formatINR } from "../lib/store";
 
 type PaymentLine = { id: string; method: string; amount: number };
 
 export default function PosPage() {
-  const { items, rates, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, customers } = useStore();
+  const { items, rates, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, customers, selectedBranch, currentUser } = useStore();
   const [query, setQuery] = useState("");
   const [customer, setCustomer] = useState("Walk-in Customer");
   const [customerPhone, setCustomerPhone] = useState("");
@@ -28,6 +29,8 @@ export default function PosPage() {
   const [scanValue, setScanValue] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [payments, setPayments] = useState<PaymentLine[]>([]);
+  const [paymentMethod, setPaymentMethod] = useState<string>(PAYMENT_METHODS[0]);
+  const [sessionOpen] = useState(true);
 
   const lines = cart
     .map((line) => {
@@ -65,21 +68,29 @@ export default function PosPage() {
     if (amount <= 0) return;
     setPayments((prev) => [
       ...prev,
-      { id: `pay-${Date.now()}`, method: "Cash", amount },
+      { id: `pay-${Date.now()}`, method: paymentMethod, amount },
     ]);
   }
 
   return (
     <AppShell searchPlaceholder="Search item, SKU or scan barcode...">
       <section className="page-content sales-workspace-page">
+        <div className="pos-session-strip">
+          <span><strong>Branch</strong> {selectedBranch}</span>
+          <span><strong>Terminal</strong> POS-01</span>
+          <span><strong>Cashier</strong> {currentUser?.name ?? "Staff"}</span>
+          <span className={`status-pill ${sessionOpen ? "success" : "danger"}`}>{sessionOpen ? "Session open" : "Session closed"}</span>
+        </div>
+
         <div className="sales-workspace-head">
           <div>
-            <span className="eyebrow">Sales</span>
+            <span className="eyebrow">POS · SCR-16</span>
             <h1>Sales counter</h1>
           </div>
           <div className="sales-workspace-toolbar">
             <button type="button" className="gold-action" onClick={() => setAddOpen(true)}>+ Add item</button>
             <Link className="export-button subtle" href="/sales/invoices">Invoices</Link>
+            <button type="button" className="ghost-action" disabled title="Phase 1 — quotation flow">Quotation</button>
           </div>
         </div>
 
@@ -171,8 +182,16 @@ export default function PosPage() {
             <section className="sales-side-block">
               <div className="sales-side-block-head">
                 <h3>Transactions</h3>
-                <button type="button" className="link-plain" onClick={addPayment} disabled={total <= 0}>+ Add transaction</button>
+                <button type="button" className="link-plain" onClick={addPayment} disabled={total <= 0}>+ Add payment</button>
               </div>
+              <label className="field">
+                <span>Payment method</span>
+                <div className="field-input">
+                  <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+                    {PAYMENT_METHODS.map((m) => <option key={m}>{m}</option>)}
+                  </select>
+                </div>
+              </label>
               <div className="sales-txn-summary">
                 <div><span>Total amount</span><strong>{formatINR(total)}</strong></div>
                 <div><span>Outstanding</span><strong className={outstanding === 0 && total > 0 ? "ok" : ""}>{formatINR(outstanding)} {outstanding === 0 && total > 0 ? "✓" : ""}</strong></div>
@@ -206,7 +225,10 @@ export default function PosPage() {
                 Checkout &amp; Collect Payment
               </button>
               {cart.length ? (
-                <button type="button" className="ghost-action full" onClick={clearCart}>Clear sale</button>
+                <>
+                  <button type="button" className="ghost-action full" onClick={clearCart}>Clear sale</button>
+                  <button type="button" className="ghost-action full" disabled>Hold sale</button>
+                </>
               ) : null}
             </section>
           </aside>

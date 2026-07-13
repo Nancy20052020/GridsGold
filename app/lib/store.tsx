@@ -8,7 +8,22 @@ import {
   useMemo,
   useState,
 } from "react";
-import { isRemovedCategory } from "./categories";
+import {
+  migrateCustomerType,
+  migrateInvoiceStatus,
+  migratePoStatus,
+  migrateRepairPriority,
+  migrateRepairStatus,
+  migrateWorkOrderStatus,
+  type CustomerStatus,
+  type CustomerType,
+  type InvoiceStatus,
+  type ItemReferenceType,
+  type PoStatus,
+  type RepairPriority,
+  type RepairStatus,
+  type WorkOrderStatus,
+} from "./srs";
 
 /* ----------------------------- Types ----------------------------- */
 
@@ -34,9 +49,17 @@ export type Customer = {
   code: string;
   name: string;
   mobile: string;
+  whatsapp?: string;
   email: string;
   city: string;
-  type: "Retail" | "Wholesale" | "VIP";
+  type: CustomerType;
+  preferredLanguage?: string;
+  status?: CustomerStatus;
+  vipFlag?: boolean;
+  consentSms?: boolean;
+  consentWhatsapp?: boolean;
+  consentEmail?: boolean;
+  blacklistFlag?: boolean;
 };
 
 export type InvoiceLine = { name: string; qty: number; amount: number };
@@ -50,7 +73,7 @@ export type Invoice = {
   subtotal: number;
   gst: number;
   total: number;
-  status: "Paid" | "Draft";
+  status: InvoiceStatus;
 };
 
 export type Repair = {
@@ -59,12 +82,31 @@ export type Repair = {
   customer: string;
   item: string;
   issue: string;
-  status: "Received" | "In Progress" | "Ready" | "Delivered";
+  status: RepairStatus;
   estimate: number;
+  approvedAmount?: number;
+  deposit?: number;
+  balanceDue?: number;
+  promisedDate?: string;
+  priority?: RepairPriority;
+  itemReferenceType?: ItemReferenceType;
+  observedCondition?: string;
+  metalDetails?: string;
+  stoneDetails?: string;
   date: string;
 };
 
-export type Supplier = { id: string; code: string; name: string; city: string; phone: string; balance: number };
+export type Supplier = {
+  id: string;
+  code: string;
+  name: string;
+  tradeName?: string;
+  city: string;
+  phone: string;
+  paymentTerms?: string;
+  currency?: string;
+  balance: number;
+};
 
 export type PurchaseOrder = {
   id: string;
@@ -72,7 +114,9 @@ export type PurchaseOrder = {
   supplier: string;
   items: string;
   amount: number;
-  status: "Draft" | "Sent" | "Received";
+  branch?: string;
+  currency?: string;
+  status: PoStatus;
   date: string;
 };
 
@@ -100,7 +144,16 @@ export type Expense = { id: string; date: string; category: string; note: string
 
 export type BulkOrder = { id: string; number: string; customer: string; pieces: number; amount: number; status: "Draft" | "Confirmed" | "Dispatched"; date: string };
 
-export type WorkOrder = { id: string; number: string; product: string; karigar: string; qtyPlanned: number; qtyDone: number; status: "Planned" | "In Progress" | "Completed"; due: string };
+export type WorkOrder = {
+  id: string;
+  number: string;
+  product: string;
+  karigar: string;
+  qtyPlanned: number;
+  qtyDone: number;
+  status: WorkOrderStatus;
+  due: string;
+};
 
 export type CartLine = { itemId: string; qty: number };
 export type Rates = Record<Karat, number>;
@@ -134,31 +187,31 @@ const seedItems: Item[] = [
 ];
 
 const seedCustomers: Customer[] = [
-  { id: "c1", code: "CUST-0001", name: "John Smith", mobile: "+91 98765 43210", email: "john@example.com", city: "Bengaluru", type: "VIP" },
-  { id: "c2", code: "CUST-0002", name: "Priya Mehta", mobile: "+91 90000 12345", email: "priya@example.com", city: "Mumbai", type: "Retail" },
-  { id: "c3", code: "CUST-0003", name: "Raj Gems (B2B)", mobile: "+91 91234 56789", email: "raj@rajgems.in", city: "Surat", type: "Wholesale" },
-  { id: "c4", code: "CUST-0004", name: "Zara Jewels (B2B)", mobile: "+91 98111 22334", email: "buy@zarajewels.in", city: "Delhi", type: "Wholesale" },
+  { id: "c1", code: "CUST-000245", name: "John Smith", mobile: "+91 98765 43210", whatsapp: "+91 98765 43210", email: "john@example.com", city: "Bengaluru", type: "vip", preferredLanguage: "en", status: "active", vipFlag: true, consentSms: true, consentWhatsapp: true, consentEmail: true },
+  { id: "c2", code: "CUST-000246", name: "Priya Mehta", mobile: "+91 90000 12345", email: "priya@example.com", city: "Mumbai", type: "retail", preferredLanguage: "en", status: "active", consentWhatsapp: true },
+  { id: "c3", code: "CUST-000247", name: "Raj Gems (B2B)", mobile: "+91 91234 56789", whatsapp: "+91 91234 56789", email: "raj@rajgems.in", city: "Surat", type: "wholesale", preferredLanguage: "en", status: "active", consentEmail: true },
+  { id: "c4", code: "CUST-000248", name: "Zara Jewels (B2B)", mobile: "+91 98111 22334", email: "buy@zarajewels.in", city: "Delhi", type: "wholesale", preferredLanguage: "en", status: "active" },
 ];
 
 const seedInvoices: Invoice[] = [
-  { id: "inv1", number: "INV-SA-2026-000015", customer: "John Smith", date: "30 Apr, 2025", lines: [{ name: "Heritage Gold Necklace", qty: 1, amount: 145280 }], subtotal: 145280, gst: 4358, total: 149638, status: "Paid" },
-  { id: "inv2", number: "INV-SA-2026-000016", customer: "Priya Mehta", date: "01 May, 2025", lines: [{ name: "Textured Gold Band Ring", qty: 1, amount: 38051 }], subtotal: 38051, gst: 1142, total: 39193, status: "Paid" },
-  { id: "inv3", number: "INV-SA-2026-000017", customer: "Raj Gems (B2B)", date: "05 May, 2025", lines: [{ name: "Royal Gold Bangle", qty: 2, amount: 186400 }], subtotal: 186400, gst: 5592, total: 191992, status: "Paid" },
-  { id: "inv4", number: "INV-SA-2026-000018", customer: "John Smith", date: "12 May, 2025", lines: [{ name: "Gold Hoop Earrings", qty: 1, amount: 64200 }], subtotal: 64200, gst: 1926, total: 66126, status: "Paid" },
+  { id: "inv1", number: "INV-SA-JED-2026-000015", customer: "John Smith", date: "30 Apr, 2025", lines: [{ name: "Heritage Gold Necklace", qty: 1, amount: 145280 }], subtotal: 145280, gst: 4358, total: 149638, status: "paid" },
+  { id: "inv2", number: "INV-SA-JED-2026-000016", customer: "Priya Mehta", date: "01 May, 2025", lines: [{ name: "Textured Gold Band Ring", qty: 1, amount: 38051 }], subtotal: 38051, gst: 1142, total: 39193, status: "paid" },
+  { id: "inv3", number: "INV-SA-JED-2026-000017", customer: "Raj Gems (B2B)", date: "05 May, 2025", lines: [{ name: "Royal Gold Bangle", qty: 2, amount: 186400 }], subtotal: 186400, gst: 5592, total: 191992, status: "paid" },
+  { id: "inv4", number: "INV-SA-JED-2026-000018", customer: "John Smith", date: "12 May, 2025", lines: [{ name: "Gold Hoop Earrings", qty: 1, amount: 64200 }], subtotal: 64200, gst: 1926, total: 66126, status: "paid" },
 ];
 
 const seedRepairs: Repair[] = [
-  { id: "r1", number: "REP-2026-000028", customer: "Priya Mehta", item: "Gold Ring", issue: "Ring resizing", status: "Ready", estimate: 1200, date: "02 May, 2025" },
-  { id: "r2", number: "REP-2026-000029", customer: "John Smith", item: "Gold Bangle", issue: "Resize bangle", status: "In Progress", estimate: 850, date: "03 May, 2025" },
+  { id: "r1", number: "REP-JED-2026-000028", customer: "Priya Mehta", item: "Gold Ring", issue: "Ring resizing", status: "ready", estimate: 1200, approvedAmount: 1200, deposit: 500, balanceDue: 700, promisedDate: "08 May, 2025", priority: "normal", itemReferenceType: "external_item", observedCondition: "Minor scratches on band", date: "02 May, 2025" },
+  { id: "r2", number: "REP-JED-2026-000029", customer: "John Smith", item: "Gold Bangle", issue: "Resize bangle", status: "in_progress", estimate: 850, approvedAmount: 850, deposit: 300, balanceDue: 550, promisedDate: "12 May, 2025", priority: "urgent", itemReferenceType: "external_item", metalDetails: "22K gold", date: "03 May, 2025" },
 ];
 
 const seedSuppliers: Supplier[] = [
-  { id: "s1", code: "SUP-0001", name: "Raj Gems", city: "Surat", phone: "+91 90000 11111", balance: 875000 },
-  { id: "s2", code: "SUP-0002", name: "Kundan Casting Co.", city: "Jaipur", phone: "+91 90000 22222", balance: 120000 },
+  { id: "s1", code: "SUP-000031", name: "Raj Gems", tradeName: "Raj Gems Pvt Ltd", city: "Surat", phone: "+91 90000 11111", paymentTerms: "Net 30", currency: "INR", balance: 875000 },
+  { id: "s2", code: "SUP-000032", name: "Kundan Casting Co.", tradeName: "Kundan Casting", city: "Jaipur", phone: "+91 90000 22222", paymentTerms: "Net 15", currency: "INR", balance: 120000 },
 ];
 
 const seedPOs: PurchaseOrder[] = [
-  { id: "po1", number: "PO-3301", supplier: "Raj Gems", items: "Loose Diamonds", amount: 875000, status: "Received", date: "29 Apr, 2025" },
+  { id: "po1", number: "PO-JED-2026-003301", supplier: "Raj Gems", items: "Loose Diamonds", amount: 875000, branch: "Main Branch", currency: "INR", status: "closed", date: "29 Apr, 2025" },
 ];
 
 const seedOrders: CustomerOrder[] = [
@@ -184,8 +237,8 @@ const seedBulk: BulkOrder[] = [
 ];
 
 const seedWork: WorkOrder[] = [
-  { id: "w1", number: "WO-MFG-000010", product: "22K Bangle (custom)", karigar: "Suresh Karigar", qtyPlanned: 20, qtyDone: 12, status: "In Progress", due: "10 May, 2025" },
-  { id: "w2", number: "WO-MFG-000011", product: "Gold Bangle 22K", karigar: "Ramesh Workshop", qtyPlanned: 50, qtyDone: 50, status: "Completed", due: "28 Apr, 2025" },
+  { id: "w1", number: "WO-MFG-2026-000010", product: "22K Bangle (custom)", karigar: "Suresh Karigar", qtyPlanned: 20, qtyDone: 12, status: "in_progress", due: "10 May, 2025" },
+  { id: "w2", number: "WO-MFG-2026-000011", product: "Gold Bangle 22K", karigar: "Ramesh Workshop", qtyPlanned: 50, qtyDone: 50, status: "completed", due: "28 Apr, 2025" },
 ];
 
 const seedNotifications: Notification[] = [
@@ -237,7 +290,8 @@ type StoreValue = {
   invoices: Invoice[];
   getInvoice: (id: string) => Invoice | undefined;
   repairs: Repair[];
-  addRepair: (repair: Omit<Repair, "id" | "number" | "date" | "status">) => void;
+  addRepair: (repair: Omit<Repair, "id" | "number" | "date" | "status" | "balanceDue">) => void;
+  updateRepairStatus: (id: string, status: RepairStatus) => void;
   suppliers: Supplier[];
   addSupplier: (supplier: Omit<Supplier, "id" | "code" | "balance">) => void;
   purchaseOrders: PurchaseOrder[];
@@ -270,6 +324,51 @@ type StoreValue = {
 
 const StoreContext = createContext<StoreValue | null>(null);
 const KEY = "gg_state_v4";
+
+function hydrateCustomers(saved: Customer[] | undefined): Customer[] {
+  if (!saved?.length) return seedCustomers;
+  return saved.map((c) => ({
+    ...c,
+    type: migrateCustomerType(c.type as string),
+    status: c.status ?? "active",
+    vipFlag: c.vipFlag ?? c.type === "vip",
+    consentSms: c.consentSms ?? false,
+    consentWhatsapp: c.consentWhatsapp ?? false,
+    consentEmail: c.consentEmail ?? false,
+    blacklistFlag: c.blacklistFlag ?? false,
+  }));
+}
+
+function hydrateInvoices(saved: Invoice[] | undefined): Invoice[] {
+  if (!saved?.length) return seedInvoices;
+  return saved.map((i) => ({ ...i, status: migrateInvoiceStatus(i.status as string) }));
+}
+
+function hydrateRepairs(saved: Repair[] | undefined): Repair[] {
+  if (!saved?.length) return seedRepairs;
+  return saved.map((r) => ({
+    ...r,
+    status: migrateRepairStatus(r.status as string),
+    priority: migrateRepairPriority(r.priority),
+    itemReferenceType: r.itemReferenceType ?? "external_item",
+    balanceDue: r.balanceDue ?? Math.max(0, (r.approvedAmount ?? r.estimate) - (r.deposit ?? 0)),
+  }));
+}
+
+function hydratePurchaseOrders(saved: PurchaseOrder[] | undefined): PurchaseOrder[] {
+  if (!saved?.length) return seedPOs;
+  return saved.map((p) => ({
+    ...p,
+    status: migratePoStatus(p.status as string),
+    branch: p.branch ?? "Main Branch",
+    currency: p.currency ?? "INR",
+  }));
+}
+
+function hydrateWorkOrders(saved: WorkOrder[] | undefined): WorkOrder[] {
+  if (!saved?.length) return seedWork;
+  return saved.map((w) => ({ ...w, status: migrateWorkOrderStatus(w.status as string) }));
+}
 
 function hydrateItems(saved: Item[] | undefined): Item[] {
   const savedMap = new Map(saved?.map((item) => [item.id, item]));
@@ -313,16 +412,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (d.selectedBranch) setSelectedBranch(d.selectedBranch);
         if (d.currentUser) setCurrentUser(d.currentUser);
         if (d.items) setItems(hydrateItems(d.items as Item[]));
-        if (d.customers) setCustomers(d.customers);
-        if (d.invoices) setInvoices(d.invoices);
-        if (d.repairs) setRepairs(d.repairs);
+        if (d.customers) setCustomers(hydrateCustomers(d.customers as Customer[]));
+        if (d.invoices) setInvoices(hydrateInvoices(d.invoices as Invoice[]));
+        if (d.repairs) setRepairs(hydrateRepairs(d.repairs as Repair[]));
         if (d.suppliers) setSuppliers(d.suppliers);
-        if (d.purchaseOrders) setPurchaseOrders(d.purchaseOrders);
+        if (d.purchaseOrders) setPurchaseOrders(hydratePurchaseOrders(d.purchaseOrders as PurchaseOrder[]));
         if (d.orders) setOrders(d.orders);
         if (d.movements) setMovements(d.movements);
         if (d.expenses) setExpenses(d.expenses);
         if (d.bulkOrders) setBulkOrders(d.bulkOrders);
-        if (d.workOrders) setWorkOrders(d.workOrders);
+        if (d.workOrders) setWorkOrders(hydrateWorkOrders(d.workOrders as WorkOrder[]));
         if (d.wishlist) setWishlist(d.wishlist);
         if (d.notifications) setNotifications(d.notifications);
       }
@@ -370,7 +469,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setCustomers((prev) =>
         prev.some((c) => c.email.toLowerCase() === u.email.toLowerCase())
           ? prev
-          : [{ id: "c" + Date.now(), code: "CUST-" + String(prev.length + 1).padStart(4, "0"), name: u.name, mobile: u.mobile ?? "", email: u.email, city: u.city ?? "", type: "Retail" }, ...prev],
+          : [{ id: "c" + Date.now(), code: "CUST-" + String(245 + prev.length).padStart(6, "0"), name: u.name, mobile: u.mobile ?? "", email: u.email, city: u.city ?? "", type: "retail" as const, preferredLanguage: "en", status: "active" as const }, ...prev],
       );
     }
   }, []);
@@ -390,20 +489,67 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const getItem = useCallback((id: string) => items.find((i) => i.id === id), [items]);
   const getInvoice = useCallback((id: string) => invoices.find((i) => i.id === id), [invoices]);
 
-  const addCustomer = useCallback((c: Omit<Customer, "id" | "code">) => {
-    setCustomers((p) => [{ ...c, id: "c" + Date.now(), code: "CUST-" + String(p.length + 1).padStart(4, "0") }, ...p]);
+  const addCustomer = useCallback((c: Omit<Customer, "id" | "code" | "status" | "vipFlag" | "consentSms" | "consentWhatsapp" | "consentEmail" | "blacklistFlag"> & {
+    consentSms?: boolean;
+    consentWhatsapp?: boolean;
+    consentEmail?: boolean;
+    blacklistFlag?: boolean;
+  }) => {
+    setCustomers((p) => [{
+      ...c,
+      id: "c" + Date.now(),
+      code: "CUST-" + String(245 + p.length).padStart(6, "0"),
+      status: "active",
+      vipFlag: c.type === "vip",
+      preferredLanguage: c.preferredLanguage ?? "en",
+      consentSms: c.consentSms ?? false,
+      consentWhatsapp: c.consentWhatsapp ?? false,
+      consentEmail: c.consentEmail ?? false,
+      blacklistFlag: c.blacklistFlag ?? false,
+    }, ...p]);
   }, []);
 
-  const addRepair = useCallback((r: Omit<Repair, "id" | "number" | "date" | "status">) => {
-    setRepairs((p) => [{ ...r, id: "r" + Date.now(), number: "REP-2026-" + String(30 + p.length).padStart(6, "0"), date: today(), status: "Received" }, ...p]);
+  const addRepair = useCallback((r: Omit<Repair, "id" | "number" | "date" | "status" | "balanceDue">) => {
+    const approved = r.approvedAmount ?? r.estimate;
+    const deposit = r.deposit ?? 0;
+    setRepairs((p) => [{
+      ...r,
+      id: "r" + Date.now(),
+      number: "REP-JED-2026-" + String(28 + p.length).padStart(6, "0"),
+      date: today(),
+      status: "received",
+      approvedAmount: approved,
+      deposit,
+      balanceDue: Math.max(0, approved - deposit),
+      priority: r.priority ?? "normal",
+      itemReferenceType: r.itemReferenceType ?? "external_item",
+    }, ...p]);
   }, []);
 
-  const addSupplier = useCallback((s: Omit<Supplier, "id" | "code" | "balance">) => {
-    setSuppliers((p) => [{ ...s, id: "s" + Date.now(), code: "SUP-" + String(p.length + 1).padStart(4, "0"), balance: 0 }, ...p]);
+  const updateRepairStatus = useCallback((id: string, status: RepairStatus) => {
+    setRepairs((p) => p.map((r) => (r.id === id ? { ...r, status } : r)));
+  }, []);
+
+  const addSupplier = useCallback((s: Omit<Supplier, "id" | "code" | "balance" | "currency"> & { paymentTerms?: string }) => {
+    setSuppliers((p) => [{
+      ...s,
+      id: "s" + Date.now(),
+      code: "SUP-" + String(31 + p.length).padStart(6, "0"),
+      balance: 0,
+      currency: "INR",
+    }, ...p]);
   }, []);
 
   const addPurchaseOrder = useCallback((po: Omit<PurchaseOrder, "id" | "number" | "date" | "status">) => {
-    setPurchaseOrders((p) => [{ ...po, id: "po" + Date.now(), number: "PO-" + (3302 + p.length), date: today(), status: "Draft" }, ...p]);
+    setPurchaseOrders((p) => [{
+      ...po,
+      id: "po" + Date.now(),
+      number: "PO-JED-2026-" + String(3302 + p.length),
+      date: today(),
+      status: "draft",
+      branch: po.branch ?? "Main Branch",
+      currency: po.currency ?? "INR",
+    }, ...p]);
   }, []);
 
   const reserve = useCallback((itemId: string) => {
@@ -449,7 +595,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const addWorkOrder = useCallback((w: Omit<WorkOrder, "id" | "number" | "status" | "qtyDone">) => {
-    setWorkOrders((p) => [{ ...w, id: "w" + Date.now(), number: "WO-MFG-" + String(12 + p.length).padStart(6, "0"), status: "Planned", qtyDone: 0 }, ...p]);
+    setWorkOrders((p) => [{ ...w, id: "w" + Date.now(), number: "WO-MFG-2026-" + String(12 + p.length).padStart(6, "0"), status: "planned", qtyDone: 0 }, ...p]);
   }, []);
 
   const addToCart = useCallback((itemId: string) => {
@@ -477,7 +623,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     });
     const subtotal = lines.reduce((s, l) => s + l.amount, 0);
     const gst = Math.round(subtotal * 0.03);
-    const invoice: Invoice = { id: "inv" + Date.now(), number: "INV-SA-2026-" + String(17 + invoices.length).padStart(6, "0"), customer: customer || "Walk-in Customer", date: today(), lines, subtotal, gst, total: subtotal + gst, status: "Paid" };
+    const invoice: Invoice = { id: "inv" + Date.now(), number: "INV-SA-JED-2026-" + String(17 + invoices.length).padStart(6, "0"), customer: customer || "Walk-in Customer", date: today(), lines, subtotal, gst, total: subtotal + gst, status: "paid" };
     setInvoices((p) => [invoice, ...p]);
     setItems((p) => p.map((it) => {
       const line = cart.find((l) => l.itemId === it.id);
@@ -499,11 +645,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<StoreValue>(() => ({
     ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, currentUser, signup, login, logout, updateUser,
-    items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, suppliers, addSupplier,
+    items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, suppliers, addSupplier,
     purchaseOrders, addPurchaseOrder, orders, reserve, unreserve, movements, transferStock, adjustStock, cycleCount,
     expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder,
     cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, wishlist, toggleWishlist, notifications, markNotificationsRead,
-  }), [ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, currentUser, signup, login, logout, updateUser, items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, orders, reserve, unreserve, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, wishlist, toggleWishlist, notifications, markNotificationsRead]);
+  }), [ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, currentUser, signup, login, logout, updateUser, items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, orders, reserve, unreserve, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, wishlist, toggleWishlist, notifications, markNotificationsRead]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
