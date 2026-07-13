@@ -8999,20 +8999,9 @@ a.ghost-action {
 }
 
 .admin-nav-v2 .admin-nav-item {
-  grid-template-columns: 18px 22px minmax(0, 1fr);
+  grid-template-columns: 22px minmax(0, 1fr);
   min-height: 44px;
   padding: 0 11px;
-}
-
-.admin-nav-index {
-  font-size: 10px;
-  font-weight: 800;
-  color: rgba(255, 255, 255, 0.35);
-  text-align: center;
-}
-
-.admin-nav-item.active .admin-nav-index {
-  color: #ffd36c;
 }
 
 .admin-nav-v2 .nav-label {
