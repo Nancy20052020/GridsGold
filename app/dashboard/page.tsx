@@ -22,7 +22,7 @@ import {
   topSellingItems,
 } from "../lib/analytics";
 import { AppShell } from "../components/AppShell";
-import { ItemImage, ProductImage } from "../components/ProductImage";
+import { ItemImage } from "../components/ProductImage";
 import { firstName, formatINR, itemStatus, useStore } from "../lib/store";
 
 type TrendPoint = { label: string; value: number };
@@ -223,24 +223,13 @@ export default function DashboardPage() {
           })}
         </section>
 
-        <div className="dash-hero-row">
-          <div className="dash-featured-visual" aria-hidden="true">
-            <div className="dash-featured-frame primary">
-              <ProductImage image="ring_3.png" icon="ring" className="product-img dash-featured-img" alt="" />
-            </div>
-            <div className="dash-featured-frame secondary">
-              <ProductImage image="necklace_2.png" icon="necklace" className="product-img dash-featured-img" alt="" />
-            </div>
+        <article className="dash-card dash-chart-card dash-chart-full">
+          <div className="dash-card-head">
+            <h2>Revenue Overview</h2>
+            <Link href="/reports">Full report</Link>
           </div>
-
-          <article className="dash-card dash-chart-card">
-            <div className="dash-card-head">
-              <h2>Revenue Overview</h2>
-              <Link href="/reports">Full report</Link>
-            </div>
-            <SmoothSalesChart points={trend} />
-          </article>
-        </div>
+          <SmoothSalesChart points={trend} />
+        </article>
 
         <div className="dash-layout">
           <div className="dash-main">
@@ -272,6 +261,53 @@ export default function DashboardPage() {
                 </table>
               </div>
             </article>
+
+            <div className="dash-split-row">
+              <article className="dash-card">
+                <div className="dash-card-head">
+                  <h2>Top Items</h2>
+                  <Link href="/jewelry">Catalog</Link>
+                </div>
+                <ul className="dash-list">
+                  {(topItems.length ? topItems.slice(0, 4) : [
+                    { name: "Gold Necklace Set", amount: 145280, icon: "necklace", image: "necklace_1.png" },
+                    { name: "22K Gold Ring", amount: 38500, icon: "ring", image: "ring_1.png" },
+                  ]).map((row) => {
+                    const match = items.find((i) => i.name === row.name);
+                    return (
+                      <li key={row.name}>
+                        <ItemImage item={match ?? row} className="product-img tile-img" />
+                        <div>
+                          <strong>{row.name}</strong>
+                          <small>{row.amount ? formatINR(row.amount) : "—"}</small>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </article>
+
+              <article className="dash-card">
+                <div className="dash-card-head">
+                  <h2>Stock Alerts</h2>
+                  <Link href="/inventory">Inventory</Link>
+                </div>
+                <ul className="dash-list">
+                  {(lowStock.length ? lowStock : items.slice(0, 4)).map((item) => (
+                    <li key={item.id}>
+                      <ItemImage item={item} className="product-img tile-img" />
+                      <div>
+                        <strong>{item.name}</strong>
+                        <small>{item.karat} · {item.weight}g</small>
+                      </div>
+                      <em className={item.stock <= 0 ? "out" : "low"}>
+                        {item.stock <= 0 ? "Out" : `${item.stock} left`}
+                      </em>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            </div>
           </div>
 
           <aside className="dash-side">
@@ -303,51 +339,6 @@ export default function DashboardPage() {
                   </div>
                 ))}
               </div>
-            </article>
-
-            <article className="dash-card">
-              <div className="dash-card-head">
-                <h2>Top Items</h2>
-                <Link href="/jewelry">Catalog</Link>
-              </div>
-              <ul className="dash-list">
-                {(topItems.length ? topItems.slice(0, 4) : [
-                  { name: "Gold Necklace Set", amount: 145280, icon: "necklace", image: "necklace_1.png" },
-                  { name: "22K Gold Ring", amount: 38500, icon: "ring", image: "ring_1.png" },
-                ]).map((row) => {
-                  const match = items.find((i) => i.name === row.name);
-                  return (
-                  <li key={row.name}>
-                    <ItemImage item={match ?? row} className="product-img tile-img" />
-                    <div>
-                      <strong>{row.name}</strong>
-                      <small>{row.amount ? formatINR(row.amount) : "—"}</small>
-                    </div>
-                  </li>
-                  );
-                })}
-              </ul>
-            </article>
-
-            <article className="dash-card">
-              <div className="dash-card-head">
-                <h2>Stock Alerts</h2>
-                <Link href="/inventory">Inventory</Link>
-              </div>
-              <ul className="dash-list">
-                {(lowStock.length ? lowStock : items.slice(0, 4)).map((item) => (
-                  <li key={item.id}>
-                    <ItemImage item={item} className="product-img tile-img" />
-                    <div>
-                      <strong>{item.name}</strong>
-                      <small>{item.karat} · {item.weight}g</small>
-                    </div>
-                    <em className={item.stock <= 0 ? "out" : "low"}>
-                      {item.stock <= 0 ? "Out" : `${item.stock} left`}
-                    </em>
-                  </li>
-                ))}
-              </ul>
             </article>
           </aside>
         </div>
