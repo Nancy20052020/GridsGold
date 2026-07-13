@@ -411,7 +411,7 @@ export default function InventoryPage() {
                   <table className="inv-v2-table">
                     <thead>
                       <tr>
-                        <th>Item</th>
+                        <th className="col-item">Item</th>
                         <th>SKU</th>
                         <th>Purity</th>
                         <th>Gross</th>
@@ -421,9 +421,9 @@ export default function InventoryPage() {
                         <th>Serial</th>
                         <th>Batch</th>
                         <th>Location</th>
-                        <th>Pcs</th>
+                        <th className="col-num">Pcs</th>
                         <th>Status</th>
-                        <th>Value</th>
+                        <th className="col-num">Value</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -431,10 +431,12 @@ export default function InventoryPage() {
                         const srs = stockToItemStatus(item.stock);
                         return (
                           <tr key={item.id}>
-                            <td>
+                            <td className="col-item">
                               <Link className="inv-v2-row-item" href={`/inventory/item-details?id=${item.id}`}>
-                                <ItemImage item={item} className="product-img cell-img" />
-                                <span>
+                                <span className="inv-v2-row-thumb" aria-hidden>
+                                  <ItemImage item={item} className="product-img cell-img" />
+                                </span>
+                                <span className="inv-v2-row-copy">
                                   <strong>{item.name}</strong>
                                   <small>{item.category} · {collectionFor(item)}</small>
                                 </span>
@@ -449,9 +451,9 @@ export default function InventoryPage() {
                             <td><code>{serialFor(item)}</code></td>
                             <td><code>{batchFor(item)}</code></td>
                             <td>{item.branch}</td>
-                            <td>{item.stock}</td>
+                            <td className="col-num">{item.stock}</td>
                             <td><span className={`status-pill ${srsPillTone(srs)}`}>{srsLabel(srs)}</span></td>
-                            <td>{item.stock ? formatINR(itemPrice(item, rates) * item.stock) : "—"}</td>
+                            <td className="col-num">{item.stock ? formatINR(itemPrice(item, rates) * item.stock) : "—"}</td>
                           </tr>
                         );
                       })}
