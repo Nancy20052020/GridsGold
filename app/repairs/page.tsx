@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { ChevronRight, Plus, Wrench, X } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import {
+  ITEM_REFERENCE_TYPES,
   REPAIR_PRIORITIES,
   REPAIR_STATUSES,
   nextRepairStatus,
@@ -25,6 +26,10 @@ export default function RepairsPage() {
     deposit: "",
     promisedDate: "",
     priority: "normal" as const,
+    itemReferenceType: "external_item" as const,
+    observedCondition: "",
+    metalDetails: "",
+    stoneDetails: "",
   });
   const [error, setError] = useState("");
 
@@ -42,7 +47,7 @@ export default function RepairsPage() {
   function submit(event: React.FormEvent) {
     event.preventDefault();
     if (!form.customer.trim() || !form.item.trim() || !form.issue.trim()) {
-      setError("Customer, item and issue are required (FR-110).");
+      setError("Customer, item and issue are required (FR-REP-001).");
       return;
     }
     const estimate = Number(form.estimate) || 0;
@@ -56,8 +61,12 @@ export default function RepairsPage() {
       deposit,
       promisedDate: form.promisedDate.trim() || undefined,
       priority: form.priority,
+      itemReferenceType: form.itemReferenceType,
+      observedCondition: form.observedCondition.trim() || undefined,
+      metalDetails: form.metalDetails.trim() || undefined,
+      stoneDetails: form.stoneDetails.trim() || undefined,
     });
-    setForm({ customer: "", item: "", issue: "", estimate: "", deposit: "", promisedDate: "", priority: "normal" });
+    setForm({ customer: "", item: "", issue: "", estimate: "", deposit: "", promisedDate: "", priority: "normal", itemReferenceType: "external_item", observedCondition: "", metalDetails: "", stoneDetails: "" });
     setError("");
     setOpen(false);
   }
@@ -69,7 +78,7 @@ export default function RepairsPage() {
           <div className="heading-copy">
             <Wrench size={28} />
             <div>
-              <span className="eyebrow">Repairs · SCR-20 / SCR-21</span>
+              <span className="eyebrow">Repairs · FR-REP-001</span>
               <h1>Repairs &amp; Service Orders</h1>
               <p>Intake, status board, deposits and pickup — per SRS repair workflow.</p>
             </div>
@@ -116,7 +125,7 @@ export default function RepairsPage() {
                       <td>{r.deposit ? formatINR(r.deposit) : "—"}</td>
                       <td>{r.balanceDue ? formatINR(r.balanceDue) : "—"}</td>
                       <td>{r.promisedDate || "—"}</td>
-                      <td><span className={`status-pill ${r.priority === "urgent" || r.priority === "high" ? "danger" : "success"}`}>{srsLabel(r.priority ?? "normal")}</span></td>
+                      <td><span className={`status-pill ${r.priority === "urgent" || r.priority === "vip" ? "danger" : "success"}`}>{srsLabel(r.priority ?? "normal")}</span></td>
                       <td><span className={`status-pill ${srsPillTone(r.status)}`}>{srsLabel(r.status)}</span></td>
                       <td>
                         {next ? (
@@ -147,6 +156,10 @@ export default function RepairsPage() {
               </div></label>
               <label className="field"><span>Item *</span><div className="field-input"><input value={form.item} onChange={(e) => setForm({ ...form, item: e.target.value })} placeholder="e.g. Gold Ring" /></div></label>
               <label className="field" style={{ gridColumn: "1 / -1" }}><span>Issue description *</span><div className="field-input"><input value={form.issue} onChange={(e) => setForm({ ...form, issue: e.target.value })} placeholder="e.g. Ring resizing to US 7" /></div></label>
+              <label className="field"><span>Item reference</span><div className="field-input"><select value={form.itemReferenceType} onChange={(e) => setForm({ ...form, itemReferenceType: e.target.value as typeof form.itemReferenceType })}>{ITEM_REFERENCE_TYPES.map((t) => <option key={t} value={t}>{srsLabel(t)}</option>)}</select></div></label>
+              <label className="field" style={{ gridColumn: "1 / -1" }}><span>Observed condition</span><div className="field-input"><input value={form.observedCondition} onChange={(e) => setForm({ ...form, observedCondition: e.target.value })} placeholder="Scratches, dents, missing stones..." /></div></label>
+              <label className="field"><span>Metal details</span><div className="field-input"><input value={form.metalDetails} onChange={(e) => setForm({ ...form, metalDetails: e.target.value })} placeholder="e.g. 22K yellow gold" /></div></label>
+              <label className="field"><span>Stone details</span><div className="field-input"><input value={form.stoneDetails} onChange={(e) => setForm({ ...form, stoneDetails: e.target.value })} placeholder="e.g. 0.25 ct diamond" /></div></label>
               <label className="field"><span>Estimate (₹)</span><div className="field-input"><input type="number" value={form.estimate} onChange={(e) => setForm({ ...form, estimate: e.target.value })} placeholder="1200" /></div></label>
               <label className="field"><span>Deposit (₹)</span><div className="field-input"><input type="number" value={form.deposit} onChange={(e) => setForm({ ...form, deposit: e.target.value })} placeholder="500" /></div></label>
               <label className="field"><span>Promised date</span><div className="field-input"><input value={form.promisedDate} onChange={(e) => setForm({ ...form, promisedDate: e.target.value })} placeholder="e.g. 15 May, 2025" /></div></label>

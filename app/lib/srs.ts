@@ -1,7 +1,8 @@
-/** Phase 1 SRS dictionaries — shared labels, codes, and UI helpers. */
+/** Phase 1 SRS dictionaries — shared labels, codes, and UI helpers (v2 Deep Dive). */
 
-export const COMPANY_CODE = "GRZ-HQ";
+export const COMPANY_CODE = "GRD-HQ";
 export const DEFAULT_BRANCH_CODE = "JED-01";
+export const DEFAULT_COUNTRY_CODE = "SA";
 export const INVOICE_NUMBER_PATTERN = "{doc_type}-{country_code}-{branch_code}-{fiscal_year}-{running_sequence}";
 
 export const CUSTOMER_TYPES = ["retail", "wholesale", "walk_in", "vip"] as const;
@@ -10,6 +11,7 @@ export type CustomerType = (typeof CUSTOMER_TYPES)[number];
 export const CUSTOMER_STATUSES = ["active", "inactive", "blocked", "archived"] as const;
 export type CustomerStatus = (typeof CUSTOMER_STATUSES)[number];
 
+/** Deep Dive §19.1 — invoice issue_status */
 export const INVOICE_STATUSES = [
   "draft",
   "posted",
@@ -21,24 +23,23 @@ export const INVOICE_STATUSES = [
 ] as const;
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 
+/** Deep Dive §19.3 — repair current_status */
 export const REPAIR_STATUSES = [
   "received",
   "diagnosis",
   "awaiting_approval",
-  "approved",
   "in_progress",
-  "outsourced",
   "ready",
   "delivered",
   "cancelled",
 ] as const;
 export type RepairStatus = (typeof REPAIR_STATUSES)[number];
 
+/** Deep Dive §7.6 — po_status */
 export const PO_STATUSES = [
   "draft",
-  "submitted",
   "approved",
-  "partially_received",
+  "partial",
   "closed",
   "cancelled",
 ] as const;
@@ -56,16 +57,35 @@ export const ITEM_STATUSES = [
 ] as const;
 export type ItemStatus = (typeof ITEM_STATUSES)[number];
 
+/** Deep Dive §19.4 — work order production_status */
 export const WORK_ORDER_STATUSES = [
   "planned",
   "released",
   "in_progress",
-  "qc",
   "completed",
   "closed",
   "cancelled",
 ] as const;
 export type WorkOrderStatus = (typeof WORK_ORDER_STATUSES)[number];
+
+/** Deep Dive §19.2 — transfer_status */
+export const TRANSFER_STATUSES = ["draft", "shipped", "received", "cancelled"] as const;
+export type TransferStatus = (typeof TRANSFER_STATUSES)[number];
+
+/** Deep Dive §17.6 — movement_type */
+export const MOVEMENT_TYPES = [
+  "receive",
+  "sale",
+  "return",
+  "transfer_out",
+  "transfer_in",
+  "adjust_up",
+  "adjust_down",
+  "repair_out",
+  "repair_in",
+  "cycle_count",
+] as const;
+export type MovementType = (typeof MOVEMENT_TYPES)[number];
 
 export const PAYMENT_METHODS = [
   "Cash",
@@ -73,30 +93,59 @@ export const PAYMENT_METHODS = [
   "Bank Transfer",
   "Cheque",
   "Gift Card",
-  "Customer Credit",
+  "Store Credit",
 ] as const;
+
+export const PAYMENT_METHOD_CODES: Record<string, string> = {
+  Cash: "cash",
+  Card: "card",
+  "Bank Transfer": "bank_transfer",
+  Cheque: "cheque",
+  "Gift Card": "gift_card",
+  "Store Credit": "store_credit",
+};
 
 export const LOCATION_TYPES = [
-  "Showroom",
-  "Warehouse",
-  "Safe",
-  "Tray",
-  "Workshop",
-  "Transit",
-  "Damaged",
-  "Memo-out",
+  "showroom",
+  "warehouse",
+  "safe",
+  "tray",
+  "workshop",
+  "transit",
+  "damaged",
+  "memo_out",
 ] as const;
 
-export const REPAIR_PRIORITIES = ["low", "normal", "high", "urgent"] as const;
+/** Deep Dive §17.5 — priority_level */
+export const REPAIR_PRIORITIES = ["normal", "urgent", "vip"] as const;
 export type RepairPriority = (typeof REPAIR_PRIORITIES)[number];
 
+export const ITEM_REFERENCE_TYPES = ["existing_item", "external_item", "custom_entry"] as const;
+export type ItemReferenceType = (typeof ITEM_REFERENCE_TYPES)[number];
+
+/** Deep Dive §12 — reporting model */
 export const SRS_REPORTS = [
   "Sales Summary",
+  "Sales by Category",
+  "Inventory Balance",
   "Inventory Aging",
+  "Transfer History",
+  "Purchase History",
+  "Receivables Aging",
+  "Payables Aging",
   "Repair Pipeline",
   "Customer History",
   "Tax Summary",
-  "Purchase History",
+  "Rate History",
+] as const;
+
+/** Demo locations per FR-ORG-002 (branch → location). */
+export const DEMO_LOCATIONS = [
+  { code: "SHOW-01", name: "Main Showroom", type: "showroom", branch: "Main Branch" },
+  { code: "SAFE-A1", name: "Vault Safe A1", type: "safe", branch: "Vault" },
+  { code: "TRAY-12", name: "Showcase Tray 12", type: "tray", branch: "Main Branch" },
+  { code: "WH-01", name: "Warehouse", type: "warehouse", branch: "Branch 2" },
+  { code: "TRANSIT", name: "In Transit", type: "transit", branch: "Main Branch" },
 ] as const;
 
 const LABELS: Record<string, string> = {
@@ -111,36 +160,48 @@ const LABELS: Record<string, string> = {
   draft: "Draft",
   posted: "Posted",
   paid: "Paid",
-  partial: "Partially Paid",
+  partial: "Partial",
   voided: "Voided",
   refunded: "Refunded",
   exchanged: "Exchanged",
   received: "Received",
   diagnosis: "Diagnosis",
   awaiting_approval: "Awaiting Approval",
-  approved: "Approved",
   in_progress: "In Progress",
-  outsourced: "Outsourced",
   ready: "Ready for Pickup",
   delivered: "Delivered",
   cancelled: "Cancelled",
-  submitted: "Submitted",
-  partially_received: "Partially Received",
+  approved: "Approved",
   closed: "Closed",
+  shipped: "Shipped",
+  showroom: "Showroom",
+  warehouse: "Warehouse",
+  safe: "Safe",
+  tray: "Tray",
+  workshop: "Workshop",
+  transit: "Transit",
+  existing_item: "Existing item",
+  external_item: "External item",
+  custom_entry: "Custom entry",
+  receive: "Receive",
+  sale: "Sale",
+  return: "Return",
+  transfer_out: "Transfer out",
+  transfer_in: "Transfer in",
+  adjust_up: "Adjust up",
+  adjust_down: "Adjust down",
+  repair_out: "Repair out",
+  repair_in: "Repair in",
+  cycle_count: "Cycle count",
   available: "Available",
   reserved: "Reserved",
   sold: "Sold",
   repair: "In Repair",
   custom_order: "Custom Order",
-  memo_out: "Memo Out",
-  damaged: "Damaged",
   planned: "Planned",
   released: "Released",
-  qc: "Quality Check",
   completed: "Completed",
-  low: "Low",
   normal: "Normal",
-  high: "High",
   urgent: "Urgent",
 };
 
@@ -156,6 +217,8 @@ export function migrateRepairStatus(status: string): RepairStatus {
     "In Progress": "in_progress",
     Ready: "ready",
     Delivered: "delivered",
+    approved: "in_progress",
+    outsourced: "in_progress",
   };
   if (REPAIR_STATUSES.includes(status as RepairStatus)) return status as RepairStatus;
   return map[status] ?? "received";
@@ -175,8 +238,10 @@ export function migrateInvoiceStatus(status: string): InvoiceStatus {
 export function migratePoStatus(status: string): PoStatus {
   const map: Record<string, PoStatus> = {
     Draft: "draft",
-    Sent: "submitted",
+    Sent: "approved",
+    submitted: "approved",
     Received: "closed",
+    partially_received: "partial",
   };
   if (PO_STATUSES.includes(status as PoStatus)) return status as PoStatus;
   return map[status] ?? "draft";
@@ -188,9 +253,32 @@ export function migrateWorkOrderStatus(status: string): WorkOrderStatus {
     Planned: "planned",
     "In Progress": "in_progress",
     Completed: "completed",
+    qc: "in_progress",
   };
   if (WORK_ORDER_STATUSES.includes(status as WorkOrderStatus)) return status as WorkOrderStatus;
   return map[status] ?? "planned";
+}
+
+/** Map legacy movement labels to SRS movement_type. */
+export function legacyMovementLabel(type: string): string {
+  const map: Record<string, MovementType> = {
+    Sale: "sale",
+    Transfer: "transfer_out",
+    Adjustment: "adjust_down",
+    "Cycle Count": "cycle_count",
+  };
+  const key = map[type];
+  return key ? srsLabel(key) : srsLabel(type);
+}
+
+export function migrateRepairPriority(priority?: string): RepairPriority {
+  const map: Record<string, RepairPriority> = {
+    low: "normal",
+    high: "urgent",
+    VIP: "vip",
+  };
+  if (priority && REPAIR_PRIORITIES.includes(priority as RepairPriority)) return priority as RepairPriority;
+  return map[priority ?? ""] ?? "normal";
 }
 
 /** Map legacy customer type to SRS. */
@@ -249,7 +337,6 @@ export function nextRepairStatus(current: RepairStatus): RepairStatus | null {
     "received",
     "diagnosis",
     "awaiting_approval",
-    "approved",
     "in_progress",
     "ready",
     "delivered",

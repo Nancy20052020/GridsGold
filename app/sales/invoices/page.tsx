@@ -90,6 +90,7 @@ export default function InvoicesPage() {
               <div className="grand"><span>Total</span><strong>{formatINR(selected.total)}</strong></div>
             </div>
             <button className="gold-action full" type="button" onClick={() => window.print()}><Printer size={16} /> Print Receipt</button>
+            <button className="ghost-action full" type="button" disabled title="FR-RET-001 — return workflow">Create Return</button>
           </div>
         </div>
       ) : null}

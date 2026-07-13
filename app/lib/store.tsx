@@ -12,11 +12,13 @@ import {
   migrateCustomerType,
   migrateInvoiceStatus,
   migratePoStatus,
+  migrateRepairPriority,
   migrateRepairStatus,
   migrateWorkOrderStatus,
   type CustomerStatus,
   type CustomerType,
   type InvoiceStatus,
+  type ItemReferenceType,
   type PoStatus,
   type RepairPriority,
   type RepairStatus,
@@ -54,6 +56,10 @@ export type Customer = {
   preferredLanguage?: string;
   status?: CustomerStatus;
   vipFlag?: boolean;
+  consentSms?: boolean;
+  consentWhatsapp?: boolean;
+  consentEmail?: boolean;
+  blacklistFlag?: boolean;
 };
 
 export type InvoiceLine = { name: string; qty: number; amount: number };
@@ -83,6 +89,10 @@ export type Repair = {
   balanceDue?: number;
   promisedDate?: string;
   priority?: RepairPriority;
+  itemReferenceType?: ItemReferenceType;
+  observedCondition?: string;
+  metalDetails?: string;
+  stoneDetails?: string;
   date: string;
 };
 
@@ -177,9 +187,9 @@ const seedItems: Item[] = [
 ];
 
 const seedCustomers: Customer[] = [
-  { id: "c1", code: "CUST-000245", name: "John Smith", mobile: "+91 98765 43210", whatsapp: "+91 98765 43210", email: "john@example.com", city: "Bengaluru", type: "vip", preferredLanguage: "en", status: "active", vipFlag: true },
-  { id: "c2", code: "CUST-000246", name: "Priya Mehta", mobile: "+91 90000 12345", email: "priya@example.com", city: "Mumbai", type: "retail", preferredLanguage: "en", status: "active" },
-  { id: "c3", code: "CUST-000247", name: "Raj Gems (B2B)", mobile: "+91 91234 56789", whatsapp: "+91 91234 56789", email: "raj@rajgems.in", city: "Surat", type: "wholesale", preferredLanguage: "en", status: "active" },
+  { id: "c1", code: "CUST-000245", name: "John Smith", mobile: "+91 98765 43210", whatsapp: "+91 98765 43210", email: "john@example.com", city: "Bengaluru", type: "vip", preferredLanguage: "en", status: "active", vipFlag: true, consentSms: true, consentWhatsapp: true, consentEmail: true },
+  { id: "c2", code: "CUST-000246", name: "Priya Mehta", mobile: "+91 90000 12345", email: "priya@example.com", city: "Mumbai", type: "retail", preferredLanguage: "en", status: "active", consentWhatsapp: true },
+  { id: "c3", code: "CUST-000247", name: "Raj Gems (B2B)", mobile: "+91 91234 56789", whatsapp: "+91 91234 56789", email: "raj@rajgems.in", city: "Surat", type: "wholesale", preferredLanguage: "en", status: "active", consentEmail: true },
   { id: "c4", code: "CUST-000248", name: "Zara Jewels (B2B)", mobile: "+91 98111 22334", email: "buy@zarajewels.in", city: "Delhi", type: "wholesale", preferredLanguage: "en", status: "active" },
 ];
 
@@ -191,8 +201,8 @@ const seedInvoices: Invoice[] = [
 ];
 
 const seedRepairs: Repair[] = [
-  { id: "r1", number: "REP-JED-2026-000028", customer: "Priya Mehta", item: "Gold Ring", issue: "Ring resizing", status: "ready", estimate: 1200, approvedAmount: 1200, deposit: 500, balanceDue: 700, promisedDate: "08 May, 2025", priority: "normal", date: "02 May, 2025" },
-  { id: "r2", number: "REP-JED-2026-000029", customer: "John Smith", item: "Gold Bangle", issue: "Resize bangle", status: "in_progress", estimate: 850, approvedAmount: 850, deposit: 300, balanceDue: 550, promisedDate: "12 May, 2025", priority: "high", date: "03 May, 2025" },
+  { id: "r1", number: "REP-JED-2026-000028", customer: "Priya Mehta", item: "Gold Ring", issue: "Ring resizing", status: "ready", estimate: 1200, approvedAmount: 1200, deposit: 500, balanceDue: 700, promisedDate: "08 May, 2025", priority: "normal", itemReferenceType: "external_item", observedCondition: "Minor scratches on band", date: "02 May, 2025" },
+  { id: "r2", number: "REP-JED-2026-000029", customer: "John Smith", item: "Gold Bangle", issue: "Resize bangle", status: "in_progress", estimate: 850, approvedAmount: 850, deposit: 300, balanceDue: 550, promisedDate: "12 May, 2025", priority: "urgent", itemReferenceType: "external_item", metalDetails: "22K gold", date: "03 May, 2025" },
 ];
 
 const seedSuppliers: Supplier[] = [
@@ -322,6 +332,10 @@ function hydrateCustomers(saved: Customer[] | undefined): Customer[] {
     type: migrateCustomerType(c.type as string),
     status: c.status ?? "active",
     vipFlag: c.vipFlag ?? c.type === "vip",
+    consentSms: c.consentSms ?? false,
+    consentWhatsapp: c.consentWhatsapp ?? false,
+    consentEmail: c.consentEmail ?? false,
+    blacklistFlag: c.blacklistFlag ?? false,
   }));
 }
 
@@ -335,6 +349,8 @@ function hydrateRepairs(saved: Repair[] | undefined): Repair[] {
   return saved.map((r) => ({
     ...r,
     status: migrateRepairStatus(r.status as string),
+    priority: migrateRepairPriority(r.priority),
+    itemReferenceType: r.itemReferenceType ?? "external_item",
     balanceDue: r.balanceDue ?? Math.max(0, (r.approvedAmount ?? r.estimate) - (r.deposit ?? 0)),
   }));
 }
@@ -473,7 +489,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const getItem = useCallback((id: string) => items.find((i) => i.id === id), [items]);
   const getInvoice = useCallback((id: string) => invoices.find((i) => i.id === id), [invoices]);
 
-  const addCustomer = useCallback((c: Omit<Customer, "id" | "code" | "status" | "vipFlag">) => {
+  const addCustomer = useCallback((c: Omit<Customer, "id" | "code" | "status" | "vipFlag" | "consentSms" | "consentWhatsapp" | "consentEmail" | "blacklistFlag"> & {
+    consentSms?: boolean;
+    consentWhatsapp?: boolean;
+    consentEmail?: boolean;
+    blacklistFlag?: boolean;
+  }) => {
     setCustomers((p) => [{
       ...c,
       id: "c" + Date.now(),
@@ -481,6 +502,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       status: "active",
       vipFlag: c.type === "vip",
       preferredLanguage: c.preferredLanguage ?? "en",
+      consentSms: c.consentSms ?? false,
+      consentWhatsapp: c.consentWhatsapp ?? false,
+      consentEmail: c.consentEmail ?? false,
+      blacklistFlag: c.blacklistFlag ?? false,
     }, ...p]);
   }, []);
 
@@ -497,6 +522,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       deposit,
       balanceDue: Math.max(0, approved - deposit),
       priority: r.priority ?? "normal",
+      itemReferenceType: r.itemReferenceType ?? "external_item",
     }, ...p]);
   }, []);
 

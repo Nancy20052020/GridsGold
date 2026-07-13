@@ -90,6 +90,7 @@ export default function PosPage() {
           <div className="sales-workspace-toolbar">
             <button type="button" className="gold-action" onClick={() => setAddOpen(true)}>+ Add item</button>
             <Link className="export-button subtle" href="/sales/invoices">Invoices</Link>
+            <button type="button" className="ghost-action" disabled title="Phase 1 — quotation flow">Quotation</button>
           </div>
         </div>
 
