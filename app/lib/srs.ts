@@ -154,26 +154,34 @@ export type ItemReferenceType = (typeof ITEM_REFERENCE_TYPES)[number];
 export const SRS_REPORTS = [
   "Sales Summary",
   "Sales by Category",
+  "Top Products",
   "Inventory Balance",
   "Inventory Aging",
   "Transfer History",
+  "Stock Valuation",
   "Purchase History",
   "Receivables Aging",
   "Payables Aging",
+  "Profit & Loss",
+  "Balance Sheet",
   "Repair Pipeline",
   "Customer History",
+  "Manufacturing Pipeline",
   "Tax Summary",
   "Rate History",
 ] as const;
 
 export type SrsReport = (typeof SRS_REPORTS)[number];
 
-/** §12 report families — sales, stock, repairs, finance, tax */
+/** §12 report families — jewellery ERP reporting hub */
 export const SRS_REPORT_CATEGORIES = {
-  Sales: ["Sales Summary", "Sales by Category", "Customer History"],
-  Stock: ["Inventory Balance", "Inventory Aging", "Transfer History", "Purchase History"],
+  Sales: ["Sales Summary", "Sales by Category", "Top Products"],
+  Inventory: ["Inventory Balance", "Inventory Aging", "Transfer History", "Stock Valuation"],
+  Purchase: ["Purchase History"],
   Repairs: ["Repair Pipeline"],
-  Finance: ["Receivables Aging", "Payables Aging"],
+  Manufacturing: ["Manufacturing Pipeline"],
+  Customers: ["Customer History"],
+  Finance: ["Receivables Aging", "Payables Aging", "Profit & Loss", "Balance Sheet"],
   Tax: ["Tax Summary", "Rate History"],
 } as const satisfies Record<string, readonly SrsReport[]>;
 
