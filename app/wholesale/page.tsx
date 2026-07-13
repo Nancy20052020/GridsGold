@@ -22,12 +22,12 @@ export default function WholesalePage() {
   const [cust, setCust] = useState({ name: "", mobile: "", city: "" });
   const [order, setOrder] = useState({ customer: "", pieces: "", amount: "" });
 
-  const b2b = customers.filter((c) => c.type === "Wholesale");
+  const b2b = customers.filter((c) => c.type === "wholesale");
 
   function saveCustomer(e: React.FormEvent) {
     e.preventDefault();
     if (!cust.name.trim()) return;
-    addCustomer({ name: cust.name.trim(), mobile: cust.mobile.trim(), email: "", city: cust.city.trim(), type: "Wholesale" });
+    addCustomer({ name: cust.name.trim(), mobile: cust.mobile.trim(), email: "", city: cust.city.trim(), type: "wholesale" });
     setCust({ name: "", mobile: "", city: "" });
     setModal(null);
   }

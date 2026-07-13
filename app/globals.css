@@ -6511,6 +6511,29 @@ a.ghost-action {
 }
 
 /* ---- Sales workspace (Gem Logic style POS) ---- */
+.pos-session-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  align-items: center;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border-radius: 12px;
+  background: rgba(6, 19, 39, 0.04);
+  border: 1px solid rgba(6, 19, 39, 0.08);
+  font-size: 13px;
+}
+
+.pos-session-strip strong {
+  color: var(--ink);
+  margin-right: 4px;
+}
+
+[data-theme="dark"] .pos-session-strip {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
 .sales-workspace-page {
   padding-bottom: 24px;
 }
@@ -7068,9 +7091,16 @@ a.ghost-action {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.erp-kpis-4,
+.stat-cards-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 @media (max-width: 900px) {
   .erp-kpis-3,
-  .stat-cards-3 {
+  .stat-cards-3,
+  .erp-kpis-4,
+  .stat-cards-4 {
     grid-template-columns: 1fr;
   }
 }

@@ -9,17 +9,16 @@ import {
   ShoppingCart,
   TrendingUp,
   UserRound,
-  WalletCards,
+  Wrench,
 } from "lucide-react";
 import {
   DEMO_SALES_BY_CATEGORY,
   DEMO_SALES_TREND,
-  estimateProfit,
   sumInvoices,
   topSellingItems,
 } from "../lib/analytics";
 import { AppShell } from "../components/AppShell";
-import { firstName, formatINR, useStore } from "../lib/store";
+import { firstName, formatINR, itemStatus, useStore } from "../lib/store";
 
 function BarChart({ points }: { points: { label: string; value: number }[] }) {
   const max = Math.max(...points.map((p) => p.value), 0.1);
@@ -38,18 +37,20 @@ function BarChart({ points }: { points: { label: string; value: number }[] }) {
 }
 
 export default function DashboardPage() {
-  const { rates, currentUser, invoices, customers, items, expenses } = useStore();
+  const { rates, currentUser, invoices, customers, items, repairs } = useStore();
   const name = firstName(currentUser) || "Admin";
 
   const totalSales = sumInvoices(invoices);
-  const profit = estimateProfit(totalSales, expenses);
   const topItems = useMemo(() => topSellingItems(invoices, items, rates), [invoices, items, rates]);
 
+  const openRepairs = repairs.filter((r) => r.status !== "delivered" && r.status !== "cancelled").length;
+  const lowStock = items.filter((i) => itemStatus(i.stock) === "Low Stock" || itemStatus(i.stock) === "Out of Stock").length;
+
   const kpis = [
-    { label: "Total Sales", value: formatINR(totalSales), delta: "This month", icon: ShoppingCart, tone: "blue" },
-    { label: "Est. Profit", value: formatINR(profit), delta: "18% margin", icon: WalletCards, tone: "green" },
-    { label: "Transactions", value: invoices.length.toLocaleString("en-IN"), delta: "Paid invoices", icon: TrendingUp, tone: "violet" },
-    { label: "Customers", value: customers.length.toLocaleString("en-IN"), delta: "Active", icon: UserRound, tone: "gold" },
+    { label: "Total Sales", value: formatINR(totalSales), delta: "Posted invoices", icon: ShoppingCart, tone: "blue" },
+    { label: "Open Repairs", value: openRepairs.toLocaleString("en-IN"), delta: "Pipeline", icon: Wrench, tone: "violet" },
+    { label: "Low / Out Stock", value: lowStock.toLocaleString("en-IN"), delta: "Items to review", icon: TrendingUp, tone: "gold" },
+    { label: "Customers", value: customers.length.toLocaleString("en-IN"), delta: "Active profiles", icon: UserRound, tone: "green" },
   ];
 
   return (

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Printer, ReceiptText, ShoppingCart, X } from "lucide-react";
 import { AppShell } from "../../components/AppShell";
 import { BrandMark } from "../../components/BrandMark";
+import { srsLabel, srsPillTone } from "../../lib/srs";
 import { useStore, formatINR, type Invoice } from "../../lib/store";
 
 export default function InvoicesPage() {
@@ -49,7 +50,7 @@ export default function InvoicesPage() {
                     <td>{formatINR(inv.subtotal)}</td>
                     <td>{formatINR(inv.gst)}</td>
                     <td><strong>{formatINR(inv.total)}</strong></td>
-                    <td><span className={`status-pill ${inv.status === "Paid" ? "success" : "warning"}`}>{inv.status}</span></td>
+                    <td><span className={`status-pill ${srsPillTone(inv.status)}`}>{srsLabel(inv.status)}</span></td>
                     <td>{inv.date}</td>
                   </tr>
                 ))}
@@ -73,7 +74,7 @@ export default function InvoicesPage() {
             </div>
             <div className="receipt-meta">
               <div><span>Billed to</span><strong>{selected.customer}</strong></div>
-              <div><span>Status</span><strong>{selected.status}</strong></div>
+              <div><span>Status</span><strong>{srsLabel(selected.status)}</strong></div>
             </div>
             <table className="receipt-table">
               <thead><tr><th>Item</th><th>Qty</th><th>Amount</th></tr></thead>
