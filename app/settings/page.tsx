@@ -3,7 +3,16 @@
 import { useState } from "react";
 import { CheckCircle2, Moon, Settings as SettingsIcon, Sun } from "lucide-react";
 import { AppShell } from "../components/AppShell";
+import { COMPANY_CODE, DEFAULT_BRANCH_CODE, INVOICE_NUMBER_PATTERN } from "../lib/srs";
 import { BRANCHES, useStore } from "../lib/store";
+
+const BRANCH_CODES: Record<string, string> = {
+  "Main Branch": DEFAULT_BRANCH_CODE,
+  "Branch 2": "JED-02",
+  "Branch 3": "JED-03",
+  "Branch 4": "JED-04",
+  Vault: "VAULT-01",
+};
 
 const tabs = ["Company", "Branches", "Invoice", "Users & Roles", "Preferences"] as const;
 
@@ -20,7 +29,7 @@ export default function SettingsPage() {
   const [tab, setTab] = useState<(typeof tabs)[number]>("Company");
   const [saved, setSaved] = useState(false);
   const [company, setCompany] = useState({ trade: "Grids Gold", legal: "Grids Gold Jewellers Pvt Ltd", gstin: "29ABCDE1234F1Z5", currency: "INR (₹)", address: "MG Road, Bengaluru" });
-  const [invoice, setInvoice] = useState({ prefix: "INV-SA-{YYYY}-{seq}", gst: "3", footer: "Thank you for shopping with Grids Gold." });
+  const [invoice, setInvoice] = useState({ prefix: INVOICE_NUMBER_PATTERN, gst: "3", footer: "Thank you for shopping with Grids Gold.", bilingual: true });
 
   function save() {
     setSaved(true);
@@ -52,6 +61,7 @@ export default function SettingsPage() {
             {tab === "Company" ? (
               <article className="erp-panel form-panel">
                 <div className="form-grid">
+                  <label className="field"><span>Company code</span><div className="field-input"><input readOnly value={COMPANY_CODE} /></div></label>
                   <label className="field"><span>Trade name</span><div className="field-input"><input value={company.trade} onChange={(e) => setCompany({ ...company, trade: e.target.value })} /></div></label>
                   <label className="field"><span>Legal name</span><div className="field-input"><input value={company.legal} onChange={(e) => setCompany({ ...company, legal: e.target.value })} /></div></label>
                   <label className="field"><span>GSTIN</span><div className="field-input"><input value={company.gstin} onChange={(e) => setCompany({ ...company, gstin: e.target.value })} /></div></label>
@@ -66,10 +76,10 @@ export default function SettingsPage() {
               <article className="erp-panel table-panel">
                 <div className="table-scroll">
                   <table className="data-table">
-                    <thead><tr><th>Branch</th><th>Type</th><th>Status</th></tr></thead>
+                    <thead><tr><th>Branch</th><th>Branch code</th><th>Type</th><th>Status</th></tr></thead>
                     <tbody>
                       {BRANCHES.map((b) => (
-                        <tr key={b}><td><strong>{b}</strong></td><td>{b === "Vault" ? "Vault / Safe" : "Showroom"}</td><td><span className="status-pill success">Active</span></td></tr>
+                        <tr key={b}><td><strong>{b}</strong></td><td>{BRANCH_CODES[b] ?? "—"}</td><td>{b === "Vault" ? "Safe / Vault" : "Showroom"}</td><td><span className="status-pill success">Active</span></td></tr>
                       ))}
                     </tbody>
                   </table>
@@ -83,6 +93,10 @@ export default function SettingsPage() {
                   <label className="field"><span>Numbering pattern</span><div className="field-input"><input value={invoice.prefix} onChange={(e) => setInvoice({ ...invoice, prefix: e.target.value })} /></div></label>
                   <label className="field"><span>GST %</span><div className="field-input"><input type="number" value={invoice.gst} onChange={(e) => setInvoice({ ...invoice, gst: e.target.value })} /></div></label>
                   <label className="field" style={{ gridColumn: "1 / -1" }}><span>Invoice footer text</span><div className="field-input"><input value={invoice.footer} onChange={(e) => setInvoice({ ...invoice, footer: e.target.value })} /></div></label>
+                  <label className="field pref-row" style={{ gridColumn: "1 / -1" }}>
+                    <span>Bilingual invoices (EN + AR)</span>
+                    <label className="switch"><input type="checkbox" checked={invoice.bilingual} onChange={(e) => setInvoice({ ...invoice, bilingual: e.target.checked })} /><span /></label>
+                  </label>
                 </div>
                 <div className="form-actions"><button className="gold-action" type="button" onClick={save}>Save Changes</button></div>
               </article>

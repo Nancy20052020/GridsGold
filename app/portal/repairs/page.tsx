@@ -3,9 +3,24 @@
 import { useMemo, useState } from "react";
 import { Search, Wrench } from "lucide-react";
 import { CustomerShell } from "../../components/CustomerShell";
-import { useStore, firstName } from "../../lib/store";
+import { srsLabel, srsPillTone } from "../../lib/srs";
+import { useStore, firstName, formatINR } from "../../lib/store";
 
-const steps = ["Received", "In Progress", "Ready", "Delivered"] as const;
+const steps = ["received", "in_progress", "ready", "delivered"] as const;
+
+function stepIndex(status: string): number {
+  const map: Record<string, number> = {
+    received: 0,
+    diagnosis: 0,
+    awaiting_approval: 1,
+    approved: 1,
+    in_progress: 1,
+    outsourced: 1,
+    ready: 2,
+    delivered: 3,
+  };
+  return map[status] ?? 0;
+}
 
 export default function CustomerRepairsPage() {
   const { repairs, currentUser } = useStore();
@@ -14,7 +29,7 @@ export default function CustomerRepairsPage() {
   const mine = useMemo(() => {
     const name = currentUser?.name;
     const base = name ? repairs.filter((r) => r.customer === name) : repairs;
-    const list = base.length ? base : repairs; // fall back to all for demo
+    const list = base.length ? base : repairs;
     return list.filter((r) => !query || r.number.toLowerCase().includes(query.toLowerCase()) || r.item.toLowerCase().includes(query.toLowerCase()));
   }, [repairs, currentUser, query]);
 
@@ -41,7 +56,7 @@ export default function CustomerRepairsPage() {
         ) : (
           <div className="repair-track-list">
             {mine.map((r) => {
-              const current = steps.indexOf(r.status);
+              const current = stepIndex(r.status);
               return (
                 <article className="repair-track" key={r.id}>
                   <div className="repair-track-top">
@@ -49,19 +64,19 @@ export default function CustomerRepairsPage() {
                       <strong>{r.item}</strong>
                       <small>{r.number} · {r.issue}</small>
                     </div>
-                    <span className={`status-pill ${r.status === "Delivered" || r.status === "Ready" ? "success" : r.status === "In Progress" ? "warning" : "danger"}`}>{r.status}</span>
+                    <span className={`status-pill ${srsPillTone(r.status)}`}>{srsLabel(r.status)}</span>
                   </div>
                   <div className="stepper">
                     {steps.map((s, i) => (
                       <div className={`step ${i <= current ? "done" : ""} ${i === current ? "current" : ""}`} key={s}>
                         <span className="step-dot">{i < current ? "✓" : i + 1}</span>
-                        <span className="step-label">{s}</span>
+                        <span className="step-label">{srsLabel(s)}</span>
                       </div>
                     ))}
                   </div>
                   <div className="repair-track-foot">
-                    <span>Estimate: ₹ {r.estimate.toLocaleString("en-IN")}</span>
-                    <span>Updated {r.date}</span>
+                    <span>Estimate: {formatINR(r.estimate)}</span>
+                    <span>{r.promisedDate ? `Promised ${r.promisedDate}` : `Updated ${r.date}`}</span>
                   </div>
                 </article>
               );

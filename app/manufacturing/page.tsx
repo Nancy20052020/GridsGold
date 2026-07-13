@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Factory, Plus, X } from "lucide-react";
 import { AppShell } from "../components/AppShell";
+import { srsLabel, srsPillTone } from "../lib/srs";
 import { useStore } from "../lib/store";
 
 const tabs = ["Work Orders", "Wastage"] as const;
@@ -29,9 +30,9 @@ export default function ManufacturingPage() {
           <div className="heading-copy">
             <Factory size={28} />
             <div>
-              <span className="eyebrow">Manufacturing</span>
+              <span className="eyebrow">Manufacturing · SCR-28</span>
               <h1>Manufacturing</h1>
-              <p>Work orders and metal wastage tracking.</p>
+              <p>Work orders, production stages and wastage (FR-185 to FR-191).</p>
             </div>
           </div>
           <div className="heading-actions">
@@ -40,8 +41,8 @@ export default function ManufacturingPage() {
         </div>
 
         <section className="stat-cards stat-cards-3">
-          <article className="erp-kpi gold"><span>Active Orders</span><strong>{workOrders.filter((w) => w.status !== "Completed").length}</strong></article>
-          <article className="erp-kpi green"><span>Completed</span><strong>{workOrders.filter((w) => w.status === "Completed").length}</strong></article>
+          <article className="erp-kpi gold"><span>Active Orders</span><strong>{workOrders.filter((w) => !["completed", "closed", "cancelled"].includes(w.status)).length}</strong></article>
+          <article className="erp-kpi green"><span>Completed</span><strong>{workOrders.filter((w) => w.status === "completed" || w.status === "closed").length}</strong></article>
           <article className="erp-kpi blue"><span>Pieces Planned</span><strong>{workOrders.reduce((s, w) => s + w.qtyPlanned, 0)}</strong></article>
         </section>
 
@@ -64,7 +65,7 @@ export default function ManufacturingPage() {
                         <div className="progress"><span style={{ width: `${w.qtyPlanned ? (w.qtyDone / w.qtyPlanned) * 100 : 0}%` }} /></div>
                         <small className="muted">{w.qtyDone}/{w.qtyPlanned}</small>
                       </td>
-                      <td><span className={`status-pill ${w.status === "Completed" ? "success" : w.status === "In Progress" ? "warning" : "danger"}`}>{w.status}</span></td>
+                      <td><span className={`status-pill ${srsPillTone(w.status)}`}>{srsLabel(w.status)}</span></td>
                       <td>{w.due}</td>
                     </tr>
                   ))}
