@@ -6366,24 +6366,6 @@ a.ghost-action {
   max-width: 88%;
   max-height: 320px;
   border-radius: 12px;
-  animation: portal-hero-float 6s ease-in-out infinite;
-}
-
-.portal-hero-visual .product-img.hero-img-secondary {
-  position: absolute;
-  right: 8%;
-  bottom: 8%;
-  width: 38%;
-  max-height: 120px;
-  border-radius: 12px;
-  border: 2px solid rgba(242, 179, 61, 0.35);
-  box-shadow: 0 12px 28px rgba(2, 9, 22, 0.28);
-  animation: portal-hero-float 5s ease-in-out infinite reverse;
-}
-
-@keyframes portal-hero-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
 }
 
 .portal-category .product-img.category-img {
@@ -8395,4 +8377,285 @@ a.ghost-action {
 [data-theme="dark"] .dash-chart-axis button.active {
   background: rgba(242, 179, 61, 0.12);
   color: #ffd36c;
+}
+
+.dash-chart-full {
+  margin-bottom: 14px;
+}
+
+.dash-split-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.dash-split-row .dash-card {
+  margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+  .dash-split-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   Customer portal v2 — Grids Gold showcase images
+   ============================================================ */
+.portal-v2-hero {
+  position: relative;
+  min-height: 420px;
+  border-radius: 24px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  border: 1px solid rgba(242, 179, 61, 0.22);
+  box-shadow: 0 24px 48px rgba(6, 19, 39, 0.2);
+}
+
+.portal-v2-hero-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+}
+
+.portal-v2-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(105deg, rgba(2, 9, 22, 0.92) 0%, rgba(6, 19, 39, 0.72) 42%, rgba(6, 19, 39, 0.35) 100%);
+}
+
+.portal-v2-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 560px;
+  padding: 44px 40px;
+  display: grid;
+  gap: 16px;
+}
+
+.portal-v2-hero-inner h1 {
+  font-size: clamp(30px, 3.4vw, 46px);
+  line-height: 1.08;
+  font-weight: 800;
+  font-family: var(--font-logo), Georgia, "Times New Roman", serif;
+  color: #fff;
+}
+
+.portal-v2-hero-inner h1 span {
+  color: #ffd36c;
+}
+
+.portal-v2-hero-inner p {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+}
+
+.portal-v2-modules {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.portal-v2-module {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.portal-v2-module:hover {
+  border-color: rgba(242, 179, 61, 0.45);
+  box-shadow: 0 8px 20px rgba(6, 19, 39, 0.06);
+}
+
+.portal-v2-module strong {
+  font-size: 14px;
+}
+
+.portal-v2-module small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.portal-v2-module svg {
+  position: absolute;
+  right: 12px;
+  top: 14px;
+  color: var(--muted);
+}
+
+.portal-v2-split {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.1fr);
+  gap: 18px;
+  margin-bottom: 22px;
+  align-items: stretch;
+}
+
+.portal-v2-visual-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(242, 179, 61, 0.2);
+  background: #061327;
+  min-height: 360px;
+}
+
+.portal-v2-visual-card img {
+  width: 100%;
+  height: 100%;
+  min-height: 360px;
+  object-fit: cover;
+  display: block;
+}
+
+.portal-v2-visual-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 18px 20px;
+  background: linear-gradient(180deg, transparent, rgba(2, 9, 22, 0.88));
+  color: #fff;
+}
+
+.portal-v2-visual-caption span {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffd884;
+  font-weight: 700;
+}
+
+.portal-v2-visual-caption strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 18px;
+}
+
+.portal-v2-split-content {
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--panel);
+  padding: 18px;
+}
+
+.portal-products-compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.portal-v2-craft {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(0, 1.1fr);
+  gap: 0;
+  margin-bottom: 22px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(242, 179, 61, 0.2);
+  background: linear-gradient(150deg, #071a33, #061327);
+  color: #fff;
+}
+
+.portal-v2-craft-visual img {
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  object-fit: cover;
+  display: block;
+}
+
+.portal-v2-craft-copy {
+  padding: 36px 32px;
+  display: grid;
+  gap: 14px;
+  align-content: center;
+}
+
+.portal-eyebrow.light {
+  color: #ffd884;
+  background: rgba(242, 179, 61, 0.12);
+  border: 1px solid rgba(242, 179, 61, 0.28);
+  padding: 5px 10px;
+  border-radius: 999px;
+  width: fit-content;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.portal-v2-craft-copy h2 {
+  font-size: clamp(24px, 2.4vw, 32px);
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.portal-v2-craft-copy p {
+  color: rgba(255, 255, 255, 0.78);
+  line-height: 1.6;
+  max-width: 480px;
+}
+
+.portal-v2-craft-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.portal-v2-craft-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.portal-v2-craft-list svg {
+  color: #ffd36c;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .portal-v2-module,
+[data-theme="dark"] .portal-v2-split-content {
+  background: #0c1b2e;
+  border-color: var(--line);
+}
+
+@media (max-width: 1100px) {
+  .portal-v2-modules {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .portal-v2-split,
+  .portal-v2-craft {
+    grid-template-columns: 1fr;
+  }
+
+  .portal-products-compact {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .portal-v2-hero-inner {
+    padding: 28px 22px;
+  }
+
+  .portal-v2-modules {
+    grid-template-columns: 1fr;
+  }
 }

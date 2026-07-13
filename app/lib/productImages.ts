@@ -20,18 +20,11 @@ export const CATEGORY_IMAGES: Record<string, string> = {
 /** Hero banner on `/portal`. */
 export const HERO_IMAGE = "necklace_2.png";
 
-/** Login left-panel showcase — swaps with Customer vs Admin role. */
-export const AUTH_SHOWCASE = {
-  customer: {
-    primary: "necklace_2.png",
-    secondary: "ring_1.png",
-    label: "Browse & reserve certified gold",
-  },
-  admin: {
-    primary: "ring_3.png",
-    secondary: "necklace_1.png",
-    label: "Run sales, stock & repairs",
-  },
+/** Customer portal marketing visuals (Grids Gold). */
+export const CUSTOMER_PORTAL_IMAGES = {
+  hero: "customer_1.png",
+  showcase: "customer_2.png",
+  craft: "customer_3.png",
 } as const;
 
 export function productImageUrl(filename?: string): string | undefined {
