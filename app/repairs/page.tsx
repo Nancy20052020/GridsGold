@@ -39,7 +39,13 @@ import {
 } from "../lib/store";
 
 const TECHNICIANS = ["Ravi Nair", "Karim Ali", "Sonal Desai", "Imran Khan", "Unassigned"];
-const PHOTO_POOL = ["/images/ring_1.png", "/images/bangle_1.png", "/images/necklace_1.png", "/images/earrings_1.png", "/images/pendant_1.png"];
+const PHOTO_POOL = [
+  "/images/customer_2.png",
+  "/images/customer_1.png",
+  "/images/ring_1.png",
+  "/images/bangle_1.png",
+  "/images/necklace_1.png",
+];
 const PARTS_DEMO = ["Solder wire", "Rhodium flash", "Clasp", "Stone seating", "Polish compound"];
 
 type ViewMode = "board" | "list" | "analytics";
