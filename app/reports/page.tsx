@@ -92,6 +92,7 @@ export default function ReportsPage() {
   const [toast, setToast] = useState("");
   const [builderMetrics, setBuilderMetrics] = useState<string[]>(["Net sales", "GST"]);
   const [builderDims, setBuilderDims] = useState<string[]>(["Branch", "Category"]);
+  const [chartFocus, setChartFocus] = useState<string | null>(null);
 
   const categories = useMemo(
     () => ["All", ...new Set(items.map((i) => i.category))],
@@ -420,12 +421,24 @@ export default function ReportsPage() {
                 <h2><BarChart3 size={16} /> Sales trend</h2>
                 <span>₹ Lakhs · interactive</span>
               </div>
-              <div className="rpt-v2-chart" aria-hidden>
+              <div className="rpt-v2-chart" aria-label="Monthly sales trend">
                 {MONTHLY.map((m) => (
-                  <div className="rpt-v2-col" key={m.m}>
-                    <span style={{ height: `${(m.v / maxMonth) * 100}%` }} title={`${m.m}: ${m.v}L`} />
+                  <button
+                    type="button"
+                    className={`rpt-v2-col ${chartFocus === m.m ? "focus" : ""}`}
+                    key={m.m}
+                    onClick={() => {
+                      setChartFocus(m.m);
+                      flash(`Drill-down · ${m.m} sales ₹${m.v}L`);
+                      setHub("Reports");
+                      setCategory("Sales");
+                      setReport("Sales Summary");
+                    }}
+                  >
+                    <span style={{ height: `${(m.v / maxMonth) * 100}%` }} />
                     <em>{m.m}</em>
-                  </div>
+                    <small>{m.v}L</small>
+                  </button>
                 ))}
               </div>
             </section>
@@ -437,11 +450,21 @@ export default function ReportsPage() {
               </div>
               <div className="rpt-v2-bars">
                 {categorySales.map((c) => (
-                  <div key={c.name}>
+                  <button
+                    type="button"
+                    className="rpt-v2-bar-btn"
+                    key={c.name}
+                    onClick={() => {
+                      setItemCategory(c.name);
+                      selectCategory("Sales");
+                      setReport("Sales by Category");
+                      flash(`Filtered · ${c.name}`);
+                    }}
+                  >
                     <div className="rpt-v2-bar-top"><span>{c.name}</span><strong>{c.percent}%</strong></div>
                     <div className="rpt-v2-bar-track"><span style={{ width: `${c.percent}%`, background: c.color }} /></div>
                     <small>{formatINR(c.value)}</small>
-                  </div>
+                  </button>
                 ))}
                 {categorySales.length === 0 ? <p className="muted">No sales in filter.</p> : null}
               </div>
