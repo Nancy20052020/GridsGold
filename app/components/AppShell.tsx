@@ -104,7 +104,7 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
         </div>
 
         <nav className="sidebar-nav-flat admin-nav-v2" aria-label="Admin modules">
-          {adminNavItems.map((item, index) => {
+          {adminNavItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(pathname, item.href);
             return (
@@ -115,7 +115,6 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
                 title={item.description ?? item.label}
                 onClick={() => setMobileNavOpen(false)}
               >
-                <span className="admin-nav-index">{index + 1}</span>
                 <Icon size={17} />
                 <span className="nav-label">{item.label}</span>
               </Link>

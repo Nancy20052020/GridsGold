@@ -1,2 +1,2 @@
 /** Shown in admin sidebar — bump when shipping UI updates. */
-export const BUILD_TAG = "Jul 13 · Live gold rates";
+export const BUILD_TAG = "Jul 13 · Delivery clean";
