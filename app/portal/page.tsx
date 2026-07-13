@@ -48,6 +48,7 @@ export default function CustomerPortalHome() {
         </div>
         <div className="portal-hero-visual" aria-hidden="true">
           <ProductImage image={HERO_IMAGE} icon="necklace" className="product-img hero-img" alt="" />
+          <ProductImage image="ring_1.png" icon="ring" className="product-img hero-img hero-img-secondary" alt="" />
         </div>
       </section>
 

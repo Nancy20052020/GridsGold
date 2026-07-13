@@ -28,9 +28,10 @@ const ADMIN_NAME = "Nancy";
 type AuthPanelProps = {
   compact?: boolean;
   initialMode?: Mode;
+  onRoleChange?: (role: Role) => void;
 };
 
-export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanelProps) {
+export function AuthPanel({ compact = false, initialMode = "signin", onRoleChange }: AuthPanelProps) {
   const router = useRouter();
   const { signup, login } = useStore();
   const [role, setRole] = useState<Role>("customer");
@@ -49,6 +50,11 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
 
   const isSignup = mode === "signup";
   const isAdmin = role === "admin";
+
+  function setRoleAndNotify(next: Role) {
+    setRole(next);
+    onRoleChange?.(next);
+  }
 
   function update(field: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -173,7 +179,7 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
           role="tab"
           aria-selected={role === "customer"}
           className={role === "customer" ? "active" : ""}
-          onClick={() => setRole("customer")}
+          onClick={() => setRoleAndNotify("customer")}
         >
           <UserRound size={17} /> Customer
         </button>
@@ -183,7 +189,7 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
           aria-selected={role === "admin"}
           className={role === "admin" ? "active" : ""}
           onClick={() => {
-            setRole("admin");
+            setRoleAndNotify("admin");
             setMode("signin");
             setError("");
           }}

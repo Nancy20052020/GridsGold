@@ -1,35 +1,17 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import {
-  BadgeCheck,
-  Boxes,
-  ShieldCheck,
-  ShoppingBag,
-  Sparkles,
-  TrendingUp,
-  Wrench,
-} from "lucide-react";
+import { ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 import { AuthPanel } from "../components/AuthPanel";
+import { AuthShowcase } from "../components/AuthShowcase";
 import { BrandMark } from "../components/BrandMark";
-
-const highlights = [
-  { icon: ShoppingBag, title: "Point of Sale", copy: "Barcode billing, gold-rate pricing & split payments." },
-  { icon: Boxes, title: "Live Inventory", copy: "Track weight, purity & stones across branches." },
-  { icon: Wrench, title: "Repairs & Orders", copy: "Follow jobs from intake to pickup." },
-  { icon: BadgeCheck, title: "Certificates", copy: "Hallmark & lab docs with every item." },
-];
-
-const trust = [
-  { icon: TrendingUp, label: "Live Gold Rate", value: "₹ 7,245 /gm" },
-  { icon: ShieldCheck, label: "Secure", value: "Cloud ready" },
-];
 
 function LoginContent() {
   const params = useSearchParams();
   const isSignup = params.get("signup") === "1";
+  const [role, setRole] = useState<"customer" | "admin">("customer");
 
   return (
     <div className="auth-page">
@@ -48,45 +30,40 @@ function LoginContent() {
         </div>
 
         <div className="auth-brand-hero">
-          <span className="auth-eyebrow">Retail · Repairs · Wholesale</span>
+          <span className="auth-eyebrow">{role === "admin" ? "Admin workspace" : "Customer portal"}</span>
           <h1>
-            {isSignup ? "Create your " : "Welcome back to "}
+            {isSignup ? "Create your " : "Welcome to "}
             <span>Grids Gold.</span>
           </h1>
           <p>
-            {isSignup
-              ? "Join as a customer or sign in as staff to run your showroom from one elegant platform."
-              : "Sign in to your customer portal or admin workspace — inventory, billing and repairs in sync."}
+            {role === "admin"
+              ? "Inventory, POS, repairs and reports — one connected ERP for your showroom."
+              : "Browse certified jewellery, track orders and repairs from your personal portal."}
           </p>
-
-          <div className="auth-highlights">
-            {highlights.map(({ icon: Icon, title, copy }) => (
-              <div className="auth-highlight" key={title}>
-                <span><Icon size={18} /></span>
-                <div>
-                  <strong>{title}</strong>
-                  <small>{copy}</small>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
 
+        <AuthShowcase role={role} />
+
         <div className="auth-trust">
-          {trust.map(({ icon: Icon, label, value }) => (
-            <div className="auth-trust-item" key={label}>
-              <Icon size={16} />
-              <div>
-                <small>{label}</small>
-                <strong>{value}</strong>
-              </div>
+          <div className="auth-trust-item">
+            <TrendingUp size={16} />
+            <div>
+              <small>Live Gold Rate</small>
+              <strong>₹ 7,245 /gm</strong>
             </div>
-          ))}
+          </div>
+          <div className="auth-trust-item">
+            <ShieldCheck size={16} />
+            <div>
+              <small>Secure</small>
+              <strong>Cloud ready</strong>
+            </div>
+          </div>
         </div>
       </aside>
 
       <main className="auth-main">
-        <AuthPanel initialMode={isSignup ? "signup" : "signin"} />
+        <AuthPanel initialMode={isSignup ? "signup" : "signin"} onRoleChange={setRole} />
         <p className="auth-foot">
           <Link href="/">← Back to website</Link>
         </p>
