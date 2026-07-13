@@ -5760,6 +5760,82 @@ a.ghost-action {
   border-color: transparent;
 }
 
+.reports-category-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.reports-category-bar button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 18px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.reports-category-bar button span {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(6, 19, 39, 0.08);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.reports-category-bar button.active {
+  color: #fff;
+  background: linear-gradient(135deg, #0b2a52, #061327);
+  border-color: transparent;
+  box-shadow: 0 10px 24px rgba(6, 19, 39, 0.18);
+}
+
+.reports-category-bar button.active span {
+  background: rgba(255, 211, 108, 0.22);
+  color: #ffd36c;
+}
+
+.reports-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 0;
+}
+
+.reports-panel-head h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.reports-tabs {
+  margin-top: 0;
+}
+
+.portal-footer button.portal-footer-link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.78);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.portal-footer button.portal-footer-link:hover {
+  color: #ffd36c;
+}
+
 .stat-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -5897,6 +5973,17 @@ a.ghost-action {
 [data-theme="dark"] .portal-chips button.active {
   background: linear-gradient(135deg, #ffd76d, #e6a520);
   color: #3a2a05;
+}
+
+[data-theme="dark"] .reports-category-bar button {
+  background: #0c1b2e;
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .reports-category-bar button.active {
+  background: linear-gradient(135deg, #12345f, #0a1f3d);
+  color: #fff;
 }
 
 [data-theme="dark"] .price-preview {
