@@ -25,7 +25,8 @@ type AppShellProps = { children: React.ReactNode; searchPlaceholder?: string };
 
 function isActive(pathname: string, href: string) {
   if (href === "/dashboard") return pathname === "/dashboard";
-  if (href === "/pos") return pathname === "/pos";
+  if (href === "/pos") return pathname === "/pos" || pathname.startsWith("/sales");
+  if (href === "/purchase-orders") return pathname === "/purchase-orders" || pathname === "/suppliers";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
@@ -64,17 +65,17 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
   }
 
   return (
-    <div className={`app-shell ${mobileNavOpen ? "mobile-nav-open" : ""}`}>
+    <div className={`app-shell admin-shell-v2 ${mobileNavOpen ? "mobile-nav-open" : ""}`}>
       {mobileNavOpen ? (
         <button className="sidebar-backdrop" aria-label="Close menu" type="button" onClick={() => setMobileNavOpen(false)} />
       ) : null}
 
-      <aside className="sidebar sidebar-flat">
+      <aside className="sidebar sidebar-flat admin-sidebar-v2">
         <Link className="brand" href="/dashboard" onClick={() => setMobileNavOpen(false)}>
           <BrandMark className="brand-mark" />
           <div className="brand-text">
             <strong>GRIDS GOLD</strong>
-            <span>JEWELRY ERP</span>
+            <span>ADMIN ERP</span>
           </div>
         </Link>
 
@@ -93,18 +94,19 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
           ) : null}
         </div>
 
-        <nav className="sidebar-nav-flat" aria-label="SRS modules">
-          {adminNavItems.map((item) => {
+        <nav className="sidebar-nav-flat admin-nav-v2" aria-label="Admin modules">
+          {adminNavItems.map((item, index) => {
             const Icon = item.icon;
             const active = isActive(pathname, item.href);
             return (
               <Link
-                className={`nav-item ${active ? "active" : ""}`}
+                className={`nav-item admin-nav-item ${active ? "active" : ""}`}
                 href={item.href}
                 key={item.href}
-                title={item.label}
+                title={item.description ?? item.label}
                 onClick={() => setMobileNavOpen(false)}
               >
+                <span className="admin-nav-index">{index + 1}</span>
                 <Icon size={17} />
                 <span className="nav-label">{item.label}</span>
               </Link>

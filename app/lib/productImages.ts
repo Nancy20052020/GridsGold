@@ -27,6 +27,12 @@ export const CUSTOMER_PORTAL_IMAGES = {
   craft: "customer_3.png",
 } as const;
 
+/** Admin dashboard hero — product showcase (no separate admin uploads yet). */
+export const ADMIN_PORTAL_IMAGES = {
+  hero: "ring_3.png",
+  accent: "necklace_1.png",
+} as const;
+
 export function productImageUrl(filename?: string): string | undefined {
   return filename ? `/images/${filename}` : undefined;
 }

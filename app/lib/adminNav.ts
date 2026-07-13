@@ -1,15 +1,11 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Boxes,
-  Factory,
-  Gem,
-  Handshake,
   Home,
   LayoutGrid,
   Package,
   Settings,
   ShoppingCart,
-  TrendingUp,
   UserRound,
   WalletCards,
   Wrench,
@@ -19,30 +15,28 @@ export type AdminNavItem = {
   label: string;
   href: string;
   icon: LucideIcon;
+  description?: string;
 };
 
-/** SRS v1 admin modules — flat sidebar */
+/** Grids Gold admin — nine core modules */
 export const adminNavItems: AdminNavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: Home },
-  { label: "POS & Sales", href: "/pos", icon: ShoppingCart },
-  { label: "Inventory", href: "/inventory", icon: Boxes },
-  { label: "Jewelry Catalog", href: "/jewelry", icon: Gem },
-  { label: "Customers", href: "/customers", icon: UserRound },
-  { label: "Repairs", href: "/repairs", icon: Wrench },
-  { label: "Gold Rates", href: "/gold-rates", icon: TrendingUp },
-  { label: "Purchasing", href: "/purchase-orders", icon: Package },
-  { label: "Manufacturing", href: "/manufacturing", icon: Factory },
-  { label: "Wholesale", href: "/wholesale", icon: Handshake },
-  { label: "Finance", href: "/finance", icon: WalletCards },
-  { label: "Reports", href: "/reports", icon: LayoutGrid },
-  { label: "Settings", href: "/settings", icon: Settings },
+  { label: "Dashboard", href: "/dashboard", icon: Home, description: "Executive overview" },
+  { label: "POS & Sales", href: "/pos", icon: ShoppingCart, description: "Counter & invoices" },
+  { label: "Inventory", href: "/inventory", icon: Boxes, description: "Stock & catalog" },
+  { label: "Finance", href: "/finance", icon: WalletCards, description: "Receivables & payables" },
+  { label: "Customers", href: "/customers", icon: UserRound, description: "CRM & profiles" },
+  { label: "Repairs", href: "/repairs", icon: Wrench, description: "Service pipeline" },
+  { label: "Purchases", href: "/purchase-orders", icon: Package, description: "Suppliers & POs" },
+  { label: "Reports", href: "/reports", icon: LayoutGrid, description: "MIS & exports" },
+  { label: "Settings", href: "/settings", icon: Settings, description: "Branches & config" },
 ];
 
-export const adminNavGroups = [{ label: "Modules", items: adminNavItems }];
+export const adminNavGroups = [{ label: "Admin", items: adminNavItems }];
 
 export const adminQuickAddLinks = [
   { label: "New sale", href: "/pos" },
   { label: "Add item", href: "/inventory/new" },
   { label: "New customer", href: "/customers" },
   { label: "New repair", href: "/repairs" },
+  { label: "New PO", href: "/purchase-orders" },
 ];
