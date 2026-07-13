@@ -26,7 +26,6 @@ import {
 } from "../lib/analytics";
 import { AppShell } from "../components/AppShell";
 import { ItemImage } from "../components/ProductImage";
-import { adminNavItems } from "../lib/adminNav";
 import { firstName, formatINR, itemStatus, useStore } from "../lib/store";
 
 type TrendPoint = { label: string; value: number };
@@ -252,8 +251,6 @@ export default function DashboardPage() {
     { label: "Customers", value: customers.length.toLocaleString("en-IN"), note: "Active CRM", href: "/customers", icon: UserRound, tone: "navy" },
   ];
 
-  const quickLinks = adminNavItems.filter((m) => m.href !== "/dashboard").slice(0, 4);
-
   const showcaseItems = useMemo(() => {
     if (topItems.length) {
       return topItems.map((row) => {
@@ -283,18 +280,22 @@ export default function DashboardPage() {
   return (
     <AppShell>
       <section className="dashboard page-content dash-home dash-pro dash-pro-clean">
-        <header className="dash-header">
-          <div>
+        <section className="dash-welcome">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="dash-welcome-bg" src="/images/welcome_image.png" alt="" />
+          <div className="dash-welcome-veil" />
+          <div className="dash-welcome-copy">
+            <span className="dash-welcome-eyebrow">Grids Gold · Admin</span>
             <h1>Welcome back, {name}</h1>
-            <p className="muted">Store overview — sales, stock, repairs and CRM</p>
+            <p>Store overview — sales, stock, repairs and CRM at a glance.</p>
+            <div className="dash-welcome-actions">
+              <Link className="export-button" href="/pos">+ New sale</Link>
+              <Link className="dash-rate" href="/gold-rates">
+                22K · ₹{rates["22K"].toLocaleString("en-IN")}/g <CalendarDays size={15} />
+              </Link>
+            </div>
           </div>
-          <div className="dash-pro-hero-actions">
-            <Link className="export-button" href="/pos">+ New sale</Link>
-            <Link className="dash-rate" href="/gold-rates">
-              22K · ₹{rates["22K"].toLocaleString("en-IN")}/g <CalendarDays size={15} />
-            </Link>
-          </div>
-        </header>
+        </section>
 
         <section className="dash-kpis dash-pro-kpis">
           {kpis.map((kpi) => {
@@ -435,24 +436,6 @@ export default function DashboardPage() {
                   </li>
                 ))}
               </ul>
-            </article>
-
-            <article className="dash-card">
-              <div className="dash-card-head">
-                <h2>Quick Jump</h2>
-              </div>
-              <div className="dash-pro-quick">
-                {quickLinks.map((mod) => {
-                  const Icon = mod.icon;
-                  return (
-                    <Link href={mod.href} key={mod.href}>
-                      <Icon size={16} />
-                      <span>{mod.label}</span>
-                      <ArrowRight size={14} />
-                    </Link>
-                  );
-                })}
-              </div>
             </article>
           </aside>
         </div>
