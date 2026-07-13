@@ -1,2 +1,2 @@
 /** Shown in admin sidebar — bump when shipping UI updates. */
-export const BUILD_TAG = "Jul 13 · Landing + clean dashboard";
+export const BUILD_TAG = "Jul 13 · Dark mode + welcome card";
