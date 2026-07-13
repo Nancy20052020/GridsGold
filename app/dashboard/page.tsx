@@ -8,7 +8,6 @@ import {
   Lightbulb,
   Package,
   ShoppingCart,
-  Sparkles,
   TrendingUp,
   UserRound,
   Wrench,
@@ -32,15 +31,6 @@ import { firstName, formatINR, itemStatus, useStore } from "../lib/store";
 
 type TrendPoint = { label: string; value: number };
 type ChartCoord = TrendPoint & { x: number; y: number };
-
-const GALLERY = [
-  { src: "landing_image.png", label: "Cloud workspace" },
-  { src: "customer_1.png", label: "Sapphire set" },
-  { src: "customer_2.png", label: "Bridal gold" },
-  { src: "customer_3.png", label: "Craft detail" },
-  { src: "necklace_2.png", label: "Heritage necklace" },
-  { src: "ring_3.png", label: "Diamond ring" },
-];
 
 function buildChartCoords(points: TrendPoint[]): ChartCoord[] {
   const max = Math.max(...points.map((p) => p.value), 0.1) * 1.08;
@@ -254,10 +244,9 @@ export default function DashboardPage() {
 
   const openRepairs = repairs.filter((r) => r.status !== "delivered" && r.status !== "cancelled").length;
   const lowStockCount = items.filter((i) => itemStatus(i.stock) === "Low Stock" || itemStatus(i.stock) === "Out of Stock").length;
-  const inventoryPieces = items.reduce((sum, item) => sum + item.stock, 0);
 
   const kpis = [
-    { label: "Total Sales", value: formatINR(totalSales), note: "+12% vs last week", href: "/sales/invoices", icon: ShoppingCart, tone: "gold" },
+    { label: "Total Sales", value: formatINR(totalSales), note: "All invoices", href: "/sales/invoices", icon: ShoppingCart, tone: "gold" },
     { label: "Open Repairs", value: openRepairs.toLocaleString("en-IN"), note: "In pipeline", href: "/repairs", icon: Wrench, tone: "blue" },
     { label: "Stock Alerts", value: lowStockCount.toLocaleString("en-IN"), note: "Need attention", href: "/inventory", icon: Package, tone: "warn" },
     { label: "Customers", value: customers.length.toLocaleString("en-IN"), note: "Active CRM", href: "/customers", icon: UserRound, tone: "navy" },
@@ -293,31 +282,19 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-      <section className="dashboard page-content dash-home dash-pro">
-        <section className="dash-pro-hero">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="dash-pro-hero-bg" src="/images/landing_image.png" alt="" />
-          <div className="dash-pro-hero-veil" />
-          <div className="dash-pro-hero-copy">
-            <span className="dash-pro-eyebrow"><Sparkles size={14} /> AI-ready showroom dashboard</span>
+      <section className="dashboard page-content dash-home dash-pro dash-pro-clean">
+        <header className="dash-header">
+          <div>
             <h1>Welcome back, {name}</h1>
-            <p>
-              Live gold pricing, sales pulse and stock alerts — {inventoryPieces} pieces across branches.
-            </p>
-            <div className="dash-pro-hero-actions">
-              <Link className="export-button" href="/pos">+ New sale</Link>
-              <Link className="dash-rate" href="/gold-rates">
-                22K · ₹{rates["22K"].toLocaleString("en-IN")}/g <CalendarDays size={15} />
-              </Link>
-            </div>
+            <p className="muted">Store overview — sales, stock, repairs and CRM</p>
           </div>
-          <div className="dash-pro-hero-gallery" aria-hidden="true">
-            {GALLERY.slice(1, 4).map((shot) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img key={shot.src} src={`/images/${shot.src}`} alt="" />
-            ))}
+          <div className="dash-pro-hero-actions">
+            <Link className="export-button" href="/pos">+ New sale</Link>
+            <Link className="dash-rate" href="/gold-rates">
+              22K · ₹{rates["22K"].toLocaleString("en-IN")}/g <CalendarDays size={15} />
+            </Link>
           </div>
-        </section>
+        </header>
 
         <section className="dash-kpis dash-pro-kpis">
           {kpis.map((kpi) => {
@@ -357,7 +334,7 @@ export default function DashboardPage() {
         <section className="dash-pro-ai">
           <div className="dash-card-head">
             <h2><Lightbulb size={18} /> AI Insights</h2>
-            <span className="dash-pro-ai-badge">Live from your store data</span>
+            <span className="dash-pro-ai-badge">From your store data</span>
           </div>
           <div className="dash-pro-ai-grid">
             {insights.map((insight) => (
@@ -370,27 +347,12 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="dash-pro-summary">
-          <div className="dash-card-head">
-            <h2>Today&apos;s Summary</h2>
-            <Link href="/reports">View report</Link>
-          </div>
-          <div className="dash-pro-summary-grid">
-            <div><strong>{summary.orders}</strong><span>Orders</span></div>
-            <div><strong>{summary.quotations}</strong><span>Quotations</span></div>
-            <div><strong>{summary.repairs}</strong><span>Repairs</span></div>
-            <div><strong>{summary.customers}</strong><span>Customers</span></div>
-            <div><strong>{inventoryPieces}</strong><span>Stock pieces</span></div>
-            <div><strong>₹{rates["22K"].toLocaleString("en-IN")}</strong><span>22K / gram</span></div>
-          </div>
-        </section>
-
         <div className="dash-layout dash-pro-layout">
           <div className="dash-main">
             <article className="dash-card">
               <div className="dash-card-head">
                 <h2>Top Selling Items</h2>
-                <Link href="/jewelry">View catalog</Link>
+                <Link href="/reports">View report</Link>
               </div>
               <ul className="dash-list dash-pro-sellers">
                 {showcaseItems.map((row) => (
@@ -401,7 +363,7 @@ export default function DashboardPage() {
                       <small>
                         {[row.karat, row.weight ? `${row.weight}g` : null, row.qty ? `${row.qty} sold` : null]
                           .filter(Boolean)
-                          .join(" · ") || "Featured piece"}
+                          .join(" · ") || "In catalog"}
                       </small>
                     </div>
                     <em className="dash-pro-seller-amt">{row.amount ? formatINR(row.amount) : "—"}</em>
@@ -443,6 +405,19 @@ export default function DashboardPage() {
           <aside className="dash-side">
             <article className="dash-card">
               <div className="dash-card-head">
+                <h2>Today&apos;s Summary</h2>
+                <Link href="/reports">Report</Link>
+              </div>
+              <div className="dash-pro-summary-grid dash-pro-summary-side">
+                <div><strong>{summary.orders}</strong><span>Orders</span></div>
+                <div><strong>{summary.quotations}</strong><span>Quotations</span></div>
+                <div><strong>{summary.repairs}</strong><span>Repairs</span></div>
+                <div><strong>{summary.customers}</strong><span>Customers</span></div>
+              </div>
+            </article>
+
+            <article className="dash-card">
+              <div className="dash-card-head">
                 <h2>Stock Alerts</h2>
                 <Link href="/inventory">Inventory</Link>
               </div>
@@ -481,22 +456,6 @@ export default function DashboardPage() {
             </article>
           </aside>
         </div>
-
-        <section className="dash-pro-gallery">
-          <div className="dash-card-head">
-            <h2>Collection spotlight</h2>
-            <Link href="/jewelry">Browse jewelry</Link>
-          </div>
-          <div className="dash-pro-gallery-track">
-            {GALLERY.map((shot) => (
-              <figure key={shot.src}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`/images/${shot.src}`} alt={shot.label} />
-                <figcaption>{shot.label}</figcaption>
-              </figure>
-            ))}
-          </div>
-        </section>
       </section>
     </AppShell>
   );
