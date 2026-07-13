@@ -10,6 +10,8 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
+import { BrandMark } from "./components/BrandMark";
+import { CompanyCarousel } from "./components/CompanyCarousel";
 import { LandingNav } from "./components/LandingNav";
 import { ScrollReveal } from "./components/ScrollReveal";
 import { TypewriterText } from "./components/TypewriterText";
@@ -76,39 +78,47 @@ export default function LandingPage() {
     <div className="landing-site">
       <LandingNav />
 
-      <section className="landing-hero">
-        <div className="landing-hero-glow landing-hero-glow-a" aria-hidden="true" />
-        <div className="landing-hero-glow landing-hero-glow-b" aria-hidden="true" />
+      <section className="landing-hero landing-hero-photo">
+        <div className="landing-hero-photo-bg" aria-hidden="true" />
+        <div className="landing-hero-photo-veil" aria-hidden="true" />
 
-        <ScrollReveal className="landing-hero-centered">
-          <span className="landing-eyebrow">
+        <ScrollReveal className="landing-hero-split">
+          <div className="landing-hero-brand-lockup">
+            <BrandMark className="landing-hero-brand-mark" />
+            <div>
+              <strong>GRIDS GOLD</strong>
+              <span>JEWELLERY ERP</span>
+            </div>
+          </div>
+
+          <span className="landing-eyebrow dark">
             <Sparkles size={14} /> Built for Indian jewellers
           </span>
+
           <h1 className="display-serif">
             Run your jewellery business from{" "}
             <span className="gold-text">
               <TypewriterText phrases={["one place.", "every branch.", "one platform."]} />
             </span>
           </h1>
+
           <p>
-            Cut admin in half, catch every repair on time, and know your margin to the gram.
-            Retail, repairs, wholesale and manufacturing — one connected admin platform.
+            Cut admin in half, catch every repair on time, and know your margin to the gram —
+            retail, repairs, wholesale and manufacturing in one admin platform.
           </p>
-          <div className="landing-hero-actions">
+
+          <div className="landing-hero-actions landing-hero-actions-start">
             <Link className="landing-btn-primary" href="/login?signup=1">
               Start free trial <ArrowRight size={18} />
             </Link>
-            <a className="landing-btn-ghost light" href="#features">
+            <a className="landing-btn-ghost" href="#features">
               See how it works
             </a>
           </div>
-          <ul className="landing-hero-checks">
-            <li><Check size={16} /> No credit card</li>
-            <li><Check size={16} /> Live gold-rate pricing</li>
-            <li><Check size={16} /> BIS hallmark ready</li>
-          </ul>
         </ScrollReveal>
       </section>
+
+      <CompanyCarousel />
 
       <section className="landing-stats" aria-label="Highlights">
         {stats.map(({ value, label, note }, i) => (
