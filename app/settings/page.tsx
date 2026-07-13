@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { CheckCircle2, Moon, Settings as SettingsIcon, Sun } from "lucide-react";
 import { AppShell } from "../components/AppShell";
-import { COMPANY_CODE, DEFAULT_BRANCH_CODE, DEFAULT_COUNTRY_CODE, DEMO_LOCATIONS, INVOICE_NUMBER_PATTERN, srsLabel } from "../lib/srs";
+import { COMPANY_CODE, CURRENCY_CODES, CURRENCY_LABELS, DEFAULT_BRANCH_CODE, DEFAULT_COUNTRY_CODE, DEMO_LOCATIONS, INVOICE_NUMBER_PATTERN, srsLabel } from "../lib/srs";
 import { BRANCHES, useStore } from "../lib/store";
+import type { CurrencyCode } from "../lib/srs";
 
 const BRANCH_CODES: Record<string, string> = {
   "Main Branch": DEFAULT_BRANCH_CODE,
@@ -25,10 +26,10 @@ const roles = [
 ];
 
 export default function SettingsPage() {
-  const { theme, toggleTheme, selectedBranch, setBranch } = useStore();
+  const { theme, toggleTheme, selectedBranch, setBranch, baseCurrency, setBaseCurrency } = useStore();
   const [tab, setTab] = useState<(typeof tabs)[number]>("Company");
   const [saved, setSaved] = useState(false);
-  const [company, setCompany] = useState({ trade: "Grids Gold", legal: "Grids Gold Jewellers Pvt Ltd", gstin: "29ABCDE1234F1Z5", currency: "INR (₹)", country: DEFAULT_COUNTRY_CODE, address: "MG Road, Bengaluru" });
+  const [company, setCompany] = useState({ trade: "Grids Gold", legal: "Grids Gold Jewellers Pvt Ltd", gstin: "29ABCDE1234F1Z5", country: DEFAULT_COUNTRY_CODE, address: "MG Road, Bengaluru" });
   const [invoice, setInvoice] = useState({ prefix: INVOICE_NUMBER_PATTERN, gst: "3", footer: "Thank you for shopping with Grids Gold.", bilingual: true });
 
   function save() {
@@ -65,7 +66,7 @@ export default function SettingsPage() {
                   <label className="field"><span>Trade name</span><div className="field-input"><input value={company.trade} onChange={(e) => setCompany({ ...company, trade: e.target.value })} /></div></label>
                   <label className="field"><span>Legal name</span><div className="field-input"><input value={company.legal} onChange={(e) => setCompany({ ...company, legal: e.target.value })} /></div></label>
                   <label className="field"><span>GSTIN</span><div className="field-input"><input value={company.gstin} onChange={(e) => setCompany({ ...company, gstin: e.target.value })} /></div></label>
-                  <label className="field"><span>Base currency</span><div className="field-input"><input value={company.currency} onChange={(e) => setCompany({ ...company, currency: e.target.value })} /></div></label>
+                  <label className="field"><span>Base currency</span><div className="field-input"><select value={baseCurrency} onChange={(e) => setBaseCurrency(e.target.value as CurrencyCode)}>{CURRENCY_CODES.map((code) => <option key={code} value={code}>{CURRENCY_LABELS[code]}</option>)}</select></div></label>
                   <label className="field"><span>Country code</span><div className="field-input"><input value={company.country} onChange={(e) => setCompany({ ...company, country: e.target.value })} /></div></label>
                   <label className="field" style={{ gridColumn: "1 / -1" }}><span>Address</span><div className="field-input"><input value={company.address} onChange={(e) => setCompany({ ...company, address: e.target.value })} /></div></label>
                 </div>
@@ -137,6 +138,12 @@ export default function SettingsPage() {
                   <button className="ghost-action" type="button" onClick={toggleTheme}>
                     {theme === "dark" ? <><Sun size={16} /> Light mode</> : <><Moon size={16} /> Dark mode</>}
                   </button>
+                </div>
+                <div className="pref-row">
+                  <div><strong>Base currency</strong><small>Display symbol across POS, inventory, finance and reports.</small></div>
+                  <select className="select-plain" value={baseCurrency} onChange={(e) => setBaseCurrency(e.target.value as CurrencyCode)}>
+                    {CURRENCY_CODES.map((code) => <option key={code} value={code}>{CURRENCY_LABELS[code]}</option>)}
+                  </select>
                 </div>
                 <div className="pref-row">
                   <div><strong>Default branch</strong><small>Used for billing and inventory context.</small></div>

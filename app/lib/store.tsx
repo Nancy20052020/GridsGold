@@ -23,6 +23,8 @@ import {
   type RepairPriority,
   type RepairStatus,
   type WorkOrderStatus,
+  type CurrencyCode,
+  CURRENCY_CODES,
 } from "./srs";
 
 /* ----------------------------- Types ----------------------------- */
@@ -104,7 +106,7 @@ export type Supplier = {
   city: string;
   phone: string;
   paymentTerms?: string;
-  currency?: string;
+  currency?: CurrencyCode;
   balance: number;
 };
 
@@ -115,7 +117,7 @@ export type PurchaseOrder = {
   items: string;
   amount: number;
   branch?: string;
-  currency?: string;
+  currency?: CurrencyCode;
   status: PoStatus;
   date: string;
 };
@@ -261,9 +263,26 @@ export function itemStatus(stock: number): "In Stock" | "Low Stock" | "Out of St
   return "In Stock";
 }
 
-export function formatINR(value: number): string {
-  return "₹ " + Math.round(value).toLocaleString("en-IN");
+const CURRENCY_SYMBOLS: Record<CurrencyCode, string> = {
+  INR: "₹",
+  USD: "$",
+  AED: "AED",
+  SAR: "SAR",
+};
+
+let displayCurrency: CurrencyCode = "INR";
+
+export function currencySymbol(currency?: CurrencyCode): string {
+  return CURRENCY_SYMBOLS[currency ?? displayCurrency] ?? currency ?? "₹";
 }
+
+export function formatINR(value: number, currency?: CurrencyCode): string {
+  const code = currency ?? displayCurrency;
+  const sym = CURRENCY_SYMBOLS[code] ?? code;
+  return `${sym} ${Math.round(value).toLocaleString("en-IN")}`;
+}
+
+export { CURRENCY_CODES };
 
 function today(): string {
   return new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
@@ -279,6 +298,8 @@ type StoreValue = {
   setRate: (karat: Karat, value: number) => void;
   selectedBranch: string;
   setBranch: (branch: string) => void;
+  baseCurrency: CurrencyCode;
+  setBaseCurrency: (currency: CurrencyCode) => void;
   currentUser: User | null;
   signup: (u: { name: string; email: string; mobile?: string; city?: string; role: Role }) => void;
   login: (email: string, role: Role) => void;
@@ -387,6 +408,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>("light");
   const [rates, setRates] = useState<Rates>(seedRates);
   const [selectedBranch, setSelectedBranch] = useState("Main Branch");
+  const [baseCurrency, setBaseCurrencyState] = useState<CurrencyCode>("INR");
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [items, setItems] = useState<Item[]>(seedItems);
   const [customers, setCustomers] = useState<Customer[]>(seedCustomers);
@@ -412,6 +434,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (d.theme) setTheme(d.theme);
         if (d.rates) setRates((p) => ({ ...p, ...d.rates }));
         if (d.selectedBranch) setSelectedBranch(d.selectedBranch);
+        if (d.baseCurrency && CURRENCY_CODES.includes(d.baseCurrency)) {
+          setBaseCurrencyState(d.baseCurrency);
+          displayCurrency = d.baseCurrency;
+        }
         if (d.currentUser) setCurrentUser(d.currentUser);
         if (d.items) setItems(hydrateItems(d.items as Item[]));
         if (d.customers) setCustomers(hydrateCustomers(d.customers as Customer[]));
@@ -445,12 +471,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.setItem(
         KEY,
-        JSON.stringify({ theme, rates, selectedBranch, currentUser, items, customers, invoices, repairs, suppliers, purchaseOrders, orders, movements, expenses, bulkOrders, workOrders, wishlist, notifications }),
+        JSON.stringify({ theme, rates, selectedBranch, baseCurrency, currentUser, items, customers, invoices, repairs, suppliers, purchaseOrders, orders, movements, expenses, bulkOrders, workOrders, wishlist, notifications }),
       );
     } catch {
       /* ignore */
     }
-  }, [ready, theme, rates, selectedBranch, currentUser, items, customers, invoices, repairs, suppliers, purchaseOrders, orders, movements, expenses, bulkOrders, workOrders, wishlist, notifications]);
+  }, [ready, theme, rates, selectedBranch, baseCurrency, currentUser, items, customers, invoices, repairs, suppliers, purchaseOrders, orders, movements, expenses, bulkOrders, workOrders, wishlist, notifications]);
 
   useEffect(() => {
     if (!ready) return;
@@ -461,9 +487,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }
   }, [ready, cart]);
 
+  useEffect(() => {
+    displayCurrency = baseCurrency;
+  }, [baseCurrency]);
+
   const toggleTheme = useCallback(() => setTheme((t) => (t === "light" ? "dark" : "light")), []);
   const setRate = useCallback((karat: Karat, value: number) => setRates((p) => ({ ...p, [karat]: value })), []);
   const setBranch = useCallback((b: string) => setSelectedBranch(b), []);
+  const setBaseCurrency = useCallback((currency: CurrencyCode) => setBaseCurrencyState(currency), []);
 
   const signup = useCallback((u: { name: string; email: string; mobile?: string; city?: string; role: Role }) => {
     setCurrentUser({ name: u.name, email: u.email, role: u.role, mobile: u.mobile, city: u.city });
@@ -532,15 +563,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setRepairs((p) => p.map((r) => (r.id === id ? { ...r, status } : r)));
   }, []);
 
-  const addSupplier = useCallback((s: Omit<Supplier, "id" | "code" | "balance" | "currency"> & { paymentTerms?: string }) => {
+  const addSupplier = useCallback((s: Omit<Supplier, "id" | "code" | "balance">) => {
     setSuppliers((p) => [{
       ...s,
       id: "s" + Date.now(),
       code: "SUP-" + String(31 + p.length).padStart(6, "0"),
       balance: 0,
-      currency: "INR",
+      currency: s.currency ?? baseCurrency,
     }, ...p]);
-  }, []);
+  }, [baseCurrency]);
 
   const addPurchaseOrder = useCallback((po: Omit<PurchaseOrder, "id" | "number" | "date" | "status">) => {
     setPurchaseOrders((p) => [{
@@ -646,12 +677,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const markNotificationsRead = useCallback(() => setNotifications((p) => p.map((n) => ({ ...n, read: true }))), []);
 
   const value = useMemo<StoreValue>(() => ({
-    ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, currentUser, signup, login, logout, updateUser,
+    ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser,
     items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, suppliers, addSupplier,
     purchaseOrders, addPurchaseOrder, orders, reserve, unreserve, movements, transferStock, adjustStock, cycleCount,
     expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder,
     cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, wishlist, toggleWishlist, notifications, markNotificationsRead,
-  }), [ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, currentUser, signup, login, logout, updateUser, items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, orders, reserve, unreserve, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, wishlist, toggleWishlist, notifications, markNotificationsRead]);
+  }), [ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser, items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, orders, reserve, unreserve, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, wishlist, toggleWishlist, notifications, markNotificationsRead]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

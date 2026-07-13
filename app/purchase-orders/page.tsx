@@ -3,18 +3,18 @@
 import { useState } from "react";
 import { ClipboardList, Plus, X } from "lucide-react";
 import { AppShell } from "../components/AppShell";
-import { PO_STATUSES, srsLabel, srsPillTone } from "../lib/srs";
+import { CURRENCY_CODES, CURRENCY_LABELS, PO_STATUSES, srsLabel, srsPillTone, type CurrencyCode } from "../lib/srs";
 import { useStore, formatINR } from "../lib/store";
 
 const tabs = ["Purchase Orders", "Suppliers"] as const;
 
 export default function PurchaseOrdersPage() {
-  const { purchaseOrders, addPurchaseOrder, suppliers, addSupplier, selectedBranch } = useStore();
+  const { purchaseOrders, addPurchaseOrder, suppliers, addSupplier, selectedBranch, baseCurrency } = useStore();
   const [tab, setTab] = useState<(typeof tabs)[number]>("Purchase Orders");
   const [open, setOpen] = useState(false);
   const [supOpen, setSupOpen] = useState(false);
-  const [form, setForm] = useState({ supplier: "", items: "", amount: "", currency: "INR" });
-  const [supForm, setSupForm] = useState({ name: "", city: "", phone: "", paymentTerms: "Net 30" });
+  const [form, setForm] = useState({ supplier: "", items: "", amount: "", currency: baseCurrency as CurrencyCode });
+  const [supForm, setSupForm] = useState({ name: "", city: "", phone: "", paymentTerms: "Net 30", currency: baseCurrency as CurrencyCode });
   const [error, setError] = useState("");
 
   function submitPo(event: React.FormEvent) {
@@ -30,7 +30,7 @@ export default function PurchaseOrdersPage() {
       branch: selectedBranch,
       currency: form.currency,
     });
-    setForm({ supplier: "", items: "", amount: "", currency: "INR" });
+    setForm({ supplier: "", items: "", amount: "", currency: baseCurrency });
     setError("");
     setOpen(false);
   }
@@ -38,8 +38,8 @@ export default function PurchaseOrdersPage() {
   function submitSupplier(event: React.FormEvent) {
     event.preventDefault();
     if (!supForm.name.trim()) return;
-    addSupplier({ name: supForm.name.trim(), city: supForm.city.trim(), phone: supForm.phone.trim(), paymentTerms: supForm.paymentTerms });
-    setSupForm({ name: "", city: "", phone: "", paymentTerms: "Net 30" });
+    addSupplier({ name: supForm.name.trim(), city: supForm.city.trim(), phone: supForm.phone.trim(), paymentTerms: supForm.paymentTerms, currency: supForm.currency });
+    setSupForm({ name: "", city: "", phone: "", paymentTerms: "Net 30", currency: baseCurrency });
     setSupOpen(false);
   }
 
@@ -135,7 +135,7 @@ export default function PurchaseOrdersPage() {
               <label className="field"><span>Branch</span><div className="field-input"><input readOnly value={selectedBranch} /></div></label>
               <label className="field"><span>Items *</span><div className="field-input"><input value={form.items} onChange={(e) => setForm({ ...form, items: e.target.value })} placeholder="e.g. 22K casting grain 200g" /></div></label>
               <label className="field"><span>Amount (₹)</span><div className="field-input"><input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} placeholder="250000" /></div></label>
-              <label className="field"><span>Currency</span><div className="field-input"><select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value })}><option>INR</option><option>USD</option><option>AED</option></select></div></label>
+              <label className="field"><span>Currency</span><div className="field-input"><select value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value as CurrencyCode })}>{CURRENCY_CODES.map((code) => <option key={code} value={code}>{CURRENCY_LABELS[code]}</option>)}</select></div></label>
             </div>
             {error ? <p className="auth-error">{error}</p> : null}
             <div className="form-actions">
@@ -156,6 +156,7 @@ export default function PurchaseOrdersPage() {
               <label className="field"><span>City</span><div className="field-input"><input value={supForm.city} onChange={(e) => setSupForm({ ...supForm, city: e.target.value })} /></div></label>
               <label className="field"><span>Phone</span><div className="field-input"><input value={supForm.phone} onChange={(e) => setSupForm({ ...supForm, phone: e.target.value })} /></div></label>
               <label className="field"><span>Payment terms</span><div className="field-input"><input value={supForm.paymentTerms} onChange={(e) => setSupForm({ ...supForm, paymentTerms: e.target.value })} /></div></label>
+              <label className="field"><span>Currency</span><div className="field-input"><select value={supForm.currency} onChange={(e) => setSupForm({ ...supForm, currency: e.target.value as CurrencyCode })}>{CURRENCY_CODES.map((code) => <option key={code} value={code}>{CURRENCY_LABELS[code]}</option>)}</select></div></label>
             </div>
             <div className="form-actions">
               <button className="ghost-action" type="button" onClick={() => setSupOpen(false)}>Cancel</button>
