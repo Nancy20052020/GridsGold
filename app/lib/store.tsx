@@ -322,6 +322,7 @@ type StoreValue = {
   updateUser: (patch: Partial<User>) => void;
   items: Item[];
   addItem: (item: Omit<Item, "id">) => void;
+  removeItem: (id: string) => void;
   getItem: (id: string) => Item | undefined;
   customers: Customer[];
   addCustomer: (customer: Omit<Customer, "id" | "code">) => void;
@@ -419,18 +420,23 @@ function hydrateWorkOrders(saved: WorkOrder[] | undefined): WorkOrder[] {
   return saved.map((w) => ({ ...w, status: migrateWorkOrderStatus(w.status as string) }));
 }
 
-function hydrateItems(saved: Item[] | undefined): Item[] {
-  const removedIds = new Set(["it7"]); // Classic Gold Band Ring removed from catalog
+/** Soft-deleted catalog ids (seed or custom) — kept so removals survive refresh. */
+const HARD_REMOVED_ITEM_IDS = ["it7"]; // Classic Gold Band Ring retired from catalog
+
+function hydrateItems(saved: Item[] | undefined, removedIds: string[] = []): Item[] {
+  const blocked = new Set([...HARD_REMOVED_ITEM_IDS, ...removedIds]);
   const savedMap = new Map(saved?.map((item) => [item.id, item]));
-  const fromSeed = seedItems.map((seed) => {
-    const saved = savedMap.get(seed.id);
-    return saved
-      ? { ...saved, name: seed.name, category: seed.category, icon: seed.icon, image: seed.image, sku: seed.sku }
-      : seed;
-  });
+  const fromSeed = seedItems
+    .filter((seed) => !blocked.has(seed.id))
+    .map((seed) => {
+      const saved = savedMap.get(seed.id);
+      return saved
+        ? { ...saved, name: seed.name, category: seed.category, icon: seed.icon, image: seed.image, sku: seed.sku }
+        : seed;
+    });
   const seedIds = new Set(seedItems.map((item) => item.id));
   const extras = (saved ?? [])
-    .filter((item) => !seedIds.has(item.id) && !removedIds.has(item.id))
+    .filter((item) => !seedIds.has(item.id) && !blocked.has(item.id))
     .map((item) => ({
       ...item,
       image: item.image || defaultProductImage(item.category, item.icon),
@@ -446,7 +452,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [selectedBranch, setSelectedBranch] = useState("Main Branch");
   const [baseCurrency, setBaseCurrencyState] = useState<CurrencyCode>("INR");
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [items, setItems] = useState<Item[]>(seedItems);
+  const [items, setItems] = useState<Item[]>(() => hydrateItems(undefined, HARD_REMOVED_ITEM_IDS));
+  const [removedItemIds, setRemovedItemIds] = useState<string[]>(HARD_REMOVED_ITEM_IDS);
   const [customers, setCustomers] = useState<Customer[]>(seedCustomers);
   const [invoices, setInvoices] = useState<Invoice[]>(seedInvoices);
   const [repairs, setRepairs] = useState<Repair[]>(seedRepairs);
@@ -473,7 +480,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
           displayCurrency = d.baseCurrency;
         }
         if (d.currentUser) setCurrentUser(d.currentUser);
-        if (d.items) setItems(hydrateItems(d.items as Item[]));
+        if (d.removedItemIds) setRemovedItemIds([...new Set([...HARD_REMOVED_ITEM_IDS, ...(d.removedItemIds as string[])])]);
+        if (d.items) {
+          const removed = [...new Set([...HARD_REMOVED_ITEM_IDS, ...((d.removedItemIds as string[]) ?? [])])];
+          setItems(hydrateItems(d.items as Item[], removed));
+        }
         if (d.customers) setCustomers(hydrateCustomers(d.customers as Customer[]));
         if (d.invoices) setInvoices(hydrateInvoices(d.invoices as Invoice[]));
         if (d.repairs) setRepairs(hydrateRepairs(d.repairs as Repair[]));
@@ -503,12 +514,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.setItem(
         KEY,
-        JSON.stringify({ theme, rates, selectedBranch, baseCurrency, currentUser, items, customers, invoices, repairs, suppliers, purchaseOrders, movements, expenses, bulkOrders, workOrders, notifications }),
+        JSON.stringify({ theme, rates, selectedBranch, baseCurrency, currentUser, items, removedItemIds, customers, invoices, repairs, suppliers, purchaseOrders, movements, expenses, bulkOrders, workOrders, notifications }),
       );
     } catch {
       /* ignore */
     }
-  }, [ready, theme, rates, selectedBranch, baseCurrency, currentUser, items, customers, invoices, repairs, suppliers, purchaseOrders, movements, expenses, bulkOrders, workOrders, notifications]);
+  }, [ready, theme, rates, selectedBranch, baseCurrency, currentUser, items, removedItemIds, customers, invoices, repairs, suppliers, purchaseOrders, movements, expenses, bulkOrders, workOrders, notifications]);
 
   useEffect(() => {
     if (!ready) return;
@@ -575,6 +586,13 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     };
     setItems((p) => [{ ...withImage, id: "it" + Date.now() }, ...p]);
   }, []);
+
+  const removeItem = useCallback((id: string) => {
+    setRemovedItemIds((p) => (p.includes(id) ? p : [...p, id]));
+    setItems((p) => p.filter((item) => item.id !== id));
+    setCart((p) => p.filter((line) => line.itemId !== id));
+  }, []);
+
   const getItem = useCallback((id: string) => items.find((i) => i.id === id), [items]);
   const getInvoice = useCallback((id: string) => invoices.find((i) => i.id === id), [invoices]);
 
@@ -726,11 +744,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<StoreValue>(() => ({
     ready, theme, toggleTheme, rates, applyLiveRates, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser,
-    items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, assignRepairTechnician, suppliers, addSupplier,
+    items, addItem, removeItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, assignRepairTechnician, suppliers, addSupplier,
     purchaseOrders, addPurchaseOrder, updatePurchaseOrderStatus, movements, transferStock, adjustStock, cycleCount,
     expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder,
     cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, notifications, markNotificationsRead,
-  }), [ready, theme, toggleTheme, rates, applyLiveRates, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser, items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, assignRepairTechnician, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, updatePurchaseOrderStatus, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, notifications, markNotificationsRead]);
+  }), [ready, theme, toggleTheme, rates, applyLiveRates, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser, items, addItem, removeItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, assignRepairTechnician, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, updatePurchaseOrderStatus, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, notifications, markNotificationsRead]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
