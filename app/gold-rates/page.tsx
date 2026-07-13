@@ -3,12 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
-  Bookmark,
   Download,
   Gauge,
   GitCompareArrows,
   Globe2,
   Mail,
+  MapPin,
   MessageCircle,
   Phone,
   RefreshCw,
@@ -36,8 +36,9 @@ import {
 import { formatINR, useStore } from "../lib/store";
 
 const FAV_KEY = "gg_live_rate_favs";
-const HUB_TABS = ["Live", "Map & Globe", "Compare", "Insights", "Alerts", "News"] as const;
+const HUB_TABS = ["Live Map", "Compare", "Insights", "Alerts", "News"] as const;
 type HubTab = (typeof HUB_TABS)[number];
+type MapMode = "map" | "globe";
 
 function loadFavs(): string[] {
   try {
@@ -50,10 +51,12 @@ function loadFavs(): string[] {
 }
 
 export default function GoldRatesPage() {
-  const { applyLiveRates, items, rates } = useStore();
+  const { applyLiveRates, rates } = useStore();
 
-  const [hub, setHub] = useState<HubTab>("Live");
+  const [hub, setHub] = useState<HubTab>("Live Map");
   const [countryCode, setCountryCode] = useState("IN");
+  const [hoverCode, setHoverCode] = useState<string | null>(null);
+  const [mapMode, setMapMode] = useState<MapMode>("map");
   const [compareA, setCompareA] = useState("IN");
   const [compareB, setCompareB] = useState("AE");
   const [usdSpots, setUsdSpots] = useState(USD_SPOT_SEED);
@@ -69,9 +72,10 @@ export default function GoldRatesPage() {
   const [alertAbove, setAlertAbove] = useState("");
   const [alertChannel, setAlertChannel] = useState<"Email" | "SMS" | "WhatsApp">("WhatsApp");
   const [alerts, setAlerts] = useState<{ id: string; metal: MetalId; above: number; channel: string; country: string }[]>([]);
-  const [mapFocus, setMapFocus] = useState("IN");
+  const [focusMetal, setFocusMetal] = useState<MetalId>("gold22");
 
   const country = countryByCode(countryCode);
+  const hoverCountry = hoverCode ? countryByCode(hoverCode) : null;
 
   useEffect(() => {
     try {
@@ -81,10 +85,8 @@ export default function GoldRatesPage() {
     }
   }, [favorites]);
 
-  // Sync live India rates into ERP pricing (replaces manual edits)
   useEffect(() => {
-    const india = countryByCode("IN");
-    applyLiveRates(liveFeedToRates(usdSpots, india));
+    applyLiveRates(liveFeedToRates(usdSpots, countryByCode("IN")));
   }, [usdSpots, applyLiveRates]);
 
   useEffect(() => {
@@ -115,8 +117,8 @@ export default function GoldRatesPage() {
 
   function selectCountry(code: string) {
     setCountryCode(code);
-    setMapFocus(code);
-    flash(`Viewing ${countryByCode(code).name}`);
+    setHub("Live Map");
+    flash(`${countryByCode(code).name} selected`);
   }
 
   function toggleFav(code: string) {
@@ -160,71 +162,38 @@ export default function GoldRatesPage() {
   );
 
   const chartSeries = useMemo(
-    () => historySeries(priceInCurrency(usdSpots.gold22, country), 28),
-    [usdSpots.gold22, country],
+    () => historySeries(priceInCurrency(usdSpots[focusMetal], country), 28),
+    [usdSpots, focusMetal, country],
   );
   const chartMax = Math.max(...chartSeries);
   const chartMin = Math.min(...chartSeries);
 
-  const previewItems = useMemo(
-    () =>
-      items
-        .filter((i) => i.stock > 0)
-        .slice(0, 4)
-        .map((item) => ({
-          name: item.name,
-          karat: item.karat,
-          rate: rates[item.karat],
-          metal: Math.round(item.weight * (rates[item.karat] ?? 0)),
-        })),
-    [items, rates],
-  );
-
   const ca = countryByCode(compareA);
   const cb = countryByCode(compareB);
+  const focusMeta = METALS.find((m) => m.id === focusMetal)!;
 
   return (
     <AppShell searchPlaceholder="Search country, metal, alert…">
-      <section className="page-content live-v2">
+      <section className="page-content live-v2 live-v2-mapfirst">
         <header className="live-v2-head">
           <div>
             <span className="live-v2-eyebrow"><Globe2 size={14} /> Live precious metals</span>
             <h1>Live Gold Rate</h1>
-            <p>
-              Real-time gold, silver, platinum &amp; diamond feeds — no manual entry. Auto-synced into ERP pricing.
-            </p>
+            <p>Click any country on the map — live 24K / 22K / silver / platinum / diamond with FX conversion.</p>
           </div>
           <div className="live-v2-head-actions">
             <button type="button" className={`live-v2-btn ghost ${autoRefresh ? "on" : ""}`} onClick={() => setAutoRefresh((v) => !v)}>
               <RefreshCw size={16} className={autoRefresh ? "spin" : ""} />
               {autoRefresh ? `Auto · ${refreshSec}s` : "Auto off"}
             </button>
-            <button type="button" className="live-v2-btn ghost" onClick={refreshNow}>
-              <Gauge size={16} /> Refresh
-            </button>
-            <button type="button" className="live-v2-btn ghost" onClick={exportReport}>
-              <Download size={16} /> Export
-            </button>
-            <button type="button" className="live-v2-btn ghost" onClick={() => flash("Share link copied")}>
-              <Share2 size={16} /> Share
-            </button>
-            <button type="button" className="live-v2-btn gold" onClick={() => setHub("Alerts")}>
-              <Bell size={16} /> Alerts
-            </button>
+            <button type="button" className="live-v2-btn ghost" onClick={refreshNow}><Gauge size={16} /> Refresh</button>
+            <button type="button" className="live-v2-btn ghost" onClick={exportReport}><Download size={16} /> Export</button>
+            <button type="button" className="live-v2-btn ghost" onClick={() => flash("Share link copied")}><Share2 size={16} /> Share</button>
+            <button type="button" className="live-v2-btn gold" onClick={() => setHub("Alerts")}><Bell size={16} /> Alerts</button>
           </div>
         </header>
 
-        <section className="live-v2-kpis" aria-label="Spot KPIs">
-          {localPrices.slice(0, 6).map((m) => (
-            <article className={`live-v2-kpi tone-${m.tone}`} key={m.id}>
-              <span>{m.label}</span>
-              <strong>{formatLive(m.price, country)}</strong>
-              <small>{m.unit} · {country.code}</small>
-            </article>
-          ))}
-        </section>
-
-        <section className="live-glass live-v2-tools">
+        <section className="live-glass live-v2-tools live-v2-tools-map">
           <label>
             <span>Country</span>
             <select value={countryCode} onChange={(e) => selectCountry(e.target.value)} aria-label="Country">
@@ -238,8 +207,10 @@ export default function GoldRatesPage() {
             <input readOnly value={`${country.currency} (${country.symbol})`} />
           </label>
           <label>
-            <span>FX vs USD</span>
-            <input readOnly value={`${country.usdFx} ${country.currency}/USD`} />
+            <span>Focus metal</span>
+            <select value={focusMetal} onChange={(e) => setFocusMetal(e.target.value as MetalId)}>
+              {METALS.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+            </select>
           </label>
           <div className="live-v2-tick">
             <span className="live-pulse" />
@@ -253,59 +224,196 @@ export default function GoldRatesPage() {
           ))}
         </nav>
 
-        {hub === "Live" ? (
-          <div className="live-v2-live-grid">
-            <section className="live-glass">
-              <div className="live-v2-section-head">
-                <h2><TrendingUp size={16} /> Spot board · {country.name}</h2>
-                <button type="button" className="live-v2-btn ghost compact" onClick={() => toggleFav(country.code)}>
-                  <Star size={14} fill={favorites.includes(country.code) ? "currentColor" : "none"} />
-                  {favorites.includes(country.code) ? "Favorited" : "Favorite"}
-                </button>
-              </div>
-              <div className="live-v2-metal-grid">
-                {localPrices.map((m) => (
-                  <article key={m.id} className={`live-v2-metal tone-${m.tone}`}>
-                    <strong>{m.label}</strong>
-                    <em>{formatLive(m.price, country)}</em>
-                    <small>USD {usdSpots[m.id].toFixed(m.id === "diamond" ? 0 : 2)} · prem {(country.premium * 100 - 100).toFixed(1)}%</small>
-                    <span>10× ≈ {formatLive(m.price * 10, country)}</span>
-                  </article>
-                ))}
-              </div>
+        {hub === "Live Map" ? (
+          <>
+            <div className="live-v2-hero">
+              <section className="live-glass live-v2-map-hero">
+                <div className="live-v2-section-head">
+                  <h2><MapPin size={16} /> Global rate map</h2>
+                  <div className="live-v2-map-toggle" role="group" aria-label="Map mode">
+                    <button type="button" className={mapMode === "map" ? "active" : ""} onClick={() => setMapMode("map")}>World map</button>
+                    <button type="button" className={mapMode === "globe" ? "active" : ""} onClick={() => setMapMode("globe")}>3D globe</button>
+                  </div>
+                </div>
 
-              <div className="live-v2-section-head" style={{ marginTop: 16 }}>
-                <h2>22K trend · last sessions</h2>
-                <span>Interactive</span>
-              </div>
-              <div className="live-v2-chart" aria-hidden>
-                {chartSeries.map((v, i) => (
-                  <span
-                    key={i}
-                    style={{ height: `${8 + ((v - chartMin) / Math.max(chartMax - chartMin, 1)) * 92}%` }}
-                    title={String(v)}
-                  />
-                ))}
-              </div>
-            </section>
+                {mapMode === "map" ? (
+                  <div className="live-v2-map live-v2-map-lg" onMouseLeave={() => setHoverCode(null)}>
+                    <svg className="live-v2-map-svg" viewBox="0 0 1000 480" aria-hidden>
+                      <defs>
+                        <linearGradient id="liveOcean" x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stopColor="#0b1f36" />
+                          <stop offset="55%" stopColor="#14324f" />
+                          <stop offset="100%" stopColor="#0f2740" />
+                        </linearGradient>
+                        <linearGradient id="liveLand" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="rgba(255,215,109,0.22)" />
+                          <stop offset="100%" stopColor="rgba(139,124,246,0.18)" />
+                        </linearGradient>
+                      </defs>
+                      <rect width="1000" height="480" fill="url(#liveOcean)" rx="24" />
+                      {/* Stylized continents */}
+                      <path fill="url(#liveLand)" d="M70 140 C120 90 210 95 250 130 C290 160 280 210 230 230 C170 255 90 220 70 180 Z" />
+                      <path fill="url(#liveLand)" d="M250 250 C290 240 320 270 310 310 C295 350 250 360 230 320 C215 285 225 260 250 250 Z" />
+                      <path fill="url(#liveLand)" d="M430 110 C500 85 560 100 590 140 C620 185 580 230 520 235 C455 240 410 185 430 110 Z" />
+                      <path fill="url(#liveLand)" d="M560 200 C610 190 650 220 670 270 C690 320 640 350 590 340 C540 330 525 255 560 200 Z" />
+                      <path fill="url(#liveLand)" d="M680 150 C760 120 850 140 890 190 C930 245 880 280 800 285 C720 290 650 220 680 150 Z" />
+                      <path fill="url(#liveLand)" d="M780 300 C840 290 900 320 920 370 C940 410 880 430 830 415 C780 400 750 330 780 300 Z" />
+                      <g opacity="0.35">
+                        {Array.from({ length: 18 }).map((_, i) => (
+                          <line key={`h${i}`} x1="40" y1={40 + i * 24} x2="960" y2={40 + i * 24} stroke="rgba(255,255,255,0.08)" strokeWidth="0.6" />
+                        ))}
+                        {Array.from({ length: 20 }).map((_, i) => (
+                          <line key={`v${i}`} x1={50 + i * 45} y1="30" x2={50 + i * 45} y2="450" stroke="rgba(255,255,255,0.06)" strokeWidth="0.6" />
+                        ))}
+                      </g>
+                    </svg>
 
-            <aside className="live-v2-side">
-              <section className="live-glass">
-                <div className="live-v2-section-head"><h2><Bookmark size={16} /> Favorites</h2></div>
-                <div className="live-v2-fav-list">
-                  {favorites.map((code) => {
-                    const c = countryByCode(code);
-                    const g22 = priceInCurrency(usdSpots.gold22, c);
-                    return (
-                      <button type="button" key={code} className={code === countryCode ? "active" : ""} onClick={() => selectCountry(code)}>
-                        <strong>{c.name}</strong>
-                        <span>{formatLive(g22, c)}</span>
-                      </button>
-                    );
-                  })}
+                    {LIVE_COUNTRIES.map((c) => {
+                      const active = c.code === countryCode;
+                      const hovered = c.code === hoverCode;
+                      const price = priceInCurrency(usdSpots[focusMetal], c);
+                      return (
+                        <button
+                          key={c.code}
+                          type="button"
+                          className={`live-v2-pin ${active ? "active" : ""} ${hovered ? "hover" : ""} ${favorites.includes(c.code) ? "fav" : ""}`}
+                          style={{ left: `${c.x}%`, top: `${c.y}%` }}
+                          onMouseEnter={() => setHoverCode(c.code)}
+                          onFocus={() => setHoverCode(c.code)}
+                          onClick={() => selectCountry(c.code)}
+                          aria-label={`${c.name} ${formatLive(price, c)}`}
+                        >
+                          <i />
+                          <em>{c.code}</em>
+                          {(active || hovered) ? (
+                            <span className="live-v2-pin-tip">
+                              <strong>{c.name}</strong>
+                              <small>{focusMeta.label}</small>
+                              <b>{formatLive(price, c)}</b>
+                            </span>
+                          ) : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="live-v2-globe-stage live-v2-globe-lg">
+                    <div className="live-v2-globe">
+                      <div className="live-v2-globe-sphere">
+                        {LIVE_COUNTRIES.map((c) => (
+                          <button
+                            key={c.code}
+                            type="button"
+                            className={`live-v2-globe-pin ${c.code === countryCode ? "active" : ""}`}
+                            style={{ transform: `rotateY(${c.lon}deg) rotateX(${-c.lat * 0.55}deg) translateZ(118px)` }}
+                            onClick={() => selectCountry(c.code)}
+                            aria-label={c.name}
+                          >
+                            <span>{c.code}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="live-v2-globe-hint">Hover pauses spin · click a pin to load rates</p>
+                  </div>
+                )}
+
+                <div className="live-v2-map-legend">
+                  <span><i className="dot gold" /> Selected</span>
+                  <span><i className="dot fav" /> Favorite</span>
+                  <span><i className="dot soft" /> Live market</span>
+                  {hoverCountry ? (
+                    <em>Hover · {hoverCountry.name} · {formatLive(priceInCurrency(usdSpots[focusMetal], hoverCountry), hoverCountry)}</em>
+                  ) : (
+                    <em>Hover pins for {focusMeta.label} · click to lock country</em>
+                  )}
                 </div>
               </section>
 
+              <aside className="live-v2-country-panel">
+                <section className="live-glass live-v2-selected">
+                  <div className="live-v2-selected-head">
+                    <div>
+                      <span className="live-v2-eyebrow">{country.region} · {country.currency}</span>
+                      <h2>{country.name}</h2>
+                      <p>FX {country.usdFx} / USD · premium {((country.premium - 1) * 100).toFixed(1)}%</p>
+                    </div>
+                    <button type="button" className="live-v2-btn ghost compact" onClick={() => toggleFav(country.code)}>
+                      <Star size={14} fill={favorites.includes(country.code) ? "currentColor" : "none"} />
+                    </button>
+                  </div>
+
+                  <div className="live-v2-spot-stack">
+                    {localPrices.map((m) => (
+                      <button
+                        type="button"
+                        key={m.id}
+                        className={`live-v2-spot-row tone-${m.tone} ${focusMetal === m.id ? "active" : ""}`}
+                        onClick={() => setFocusMetal(m.id)}
+                      >
+                        <span>{m.label}</span>
+                        <strong>{formatLive(m.price, country)}</strong>
+                        <small>{m.unit}</small>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="live-v2-section-head" style={{ marginTop: 14 }}>
+                    <h2><TrendingUp size={16} /> {focusMeta.label} trend</h2>
+                  </div>
+                  <div className="live-v2-chart" aria-hidden>
+                    {chartSeries.map((v, i) => (
+                      <span
+                        key={i}
+                        style={{ height: `${8 + ((v - chartMin) / Math.max(chartMax - chartMin, 1)) * 92}%` }}
+                        title={String(v)}
+                      />
+                    ))}
+                  </div>
+                </section>
+
+                <section className="live-glass">
+                  <div className="live-v2-section-head"><h2><Star size={16} /> Favorites</h2></div>
+                  <div className="live-v2-fav-list">
+                    {favorites.map((code) => {
+                      const c = countryByCode(code);
+                      return (
+                        <button type="button" key={code} className={code === countryCode ? "active" : ""} onClick={() => selectCountry(code)}>
+                          <strong>{c.name}</strong>
+                          <span>{formatLive(priceInCurrency(usdSpots.gold22, c), c)}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+
+                <section className="live-glass">
+                  <div className="live-v2-section-head"><h2>ERP sync (India)</h2></div>
+                  <div className="live-v2-sync">
+                    {(["22K", "24K", "18K", "925", "PT950"] as const).map((k) => (
+                      <div key={k}><span>{k}</span><strong>{formatINR(rates[k])}</strong></div>
+                    ))}
+                  </div>
+                </section>
+              </aside>
+            </div>
+
+            <section className="live-v2-kpis live-v2-kpis-below" aria-label="Spot KPIs">
+              {localPrices.map((m) => (
+                <button
+                  type="button"
+                  className={`live-v2-kpi tone-${m.tone} ${focusMetal === m.id ? "active" : ""}`}
+                  key={m.id}
+                  onClick={() => setFocusMetal(m.id)}
+                >
+                  <span>{m.label}</span>
+                  <strong>{formatLive(m.price, country)}</strong>
+                  <small>{m.unit} · {country.code}</small>
+                </button>
+              ))}
+            </section>
+
+            <div className="live-v2-bottom-strip">
               <section className="live-glass live-v2-ai">
                 <div className="live-v2-section-head"><h2><Sparkles size={16} /> AI price pulse</h2></div>
                 <ul className="live-v2-ai-list">
@@ -314,98 +422,26 @@ export default function GoldRatesPage() {
                   ))}
                 </ul>
               </section>
-
               <section className="live-glass">
-                <div className="live-v2-section-head"><h2>ERP sync preview</h2></div>
-                <p className="live-v2-sub">Live India feed drives store rates used by POS &amp; inventory.</p>
-                <div className="live-v2-sync">
-                  {(["22K", "24K", "18K", "925", "PT950"] as const).map((k) => (
-                    <div key={k}><span>{k}</span><strong>{formatINR(rates[k])}</strong></div>
-                  ))}
-                </div>
-                <div className="live-v2-preview">
-                  {previewItems.map((row) => (
-                    <div key={row.name}>
-                      <strong>{row.name}</strong>
-                      <small>{row.karat} · metal {formatINR(row.metal)}</small>
-                    </div>
+                <div className="live-v2-section-head"><h2>Market news</h2></div>
+                <div className="live-v2-news live-v2-news-compact">
+                  {MARKET_NEWS.slice(0, 3).map((n) => (
+                    <article key={n.id}>
+                      <em>{n.tag}</em>
+                      <strong>{n.title}</strong>
+                      <small>{n.source} · {n.when}</small>
+                    </article>
                   ))}
                 </div>
               </section>
-            </aside>
-          </div>
-        ) : null}
-
-        {hub === "Map & Globe" ? (
-          <div className="live-v2-map-grid">
-            <section className="live-glass live-v2-map-panel">
-              <div className="live-v2-section-head">
-                <h2><Globe2 size={16} /> World map</h2>
-                <span>Click a country</span>
-              </div>
-              <div className="live-v2-map">
-                <div className="live-v2-map-ocean" />
-                {LIVE_COUNTRIES.map((c) => (
-                  <button
-                    key={c.code}
-                    type="button"
-                    className={`live-v2-pin ${mapFocus === c.code ? "active" : ""} ${favorites.includes(c.code) ? "fav" : ""}`}
-                    style={{ left: `${c.x}%`, top: `${c.y}%` }}
-                    onClick={() => selectCountry(c.code)}
-                    title={c.name}
-                  >
-                    <i />
-                    <em>{c.code}</em>
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section className="live-glass live-v2-globe-panel">
-              <div className="live-v2-section-head">
-                <h2>3D globe</h2>
-                <span>Spin · select</span>
-              </div>
-              <div className="live-v2-globe-stage">
-                <div className="live-v2-globe">
-                  <div className="live-v2-globe-sphere">
-                    {LIVE_COUNTRIES.map((c) => (
-                      <button
-                        key={c.code}
-                        type="button"
-                        className={`live-v2-globe-pin ${mapFocus === c.code ? "active" : ""}`}
-                        style={{
-                          // Project lon/lat to sphere UV-ish positions
-                          transform: `rotateY(${c.lon}deg) rotateX(${-c.lat * 0.55}deg) translateZ(118px)`,
-                        }}
-                        onClick={() => selectCountry(c.code)}
-                      >
-                        <span>{c.code}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-              <div className="live-v2-map-detail">
-                <strong>{countryByCode(mapFocus).name}</strong>
-                <p>
-                  22K {formatLive(priceInCurrency(usdSpots.gold22, countryByCode(mapFocus)), countryByCode(mapFocus))} ·{" "}
-                  24K {formatLive(priceInCurrency(usdSpots.gold24, countryByCode(mapFocus)), countryByCode(mapFocus))}
-                </p>
-                <button type="button" className="live-v2-btn gold compact" onClick={() => selectCountry(mapFocus)}>
-                  Open live board
-                </button>
-              </div>
-            </section>
-          </div>
+            </div>
+          </>
         ) : null}
 
         {hub === "Compare" ? (
           <div className="live-v2-compare">
             <section className="live-glass">
-              <div className="live-v2-section-head">
-                <h2><GitCompareArrows size={16} /> Compare countries</h2>
-              </div>
+              <div className="live-v2-section-head"><h2><GitCompareArrows size={16} /> Compare countries</h2></div>
               <div className="live-v2-compare-tools">
                 <label>
                   <span>Country A</span>
@@ -425,8 +461,8 @@ export default function GoldRatesPage() {
                   <thead>
                     <tr>
                       <th>Metal</th>
-                      <th>{ca.name} ({ca.currency})</th>
-                      <th>{cb.name} ({cb.currency})</th>
+                      <th>{ca.name}</th>
+                      <th>{cb.name}</th>
                       <th>USD parity A</th>
                       <th>USD parity B</th>
                     </tr>
@@ -469,7 +505,7 @@ export default function GoldRatesPage() {
                   { t: "Retail premium", d: `${country.name} trades at ${((country.premium - 1) * 100).toFixed(1)}% vs London spot.` },
                   { t: "Spread watch", d: "22K–24K spread stable; jewellery desk can keep making bands." },
                   { t: "Cross FX", d: `${country.currency} at ${country.usdFx} vs USD — conversion baked into board.` },
-                  { t: "Liquidity", d: "AE / HK bullion windows remaining most liquid overnight." },
+                  { t: "Liquidity", d: "AE / HK bullion windows remain most liquid overnight." },
                 ].map((c) => (
                   <article key={c.t}><strong>{c.t}</strong><p>{c.d}</p></article>
                 ))}
