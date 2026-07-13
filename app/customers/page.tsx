@@ -52,7 +52,9 @@ const PROFILE_TABS = [
   "Loyalty",
   "Wishlist",
   "Comms",
-  "KYC",
+  "Payments",
+  "Appointments",
+  "Docs",
   "Service",
   "Notes",
 ] as const;
@@ -112,7 +114,9 @@ export default function CustomersPage() {
   const [tab, setTab] = useState<CrmTab>("Directory");
   const [segment, setSegment] = useState<(typeof SEGMENTS)[number]>("All");
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(customers[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
   const [profileTab, setProfileTab] = useState<ProfileTab>("360°");
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState("");
@@ -156,7 +160,17 @@ export default function CustomersPage() {
     });
   }, [customers, query, segment]);
 
-  const selected = customers.find((c) => c.id === selectedId) ?? filtered[0] ?? customers[0] ?? null;
+  const selected = customers.find((c) => c.id === selectedId) ?? null;
+
+  function openProfile(id: string) {
+    setSelectedId(id);
+    setProfileTab("360°");
+    setExpanded(true);
+  }
+
+  function closeProfile() {
+    setExpanded(false);
+  }
 
   const customerInvoices = useMemo(
     () => (selected ? invoices.filter((i) => i.customer === selected.name) : []),
@@ -237,7 +251,7 @@ export default function CustomersPage() {
           <div>
             <span className="crm-v2-eyebrow"><UsersRound size={14} /> CRM · {selectedBranch}</span>
             <h1>Customer Management</h1>
-            <p>360° profiles, loyalty, leads and service — built for jewellery relationships.</p>
+            <p>Hover a card to peek · click to expand a fluid 360° profile with Apple-smooth motion.</p>
           </div>
           <div className="crm-v2-head-actions">
             <button type="button" className="crm-v2-btn gold" onClick={() => setOpen(true)}>
@@ -299,50 +313,70 @@ export default function CustomersPage() {
               </div>
             </section>
 
-            <div className="crm-v2-grid">
-              <div className="crm-v2-list-pane">
-                <section className="crm-glass">
-                  <div className="crm-v2-section-head">
-                    <h2>Directory</h2>
-                    <span>{filtered.length} profiles</span>
-                  </div>
-                  <div className="crm-v2-customer-list">
-                    {filtered.map((c) => {
-                      const cSpend = spendMap.get(c.name) ?? 0;
-                      const t = tierFor(cSpend, c.type);
-                      return (
-                        <button
-                          key={c.id}
-                          type="button"
-                          className={`crm-v2-customer-row ${selected?.id === c.id ? "active" : ""}`}
-                          onClick={() => { setSelectedId(c.id); setProfileTab("360°"); }}
-                        >
-                          <span className="crm-v2-avatar">{initials(c.name)}</span>
-                          <span className="crm-v2-customer-copy">
-                            <strong>{c.name}</strong>
-                            <small>{c.code} · {c.city || "—"} · {srsLabel(c.type)}</small>
-                          </span>
-                          <span className="crm-v2-customer-meta">
-                            <em className={`tier ${t.name.toLowerCase()}`}>{t.name}</em>
-                            <small>{cSpend ? formatINR(cSpend) : "New"}</small>
-                          </span>
-                        </button>
-                      );
-                    })}
-                    {filtered.length === 0 ? (
-                      <div className="crm-v2-empty">
-                        <UsersRound size={32} />
-                        <strong>No matches</strong>
-                        <p>Try another segment or clear search.</p>
+            <section className="crm-v2-deck-wrap">
+              <div className="crm-v2-section-head crm-v2-deck-head">
+                <h2>Directory cards</h2>
+                <span>{filtered.length} profiles · hover peek · click expand</span>
+              </div>
+              <div className={`crm-v2-deck ${expanded ? "has-expand" : ""}`}>
+                {filtered.map((c, index) => {
+                  const cSpend = spendMap.get(c.name) ?? 0;
+                  const t = tierFor(cSpend, c.type);
+                  const cClv = clvFor(cSpend, 2 + hashN(c.id, 5));
+                  const isActive = selected?.id === c.id && expanded;
+                  const isPeek = hoveredId === c.id && !isActive;
+                  return (
+                    <article
+                      key={c.id}
+                      className={`crm-glass crm-v2-exp-card ${isActive ? "expanded" : ""} ${isPeek ? "peek" : ""}`}
+                      style={{ animationDelay: `${Math.min(index, 12) * 0.04}s` }}
+                      onMouseEnter={() => setHoveredId(c.id)}
+                      onMouseLeave={() => setHoveredId((id) => (id === c.id ? null : id))}
+                      onClick={() => openProfile(c.id)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          openProfile(c.id);
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={isActive}
+                    >
+                      <div className="crm-v2-exp-face">
+                        <span className="crm-v2-avatar">{initials(c.name)}</span>
+                        <div className="crm-v2-exp-copy">
+                          <strong>{c.name}</strong>
+                          <small>{c.code} · {c.city || "—"}</small>
+                        </div>
+                        <em className={`tier ${t.name.toLowerCase()}`}>{t.name}</em>
                       </div>
-                    ) : null}
+                      <div className="crm-v2-exp-meta">
+                        <span>{srsLabel(c.type)}</span>
+                        <b>{cSpend ? formatINR(cSpend) : "New"}</b>
+                      </div>
+                      <div className={`crm-v2-exp-peek ${isPeek ? "show" : ""}`} aria-hidden={!isPeek}>
+                        <div><span>CLV</span><strong>{formatINR(cClv)}</strong></div>
+                        <div><span>Loyalty</span><strong>{t.pts.toLocaleString("en-IN")} pts</strong></div>
+                        <div><span>Mobile</span><strong>{c.mobile}</strong></div>
+                        <div className="crm-v2-exp-peek-cta">Click to open 360°</div>
+                      </div>
+                    </article>
+                  );
+                })}
+                {filtered.length === 0 ? (
+                  <div className="crm-glass crm-v2-empty crm-v2-deck-empty">
+                    <UsersRound size={32} />
+                    <strong>No matches</strong>
+                    <p>Try another segment or clear search.</p>
                   </div>
-                </section>
+                ) : null}
               </div>
 
-              <aside className="crm-v2-profile-pane">
-                {selected && tier ? (
+              <div className={`crm-v2-expand-stage ${expanded && selected && tier ? "open" : ""}`} aria-hidden={!expanded}>
+                {expanded && selected && tier ? (
                   <Profile360
+                    key={selected.id}
                     customer={selected}
                     spend={spend}
                     clv={clv}
@@ -357,16 +391,11 @@ export default function CustomersPage() {
                     setNote={setNote}
                     onSaveNote={saveNote}
                     flash={flash}
+                    onClose={closeProfile}
                   />
-                ) : (
-                  <section className="crm-glass crm-v2-empty">
-                    <UsersRound size={36} />
-                    <strong>Select a customer</strong>
-                    <p>Open a 360° profile from the directory.</p>
-                  </section>
-                )}
-              </aside>
-            </div>
+                ) : null}
+              </div>
+            </section>
           </>
         ) : null}
 
@@ -603,6 +632,7 @@ function Profile360({
   setNote,
   onSaveNote,
   flash,
+  onClose,
 }: {
   customer: Customer;
   spend: number;
@@ -618,13 +648,25 @@ function Profile360({
   setNote: (v: string) => void;
   onSaveNote: () => void;
   flash: (m: string) => void;
+  onClose: () => void;
 }) {
   const gstin = `29${customer.code.replace(/\D/g, "").slice(-8) || "AABCU"}1Z5`;
   const kycId = `KYC-${customer.code.slice(-6)}`;
+  const appts = APPOINTMENTS.filter((a) => a.customer === customer.name);
+  const fallbackAppts = appts.length
+    ? appts
+    : [
+        { id: "x1", customer: customer.name, type: "Try-on · curated pieces", when: "Fri · 5:00 PM", branch: BRANCHES[0], status: "Suggested" },
+        { id: "x2", customer: customer.name, type: "Anniversary consult", when: "Next week", branch: BRANCHES[hashN(customer.id, BRANCHES.length)], status: "Open" },
+      ];
 
   return (
-    <section className="crm-glass crm-v2-profile">
-      <div className="crm-v2-profile-hero">
+    <section className="crm-glass crm-v2-profile crm-v2-profile-animate">
+      <button type="button" className="crm-v2-profile-close" onClick={onClose} aria-label="Close profile">
+        <X size={18} />
+      </button>
+
+      <div className="crm-v2-profile-hero crm-v2-stagger">
         <span className="crm-v2-avatar lg">{initials(customer.name)}</span>
         <div>
           <span className="crm-v2-eyebrow-inline">{customer.code} · {srsLabel(customer.status ?? "active")}</span>
@@ -640,206 +682,254 @@ function Profile360({
         </div>
       </div>
 
-      <div className="crm-v2-profile-kpis">
+      <div className="crm-v2-profile-kpis crm-v2-stagger">
         <article><span>Lifetime spend</span><strong>{spend ? formatINR(spend) : "—"}</strong></article>
         <article><span>CLV</span><strong>{formatINR(clv)}</strong></article>
         <article><span>Loyalty pts</span><strong>{tier.pts.toLocaleString("en-IN")}</strong></article>
         <article><span>Orders</span><strong>{invoices.length}</strong></article>
+        <article><span>Repairs</span><strong>{repairs.length}</strong></article>
+        <article><span>Wishlist</span><strong>3</strong></article>
       </div>
 
-      <div className="crm-v2-profile-tabs">
+      <div className="crm-v2-profile-tabs crm-v2-stagger" role="tablist">
         {PROFILE_TABS.map((t) => (
-          <button key={t} type="button" className={profileTab === t ? "active" : ""} onClick={() => setProfileTab(t)}>{t}</button>
+          <button key={t} type="button" role="tab" aria-selected={profileTab === t} className={profileTab === t ? "active" : ""} onClick={() => setProfileTab(t)}>{t}</button>
         ))}
       </div>
 
-      {profileTab === "360°" ? (
-        <div className="crm-v2-profile-body">
-          <div className="crm-v2-info-grid">
-            <div><span>Mobile</span><strong>{customer.mobile}</strong></div>
-            <div><span>WhatsApp</span><strong>{customer.whatsapp || customer.mobile}</strong></div>
-            <div><span>Email</span><strong>{customer.email || "—"}</strong></div>
-            <div><span>Language</span><strong>{(customer.preferredLanguage ?? "en").toUpperCase()}</strong></div>
-            <div><span>Birthday</span><strong>{birthdayLabel(customer.id)}</strong></div>
-            <div><span>Consent</span><strong>{[customer.consentSms && "SMS", customer.consentWhatsapp && "WA", customer.consentEmail && "Email"].filter(Boolean).join(", ") || "—"}</strong></div>
-          </div>
-          <div className="crm-v2-section-head" style={{ marginTop: 14 }}>
-            <h2><Sparkles size={16} /> AI recommendations</h2>
-          </div>
-          <div className="crm-v2-reco-grid">
-            {recommendations.map((item, idx) => (
-              <button key={item.id} type="button" className="crm-v2-reco" onClick={() => flash(`Offered ${item.name}`)}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={WISHLIST_IMGS[idx % WISHLIST_IMGS.length]} alt="" />
-                <strong>{item.name}</strong>
-                <small>{item.karat} · {formatINR(itemPrice(item, rates))}</small>
-              </button>
-            ))}
-          </div>
-          <div className="crm-v2-timeline">
-            <h3>Activity timeline</h3>
-            {[
-              { t: "2h ago", text: "Follow-up reminder sent on WhatsApp" },
-              { t: "Yesterday", text: invoices[0] ? `Invoice ${invoices[0].number} · ${formatINR(invoices[0].total)}` : "Browsed bridal catalog in-store" },
-              { t: "3d ago", text: "Wishlist updated · sapphire halo set" },
-              { t: "Last week", text: repairs[0] ? `Repair ${repairs[0].number} · ${repairs[0].issue}` : "Loyalty points credited" },
-            ].map((row) => (
-              <div key={row.t + row.text}>
-                <strong>{row.t}</strong>
-                <span>{row.text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {profileTab === "History" ? (
-        <div className="crm-v2-table-wrap">
-          <table className="crm-v2-table">
-            <thead><tr><th>Order</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
-            <tbody>
-              {invoices.map((inv) => (
-                <tr key={inv.id}>
-                  <td><code>{inv.number}</code></td>
-                  <td>{inv.lines.map((l) => l.name).join(", ")}</td>
-                  <td><strong>{formatINR(inv.total)}</strong></td>
-                  <td><span className={`status-pill ${srsPillTone(inv.status as never)}`}>{srsLabel(inv.status as never)}</span></td>
-                  <td>{inv.date}</td>
-                </tr>
-              ))}
-              {invoices.length === 0 ? <tr><td colSpan={5} className="empty-note">No purchases yet.</td></tr> : null}
-            </tbody>
-          </table>
-        </div>
-      ) : null}
-
-      {profileTab === "Loyalty" ? (
-        <div className="crm-v2-profile-body">
-          <div className="crm-v2-tier-banner">
-            <Star size={18} />
-            <div>
-              <strong>{tier.name} member</strong>
-              <small>{tier.pts.toLocaleString("en-IN")} points · redeem at POS</small>
+      <div className="crm-v2-profile-panel crm-v2-fade" key={profileTab}>
+        {profileTab === "360°" ? (
+          <div className="crm-v2-profile-body">
+            <div className="crm-v2-info-grid">
+              <div><span>Mobile</span><strong>{customer.mobile}</strong></div>
+              <div><span>WhatsApp</span><strong>{customer.whatsapp || customer.mobile}</strong></div>
+              <div><span>Email</span><strong>{customer.email || "—"}</strong></div>
+              <div><span>Language</span><strong>{(customer.preferredLanguage ?? "en").toUpperCase()}</strong></div>
+              <div><span>Birthday</span><strong>{birthdayLabel(customer.id)}</strong></div>
+              <div><span>Consent</span><strong>{[customer.consentSms && "SMS", customer.consentWhatsapp && "WA", customer.consentEmail && "Email"].filter(Boolean).join(", ") || "—"}</strong></div>
             </div>
-            <button type="button" className="crm-v2-btn gold compact" onClick={() => flash("Reward voucher issued")}>Issue reward</button>
-          </div>
-          <div className="crm-v2-list">
-            <div><strong>Points earned (YTD)</strong><span>+{tier.pts}</span><small>From invoices & referrals</small></div>
-            <div><strong>Referral credits</strong><span>{formatINR(5000)}</span><small>1 successful invite</small></div>
-            <div><strong>Next tier</strong><span>{tier.name === "Platinum" ? "Max" : "Gold / Platinum"}</span><small>Keep bridal attach high</small></div>
-          </div>
-        </div>
-      ) : null}
-
-      {profileTab === "Wishlist" ? (
-        <div className="crm-v2-wish-grid">
-          {WISHLIST_IMGS.map((src, i) => (
-            <article key={src} className="crm-v2-wish">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt="" />
-              <strong>{["Sapphire halo set", "Gold studs pair", "Cocktail diamond ring"][i]}</strong>
-              <small>Saved · notify when in showroom</small>
-              <button type="button" className="crm-v2-btn ghost compact" onClick={() => flash("Wishlist item shared via WhatsApp")}>
-                <Heart size={14} /> Share
-              </button>
-            </article>
-          ))}
-        </div>
-      ) : null}
-
-      {profileTab === "Comms" ? (
-        <div className="crm-v2-comms">
-          {[
-            { icon: MessageCircle, channel: "WhatsApp", text: "Sent try-on appointment confirmation", when: "Today 10:12" },
-            { icon: Mail, channel: "Email", text: "Invoice PDF + hallmark certificate", when: "12 May" },
-            { icon: Phone, channel: "SMS", text: "Birthday offer — 5% making off", when: "08 May" },
-          ].map((c) => {
-            const Icon = c.icon;
-            return (
-              <div key={c.when + c.channel} className="crm-v2-comm-row">
-                <span className="crm-v2-comm-icon"><Icon size={16} /></span>
-                <div>
-                  <strong>{c.channel}</strong>
-                  <small>{c.text}</small>
+            <div className="crm-v2-section-head" style={{ marginTop: 14 }}>
+              <h2><Sparkles size={16} /> AI recommendations</h2>
+            </div>
+            <div className="crm-v2-reco-grid">
+              {recommendations.map((item, idx) => (
+                <button key={item.id} type="button" className="crm-v2-reco" onClick={() => flash(`Offered ${item.name}`)}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={WISHLIST_IMGS[idx % WISHLIST_IMGS.length]} alt="" />
+                  <strong>{item.name}</strong>
+                  <small>{item.karat} · {formatINR(itemPrice(item, rates))}</small>
+                </button>
+              ))}
+            </div>
+            <div className="crm-v2-insight-strip">
+              <Sparkles size={14} />
+              <p>
+                Personalized insight: prefer {customer.type === "vip" ? "high-stone bridal" : "daily-wear 22K"} —
+                CLV trending {clv > spend ? "up" : "steady"} with {tier.name} perks unlocked.
+              </p>
+            </div>
+            <div className="crm-v2-timeline">
+              <h3>Communication & activity</h3>
+              {[
+                { t: "2h ago", text: "Follow-up reminder sent on WhatsApp" },
+                { t: "Yesterday", text: invoices[0] ? `Invoice ${invoices[0].number} · ${formatINR(invoices[0].total)}` : "Browsed bridal catalog in-store" },
+                { t: "3d ago", text: "Wishlist updated · sapphire halo set" },
+                { t: "Last week", text: repairs[0] ? `Repair ${repairs[0].number} · ${repairs[0].issue}` : "Loyalty points credited" },
+              ].map((row) => (
+                <div key={row.t + row.text}>
+                  <strong>{row.t}</strong>
+                  <span>{row.text}</span>
                 </div>
-                <em>{c.when}</em>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {profileTab === "History" ? (
+          <div className="crm-v2-table-wrap">
+            <table className="crm-v2-table">
+              <thead><tr><th>Order</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+              <tbody>
+                {invoices.map((inv) => (
+                  <tr key={inv.id}>
+                    <td><code>{inv.number}</code></td>
+                    <td>{inv.lines.map((l) => l.name).join(", ")}</td>
+                    <td><strong>{formatINR(inv.total)}</strong></td>
+                    <td><span className={`status-pill ${srsPillTone(inv.status as never)}`}>{srsLabel(inv.status as never)}</span></td>
+                    <td>{inv.date}</td>
+                  </tr>
+                ))}
+                {invoices.length === 0 ? <tr><td colSpan={5} className="empty-note">No purchases yet.</td></tr> : null}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+
+        {profileTab === "Loyalty" ? (
+          <div className="crm-v2-profile-body">
+            <div className="crm-v2-tier-banner">
+              <Star size={18} />
+              <div>
+                <strong>{tier.name} member</strong>
+                <small>{tier.pts.toLocaleString("en-IN")} points · redeem at POS</small>
               </div>
-            );
-          })}
-          <div className="crm-v2-quick-grid" style={{ marginTop: 12 }}>
-            <button type="button" onClick={() => flash("WhatsApp composer ready")}><MessageCircle size={16} /> WhatsApp</button>
-            <button type="button" onClick={() => flash("Email composer ready")}><Mail size={16} /> Email</button>
-            <button type="button" onClick={() => flash("SMS queued")}><Phone size={16} /> SMS</button>
+              <button type="button" className="crm-v2-btn gold compact" onClick={() => flash("Reward voucher issued")}>Issue reward</button>
+            </div>
+            <div className="crm-v2-list">
+              <div><strong>Points earned (YTD)</strong><span>+{tier.pts}</span><small>From invoices & referrals</small></div>
+              <div><strong>Referral credits</strong><span>{formatINR(5000)}</span><small>1 successful invite</small></div>
+              <div><strong>Next tier</strong><span>{tier.name === "Platinum" ? "Max" : "Gold / Platinum"}</span><small>Keep bridal attach high</small></div>
+            </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
 
-      {profileTab === "KYC" ? (
-        <div className="crm-v2-profile-body">
-          <div className="crm-v2-info-grid">
-            <div><span>KYC ID</span><strong>{kycId}</strong></div>
-            <div><span>GSTIN</span><strong>{customer.type === "wholesale" ? gstin : "—"}</strong></div>
-            <div><span>ID proof</span><strong>Aadhaar · verified</strong></div>
-            <div><span>PAN</span><strong>{customer.type !== "walk_in" ? "ABCDE1234F" : "—"}</strong></div>
+        {profileTab === "Wishlist" ? (
+          <div className="crm-v2-wish-grid">
+            {WISHLIST_IMGS.map((src, i) => (
+              <article key={src} className="crm-v2-wish">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={src} alt="" />
+                <strong>{["Sapphire halo set", "Gold studs pair", "Cocktail diamond ring"][i]}</strong>
+                <small>Saved · notify when in showroom</small>
+                <button type="button" className="crm-v2-btn ghost compact" onClick={() => flash("Wishlist item shared via WhatsApp")}>
+                  <Heart size={14} /> Share
+                </button>
+              </article>
+            ))}
           </div>
-          <h3 style={{ marginTop: 14 }}>Addresses</h3>
-          <div className="crm-v2-list">
-            <div><strong>Billing</strong><span>{BRANCHES[0]}</span><small>{customer.city || "India"} · Primary</small></div>
-            <div><strong>Delivery</strong><span>Home</span><small><MapPin size={12} /> Same as billing</small></div>
-            <div><strong>Branch preference</strong><span>{BRANCHES[hashN(customer.id, BRANCHES.length)]}</span><small>Most visits</small></div>
-          </div>
-          <div className="crm-v2-docs">
-            <button type="button" onClick={() => flash("Document uploaded")}><FileText size={16} /> Upload KYC</button>
-            <button type="button" onClick={() => flash("GST certificate attached")}><ClipboardList size={16} /> GST docs</button>
-          </div>
-        </div>
-      ) : null}
+        ) : null}
 
-      {profileTab === "Service" ? (
-        <div className="crm-v2-table-wrap">
-          <table className="crm-v2-table">
-            <thead><tr><th>Ticket / Repair</th><th>Item</th><th>Issue</th><th>Due</th><th>Status</th></tr></thead>
-            <tbody>
-              {repairs.map((r) => (
-                <tr key={r.id}>
-                  <td><code>{r.number}</code></td>
-                  <td>{r.item}</td>
-                  <td>{r.issue}</td>
-                  <td>{formatINR(r.balanceDue ?? 0)}</td>
-                  <td><span className={`status-pill ${srsPillTone(r.status as never)}`}>{srsLabel(r.status as never)}</span></td>
-                </tr>
-              ))}
-              {TICKETS.filter((t) => t.customer === customer.name).map((t) => (
-                <tr key={t.id}>
-                  <td><code>{t.id.toUpperCase()}</code></td>
-                  <td>—</td>
-                  <td>{t.subject}</td>
-                  <td>{t.channel}</td>
-                  <td>{t.status}</td>
-                </tr>
-              ))}
-              {repairs.length === 0 && !TICKETS.some((t) => t.customer === customer.name) ? (
-                <tr><td colSpan={5} className="empty-note"><Wrench size={14} /> No open service items.</td></tr>
-              ) : null}
-            </tbody>
-          </table>
-          <Link className="crm-v2-btn ghost compact" href="/repairs" style={{ marginTop: 10 }}>Open repairs</Link>
-        </div>
-      ) : null}
-
-      {profileTab === "Notes" ? (
-        <div className="crm-v2-profile-body">
-          <label className="crm-v2-note-field">
-            <span>Add note / feedback</span>
-            <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Preference: prefers 22K temple sets, avoid cold calls after 8 PM…" rows={3} />
-          </label>
-          <button type="button" className="crm-v2-btn gold" onClick={onSaveNote}><Plus size={15} /> Save note</button>
-          <div className="crm-v2-list" style={{ marginTop: 12 }}>
-            <div><strong>Staff note</strong><span>Asha</span><small>Loves sapphire tones · showed halo set from gallery</small></div>
-            <div><strong>Review</strong><span>★★★★★</span><small>“Beautiful try-on experience at Main Branch.”</small></div>
+        {profileTab === "Comms" ? (
+          <div className="crm-v2-comms">
+            {[
+              { icon: MessageCircle, channel: "WhatsApp", text: "Sent try-on appointment confirmation", when: "Today 10:12" },
+              { icon: Mail, channel: "Email", text: "Invoice PDF + hallmark certificate", when: "12 May" },
+              { icon: Phone, channel: "SMS", text: "Birthday offer — 5% making off", when: "08 May" },
+            ].map((c) => {
+              const Icon = c.icon;
+              return (
+                <div key={c.when + c.channel} className="crm-v2-comm-row">
+                  <span className="crm-v2-comm-icon"><Icon size={16} /></span>
+                  <div>
+                    <strong>{c.channel}</strong>
+                    <small>{c.text}</small>
+                  </div>
+                  <em>{c.when}</em>
+                </div>
+              );
+            })}
+            <div className="crm-v2-quick-grid" style={{ marginTop: 12 }}>
+              <button type="button" onClick={() => flash("WhatsApp composer ready")}><MessageCircle size={16} /> WhatsApp</button>
+              <button type="button" onClick={() => flash("Email composer ready")}><Mail size={16} /> Email</button>
+              <button type="button" onClick={() => flash("SMS queued")}><Phone size={16} /> SMS</button>
+            </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
+
+        {profileTab === "Payments" ? (
+          <div className="crm-v2-table-wrap">
+            <table className="crm-v2-table">
+              <thead><tr><th>Payment</th><th>Method</th><th>Amount</th><th>Against</th><th>Date</th></tr></thead>
+              <tbody>
+                {(invoices.length ? invoices : [{ id: "p0", number: "—", total: 0, status: "draft", date: "—", lines: [] }]).slice(0, 6).map((inv, i) => (
+                  <tr key={`pay-${inv.id}`}>
+                    <td><code>PAY-{String(1000 + i)}</code></td>
+                    <td>{["UPI", "Card", "Cash", "Bank"][hashN(customer.id + String(i), 4)]}</td>
+                    <td><strong>{inv.total ? formatINR(inv.total) : "—"}</strong></td>
+                    <td>{inv.number}</td>
+                    <td>{inv.date}</td>
+                  </tr>
+                ))}
+                {invoices.length === 0 ? <tr><td colSpan={5} className="empty-note">No payment history yet.</td></tr> : null}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
+
+        {profileTab === "Appointments" ? (
+          <div className="crm-v2-cards">
+            {fallbackAppts.map((a) => (
+              <article className="crm-v2-soft-card" key={a.id}>
+                <strong>{a.type}</strong>
+                <span>{a.when}</span>
+                <small>{a.branch}</small>
+                <em>{a.status}</em>
+                <button type="button" className="crm-v2-btn ghost compact" onClick={() => flash("Appointment reminder sent")}>
+                  <Bell size={14} /> Remind
+                </button>
+              </article>
+            ))}
+          </div>
+        ) : null}
+
+        {profileTab === "Docs" ? (
+          <div className="crm-v2-profile-body">
+            <div className="crm-v2-info-grid">
+              <div><span>KYC ID</span><strong>{kycId}</strong></div>
+              <div><span>GSTIN</span><strong>{customer.type === "wholesale" ? gstin : "—"}</strong></div>
+              <div><span>ID proof</span><strong>Aadhaar · verified</strong></div>
+              <div><span>PAN</span><strong>{customer.type !== "walk_in" ? "ABCDE1234F" : "—"}</strong></div>
+            </div>
+            <h3 style={{ marginTop: 14 }}>Addresses</h3>
+            <div className="crm-v2-list">
+              <div><strong>Billing</strong><span>{BRANCHES[0]}</span><small>{customer.city || "India"} · Primary</small></div>
+              <div><strong>Delivery</strong><span>Home</span><small><MapPin size={12} /> Same as billing</small></div>
+              <div><strong>Branch preference</strong><span>{BRANCHES[hashN(customer.id, BRANCHES.length)]}</span><small>Most visits</small></div>
+            </div>
+            <div className="crm-v2-docs">
+              <button type="button" onClick={() => flash("Document uploaded")}><FileText size={16} /> Upload KYC</button>
+              <button type="button" onClick={() => flash("GST certificate attached")}><ClipboardList size={16} /> GST docs</button>
+              <button type="button" onClick={() => flash("Invoice pack emailed")}><Mail size={16} /> Share docs</button>
+            </div>
+          </div>
+        ) : null}
+
+        {profileTab === "Service" ? (
+          <div className="crm-v2-table-wrap">
+            <table className="crm-v2-table">
+              <thead><tr><th>Ticket / Repair</th><th>Item</th><th>Issue</th><th>Due</th><th>Status</th></tr></thead>
+              <tbody>
+                {repairs.map((r) => (
+                  <tr key={r.id}>
+                    <td><code>{r.number}</code></td>
+                    <td>{r.item}</td>
+                    <td>{r.issue}</td>
+                    <td>{formatINR(r.balanceDue ?? 0)}</td>
+                    <td><span className={`status-pill ${srsPillTone(r.status as never)}`}>{srsLabel(r.status as never)}</span></td>
+                  </tr>
+                ))}
+                {TICKETS.filter((t) => t.customer === customer.name).map((t) => (
+                  <tr key={t.id}>
+                    <td><code>{t.id.toUpperCase()}</code></td>
+                    <td>—</td>
+                    <td>{t.subject}</td>
+                    <td>{t.channel}</td>
+                    <td>{t.status}</td>
+                  </tr>
+                ))}
+                {repairs.length === 0 && !TICKETS.some((t) => t.customer === customer.name) ? (
+                  <tr><td colSpan={5} className="empty-note"><Wrench size={14} /> No open service items.</td></tr>
+                ) : null}
+              </tbody>
+            </table>
+            <Link className="crm-v2-btn ghost compact" href="/repairs" style={{ marginTop: 10 }}>Open repairs</Link>
+          </div>
+        ) : null}
+
+        {profileTab === "Notes" ? (
+          <div className="crm-v2-profile-body">
+            <label className="crm-v2-note-field">
+              <span>Add note / feedback</span>
+              <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="Preference: prefers 22K temple sets, avoid cold calls after 8 PM…" rows={3} />
+            </label>
+            <button type="button" className="crm-v2-btn gold" onClick={onSaveNote}><Plus size={15} /> Save note</button>
+            <div className="crm-v2-list" style={{ marginTop: 12 }}>
+              <div><strong>Staff note</strong><span>Asha</span><small>Loves sapphire tones · showed halo set from gallery</small></div>
+              <div><strong>Review</strong><span>★★★★★</span><small>“Beautiful try-on experience at Main Branch.”</small></div>
+            </div>
+          </div>
+        ) : null}
+      </div>
     </section>
   );
 }
