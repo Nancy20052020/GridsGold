@@ -27,13 +27,27 @@ export type InvoiceStatus = (typeof INVOICE_STATUSES)[number];
 export const REPAIR_STATUSES = [
   "received",
   "diagnosis",
+  "estimate",
   "awaiting_approval",
   "in_progress",
+  "quality_check",
   "ready",
   "delivered",
   "cancelled",
 ] as const;
 export type RepairStatus = (typeof REPAIR_STATUSES)[number];
+
+/** Kanban / advance flow (excludes cancelled). */
+export const REPAIR_BOARD_FLOW: RepairStatus[] = [
+  "received",
+  "diagnosis",
+  "estimate",
+  "awaiting_approval",
+  "in_progress",
+  "quality_check",
+  "ready",
+  "delivered",
+];
 
 /** Deep Dive §7.6 — po_status */
 export const PO_STATUSES = [
@@ -189,9 +203,11 @@ const LABELS: Record<string, string> = {
   refunded: "Refunded",
   exchanged: "Exchanged",
   received: "Received",
-  diagnosis: "Diagnosis",
-  awaiting_approval: "Awaiting Approval",
-  in_progress: "In Progress",
+  diagnosis: "Inspection",
+  estimate: "Estimate",
+  awaiting_approval: "Approval",
+  in_progress: "Repairing",
+  quality_check: "Quality Check",
   ready: "Ready for Pickup",
   delivered: "Delivered",
   cancelled: "Cancelled",
@@ -335,6 +351,8 @@ export function srsPillTone(
     "posted",
     "in_progress",
     "awaiting_approval",
+    "estimate",
+    "quality_check",
     "submitted",
     "partially_received",
     "diagnosis",
@@ -357,14 +375,6 @@ export function stockToItemStatus(stock: number): ItemStatus {
 
 /** Next repair status in the SRS workflow (for advance action). */
 export function nextRepairStatus(current: RepairStatus): RepairStatus | null {
-  const flow: RepairStatus[] = [
-    "received",
-    "diagnosis",
-    "awaiting_approval",
-    "in_progress",
-    "ready",
-    "delivered",
-  ];
-  const idx = flow.indexOf(current);
-  return idx >= 0 && idx < flow.length - 1 ? flow[idx + 1] : null;
+  const idx = REPAIR_BOARD_FLOW.indexOf(current);
+  return idx >= 0 && idx < REPAIR_BOARD_FLOW.length - 1 ? REPAIR_BOARD_FLOW[idx + 1] : null;
 }

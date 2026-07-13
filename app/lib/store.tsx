@@ -97,6 +97,7 @@ export type Repair = {
   observedCondition?: string;
   metalDetails?: string;
   stoneDetails?: string;
+  technician?: string;
   date: string;
 };
 
@@ -198,8 +199,8 @@ const seedInvoices: Invoice[] = [
 ];
 
 const seedRepairs: Repair[] = [
-  { id: "r1", number: "REP-JED-2026-000028", customer: "Priya Mehta", item: "Gold Ring", issue: "Ring resizing", status: "ready", estimate: 1200, approvedAmount: 1200, deposit: 500, balanceDue: 700, promisedDate: "08 May, 2025", priority: "normal", itemReferenceType: "external_item", observedCondition: "Minor scratches on band", date: "02 May, 2025" },
-  { id: "r2", number: "REP-JED-2026-000029", customer: "John Smith", item: "Gold Bangle", issue: "Resize bangle", status: "in_progress", estimate: 850, approvedAmount: 850, deposit: 300, balanceDue: 550, promisedDate: "12 May, 2025", priority: "urgent", itemReferenceType: "external_item", metalDetails: "22K gold", date: "03 May, 2025" },
+  { id: "r1", number: "REP-JED-2026-000028", customer: "Priya Mehta", item: "Gold Ring", issue: "Ring resizing", status: "ready", estimate: 1200, approvedAmount: 1200, deposit: 500, balanceDue: 700, promisedDate: "08 May, 2025", priority: "normal", itemReferenceType: "external_item", observedCondition: "Minor scratches on band", date: "02 May, 2025", technician: "Ravi Nair" },
+  { id: "r2", number: "REP-JED-2026-000029", customer: "John Smith", item: "Gold Bangle", issue: "Resize bangle", status: "in_progress", estimate: 850, approvedAmount: 850, deposit: 300, balanceDue: 550, promisedDate: "12 May, 2025", priority: "urgent", itemReferenceType: "external_item", metalDetails: "22K gold", date: "03 May, 2025", technician: "Karim Ali" },
 ];
 
 const seedSuppliers: Supplier[] = [
@@ -303,6 +304,7 @@ type StoreValue = {
   repairs: Repair[];
   addRepair: (repair: Omit<Repair, "id" | "number" | "date" | "status" | "balanceDue">) => void;
   updateRepairStatus: (id: string, status: RepairStatus) => void;
+  assignRepairTechnician: (id: string, technician: string) => void;
   suppliers: Supplier[];
   addSupplier: (supplier: Omit<Supplier, "id" | "code" | "balance">) => void;
   purchaseOrders: PurchaseOrder[];
@@ -557,6 +559,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     setRepairs((p) => p.map((r) => (r.id === id ? { ...r, status } : r)));
   }, []);
 
+  const assignRepairTechnician = useCallback((id: string, technician: string) => {
+    setRepairs((p) => p.map((r) => (r.id === id ? { ...r, technician: technician || undefined } : r)));
+  }, []);
+
   const addSupplier = useCallback((s: Omit<Supplier, "id" | "code" | "balance">) => {
     setSuppliers((p) => [{
       ...s,
@@ -656,11 +662,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<StoreValue>(() => ({
     ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser,
-    items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, suppliers, addSupplier,
+    items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, assignRepairTechnician, suppliers, addSupplier,
     purchaseOrders, addPurchaseOrder, movements, transferStock, adjustStock, cycleCount,
     expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder,
     cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, notifications, markNotificationsRead,
-  }), [ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser, items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, notifications, markNotificationsRead]);
+  }), [ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser, items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, assignRepairTechnician, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, notifications, markNotificationsRead]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
