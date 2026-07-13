@@ -1,2 +1,2 @@
 /** Shown in admin sidebar — bump when shipping UI updates. */
-export const BUILD_TAG = "Jul 13 · Board click status";
+export const BUILD_TAG = "Jul 13 · CRM expand + reports";
