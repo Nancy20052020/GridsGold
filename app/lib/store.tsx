@@ -28,6 +28,7 @@ import {
   type CurrencyCode,
   CURRENCY_CODES,
 } from "./srs";
+import { defaultProductImage } from "./productImages";
 
 /* ----------------------------- Types ----------------------------- */
 
@@ -171,7 +172,6 @@ const seedItems: Item[] = [
   { id: "it4", name: "Royal Diamond Ring", sku: "RG22K-00112", category: "Rings", karat: "22K", weight: 15.3, making: 2600, stoneValue: 45000, stock: 3, branch: "Main Branch", icon: "ring", image: "ring_3.png" },
   { id: "it5", name: "Gold Choker Necklace", sku: "NK22K-00105", category: "Necklaces", karat: "22K", weight: 11.85, making: 1800, stoneValue: 0, stock: 4, branch: "Main Branch", icon: "necklace", image: "necklace_3.png" },
   { id: "it6", name: "Pavé Diamond Band Ring", sku: "RG22K-00177", category: "Rings", karat: "22K", weight: 4.76, making: 900, stoneValue: 12000, stock: 6, branch: "Branch 3", icon: "ring", image: "ring_4.png" },
-  { id: "it7", name: "Classic Gold Band Ring", sku: "RG22K-01003", category: "Rings", karat: "22K", weight: 8, making: 800, stoneValue: 0, stock: 7, branch: "Vault", icon: "ring", image: "ring_5.png" },
   { id: "it8", name: "Gold Stone Anklet", sku: "SA925-00211", category: "Others", karat: "925", weight: 12.5, making: 300, stoneValue: 0, stock: 9, branch: "Branch 4", icon: "", image: "anklet_1.png" },
   { id: "it9", name: "Diamond Solitaire Ring", sku: "PR950-00021", category: "Rings", karat: "PT950", weight: 6.2, making: 3500, stoneValue: 12000, stock: 2, branch: "Vault", icon: "ring", image: "ring_2.png" },
   { id: "it10", name: "Bridal Filigree Necklace", sku: "NK22K-00301", category: "Necklaces", karat: "22K", weight: 42.4, making: 8500, stoneValue: 65000, stock: 1, branch: "Main Branch", icon: "necklace", image: "necklace_2.png" },
@@ -420,13 +420,23 @@ function hydrateWorkOrders(saved: WorkOrder[] | undefined): WorkOrder[] {
 }
 
 function hydrateItems(saved: Item[] | undefined): Item[] {
+  const removedIds = new Set(["it7"]); // Classic Gold Band Ring removed from catalog
   const savedMap = new Map(saved?.map((item) => [item.id, item]));
-  return seedItems.map((seed) => {
+  const fromSeed = seedItems.map((seed) => {
     const saved = savedMap.get(seed.id);
     return saved
       ? { ...saved, name: seed.name, category: seed.category, icon: seed.icon, image: seed.image, sku: seed.sku }
       : seed;
   });
+  const seedIds = new Set(seedItems.map((item) => item.id));
+  const extras = (saved ?? [])
+    .filter((item) => !seedIds.has(item.id) && !removedIds.has(item.id))
+    .map((item) => ({
+      ...item,
+      image: item.image || defaultProductImage(item.category, item.icon),
+      icon: item.icon || "ring",
+    }));
+  return [...extras, ...fromSeed];
 }
 
 export function StoreProvider({ children }: { children: React.ReactNode }) {
@@ -557,7 +567,14 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
   const updateUser = useCallback((patch: Partial<User>) => setCurrentUser((u) => (u ? { ...u, ...patch } : u)), []);
 
-  const addItem = useCallback((item: Omit<Item, "id">) => setItems((p) => [{ ...item, id: "it" + Date.now() }, ...p]), []);
+  const addItem = useCallback((item: Omit<Item, "id">) => {
+    const withImage: Omit<Item, "id"> = {
+      ...item,
+      icon: item.icon || "ring",
+      image: item.image || defaultProductImage(item.category, item.icon),
+    };
+    setItems((p) => [{ ...withImage, id: "it" + Date.now() }, ...p]);
+  }, []);
   const getItem = useCallback((id: string) => items.find((i) => i.id === id), [items]);
   const getInvoice = useCallback((id: string) => invoices.find((i) => i.id === id), [invoices]);
 
