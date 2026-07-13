@@ -23,6 +23,8 @@ import {
 } from "../lib/analytics";
 import { AppShell } from "../components/AppShell";
 import { ItemImage } from "../components/ProductImage";
+import { adminNavItems } from "../lib/adminNav";
+import { ADMIN_PORTAL_IMAGES } from "../lib/productImages";
 import { firstName, formatINR, itemStatus, useStore } from "../lib/store";
 
 type TrendPoint = { label: string; value: number };
@@ -184,26 +186,48 @@ export default function DashboardPage() {
     { label: "Customers", value: customers.length.toLocaleString("en-IN"), href: "/customers", icon: UserRound },
   ];
 
-  const quickLinks = [
-    { label: "New sale", href: "/pos" },
-    { label: "Gold rates", href: "/gold-rates" },
-    { label: "Reports", href: "/reports" },
-    { label: "Settings", href: "/settings" },
-  ];
+  const quickLinks = adminNavItems.filter((m) => m.href !== "/dashboard");
 
   return (
     <AppShell>
-      <section className="dashboard page-content dash-home">
-        <header className="dash-header">
-          <div>
-            <h1>Dashboard</h1>
-            <p>Welcome back, {name}</p>
+      <section className="dashboard page-content dash-home admin-home-v2">
+        <section className="admin-v2-hero">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className="admin-v2-hero-bg" src={`/images/${ADMIN_PORTAL_IMAGES.hero}`} alt="" />
+          <div className="admin-v2-hero-overlay" />
+          <div className="admin-v2-hero-inner">
+            <span className="admin-v2-eyebrow">Grids Gold · Admin</span>
+            <h1>Store workspace</h1>
+            <p>Welcome back, {name}. Sales, stock, finance and repairs — nine modules, one ERP.</p>
+            <div className="admin-v2-hero-actions">
+              <Link className="export-button" href="/pos">+ New sale</Link>
+              <Link className="dash-rate" href="/gold-rates">
+                22K · ₹{rates["22K"].toLocaleString("en-IN")}/g <CalendarDays size={15} />
+              </Link>
+            </div>
           </div>
-          <div className="heading-actions">
-            <Link className="dash-rate" href="/gold-rates">
-              22K · ₹{rates["22K"].toLocaleString("en-IN")}/g <CalendarDays size={15} />
-            </Link>
-            <Link className="export-button" href="/pos">+ New sale</Link>
+        </section>
+
+        <section className="admin-v2-modules">
+          {quickLinks.map((mod) => {
+            const Icon = mod.icon;
+            return (
+              <Link className="admin-v2-module" href={mod.href} key={mod.href}>
+                <Icon size={18} />
+                <div>
+                  <strong>{mod.label}</strong>
+                  <small>{mod.description}</small>
+                </div>
+                <ArrowRight size={16} />
+              </Link>
+            );
+          })}
+        </section>
+
+        <header className="dash-header dash-header-compact">
+          <div>
+            <h2>Today&apos;s overview</h2>
+            <p className="muted">Live KPIs from your showroom</p>
           </div>
         </header>
 
@@ -311,17 +335,6 @@ export default function DashboardPage() {
           </div>
 
           <aside className="dash-side">
-            <article className="dash-card">
-              <div className="dash-card-head">
-                <h2>Quick Actions</h2>
-              </div>
-              <div className="dash-quick">
-                {quickLinks.map((link) => (
-                  <Link href={link.href} key={link.href}>{link.label}</Link>
-                ))}
-              </div>
-            </article>
-
             <article className="dash-card">
               <div className="dash-card-head">
                 <h2>Category Mix</h2>
