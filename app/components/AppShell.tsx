@@ -16,6 +16,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { adminNavItems, adminQuickAddLinks } from "../lib/adminNav";
+import { BUILD_TAG } from "../lib/buildInfo";
 import { BRANCHES, firstName, useStore } from "../lib/store";
 import { AdminQuickSearch } from "./AdminQuickSearch";
 import { BrandMark } from "./BrandMark";
@@ -118,6 +119,7 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
         </div>
 
         <div className="sidebar-foot">
+          <p className="sidebar-build-tag">{BUILD_TAG}</p>
           {greeting ? <p className="sidebar-greeting">Hi, {greeting}</p> : null}
           <div className="sidebar-actions">
             <Link className="sidebar-account" href="/settings" onClick={() => setMobileNavOpen(false)}>
