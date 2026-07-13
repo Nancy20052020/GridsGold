@@ -6,6 +6,7 @@ import { Boxes, Plus, Search } from "lucide-react";
 import { INVENTORY_TABS, isRemovedCategory } from "../lib/categories";
 import { AppShell } from "../components/AppShell";
 import { ItemImage } from "../components/ProductImage";
+import { srsLabel, stockToItemStatus, srsPillTone } from "../lib/srs";
 import { useStore, itemPrice, itemStatus, formatINR } from "../lib/store";
 
 const tabs = [...INVENTORY_TABS];
@@ -25,7 +26,10 @@ export default function InventoryPage() {
           !query ||
           item.name.toLowerCase().includes(query.toLowerCase()) ||
           item.sku.toLowerCase().includes(query.toLowerCase());
-        const inStatus = status === "All Status" || itemStatus(item.stock) === status;
+        const itemSrs = stockToItemStatus(item.stock);
+        const inStatus =
+          status === "All Status" ||
+          (status === "Low Stock" ? itemStatus(item.stock) === "Low Stock" : srsLabel(itemSrs) === status || itemSrs === status);
         return inTab && inQuery && inStatus;
       }),
     [items, tab, query, status],
@@ -47,9 +51,9 @@ export default function InventoryPage() {
           <div className="heading-copy">
             <Boxes size={28} />
             <div>
-              <span className="eyebrow">Inventory</span>
-              <h1>Inventory Overview</h1>
-              <p>Track stock, weight and value across all locations. Prices use the live gold rate.</p>
+              <span className="eyebrow">Inventory · SCR-10</span>
+              <h1>Inventory Balance</h1>
+              <p>Perpetual stock by branch and location — FR-067 to FR-082.</p>
             </div>
           </div>
           <div className="heading-actions">
@@ -80,8 +84,9 @@ export default function InventoryPage() {
             </div>
             <select className="select-plain" value={status} onChange={(e) => setStatus(e.target.value)}>
               <option>All Status</option>
-              <option>In Stock</option>
+              <option>Available</option>
               <option>Low Stock</option>
+              <option>Reserved</option>
               <option>Out of Stock</option>
             </select>
           </div>
@@ -89,12 +94,12 @@ export default function InventoryPage() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>Item</th><th>SKU</th><th>Category</th><th>Purity</th><th>Weight</th><th>Pcs</th><th>Status</th><th>Location</th><th>Value</th>
+                  <th>Item</th><th>Item code</th><th>Category</th><th>Metal / Karat</th><th>Weight</th><th>Pcs</th><th>Status</th><th>Location</th><th>Value</th>
                 </tr>
               </thead>
               <tbody>
                 {visible.map((item) => {
-                  const s = itemStatus(item.stock);
+                  const srs = stockToItemStatus(item.stock);
                   return (
                     <tr key={item.id}>
                       <td>
@@ -102,12 +107,12 @@ export default function InventoryPage() {
                           <ItemImage item={item} className="product-img cell-img" /> {item.name}
                         </Link>
                       </td>
-                      <td>{item.sku}</td>
+                      <td><small>{item.sku}</small></td>
                       <td>{item.category}</td>
                       <td>{item.karat}</td>
                       <td>{item.weight.toFixed(3)} g</td>
                       <td>{item.stock}</td>
-                      <td><span className={`status-pill ${s === "In Stock" ? "success" : s === "Low Stock" ? "warning" : "danger"}`}>{s}</span></td>
+                      <td><span className={`status-pill ${srsPillTone(srs)}`}>{srsLabel(srs)}</span></td>
                       <td>{item.branch}</td>
                       <td>{item.stock ? formatINR(itemPrice(item, rates)) : "—"}</td>
                     </tr>

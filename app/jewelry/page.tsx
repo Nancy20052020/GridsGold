@@ -4,9 +4,10 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Gem, Search, ShoppingCart } from "lucide-react";
 import { isRemovedCategory, SHOP_CATEGORIES } from "../lib/categories";
+import { srsLabel, stockToItemStatus, srsPillTone } from "../lib/srs";
 import { AppShell } from "../components/AppShell";
 import { ItemImage } from "../components/ProductImage";
-import { useStore, itemPrice, itemStatus, formatINR } from "../lib/store";
+import { useStore, itemPrice, formatINR } from "../lib/store";
 
 const cats = ["All", ...SHOP_CATEGORIES.filter((c) => c !== "All")] as const;
 
@@ -33,9 +34,9 @@ export default function JewelryCatalogPage() {
           <div className="heading-copy">
             <Gem size={28} />
             <div>
-              <span className="eyebrow">Product Catalog</span>
+              <span className="eyebrow">Item Master · SCR-08</span>
               <h1>Jewellery Catalog</h1>
-              <p>Full product catalog with live gold-rate pricing.</p>
+              <p>Canonical item master with metal, karat, weight and live pricing (FR-051 to FR-066).</p>
             </div>
           </div>
           <div className="heading-actions">
@@ -55,18 +56,18 @@ export default function JewelryCatalogPage() {
           </div>
           <div className="catalog-grid">
             {visible.map((item) => {
-              const s = itemStatus(item.stock);
+              const srs = stockToItemStatus(item.stock);
               return (
                 <article className="catalog-card" key={item.id}>
                   <Link href={`/inventory/item-details?id=${item.id}`} className="catalog-media">
                     <ItemImage item={item} className="product-img catalog-img" />
                   </Link>
-                  <span className={`status-pill ${s === "In Stock" ? "success" : s === "Low Stock" ? "warning" : "danger"}`}>{s}</span>
+                  <span className={`status-pill ${srsPillTone(srs)}`}>{srsLabel(srs)}</span>
                   <strong>{item.name}</strong>
-                  <small>{item.karat} · {item.weight} g · {item.category}</small>
+                  <small>{item.sku} · {item.karat} · {item.weight} g · {item.category}</small>
                   <div className="catalog-foot">
                     <span>{formatINR(itemPrice(item, rates))}</span>
-                    <button type="button" disabled={s === "Out of Stock"} onClick={() => addToCart(item.id)} aria-label="Add to sale"><ShoppingCart size={15} /></button>
+                    <button type="button" disabled={item.stock <= 0} onClick={() => addToCart(item.id)} aria-label="Add to sale"><ShoppingCart size={15} /></button>
                   </div>
                 </article>
               );
