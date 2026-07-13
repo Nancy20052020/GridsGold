@@ -33,7 +33,7 @@ function isActive(pathname: string, href: string) {
 export function AppShell({ children, searchPlaceholder = "Search item, customer, invoice or page..." }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { rates, selectedBranch, setBranch, currentUser, logout, notifications, markNotificationsRead, theme, toggleTheme } = useStore();
+  const { ready, rates, selectedBranch, setBranch, currentUser, logout, notifications, markNotificationsRead, theme, toggleTheme } = useStore();
 
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [menu, setMenu] = useState<null | "branch" | "notif" | "calendar" | "profile" | "quickadd">(null);
@@ -54,14 +54,23 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
+  useEffect(() => {
+    if (!ready) return;
+    if (!currentUser) router.replace("/login");
+  }, [ready, currentUser, router]);
+
   const unread = notifications.filter((n) => !n.read).length;
   const displayName = currentUser?.name ?? "Store Admin";
-  const displayRole = currentUser?.role === "customer" ? "Customer" : "Administrator";
+  const displayRole = "Administrator";
   const greeting = firstName(currentUser);
 
   function signOut() {
     logout();
     router.push("/login");
+  }
+
+  if (!ready || !currentUser) {
+    return <div className="app-shell admin-shell-v2 auth-guard-loading">Loading…</div>;
   }
 
   return (

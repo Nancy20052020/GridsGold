@@ -8,6 +8,8 @@ import {
   useMemo,
   useState,
 } from "react";
+import { userFromSupabase } from "./auth";
+import { isSupabaseConfigured, supabase } from "./supabase";
 import {
   migrateCustomerType,
   migrateInvoiceStatus,
@@ -122,15 +124,6 @@ export type PurchaseOrder = {
   date: string;
 };
 
-export type CustomerOrder = {
-  id: string;
-  itemId: string;
-  name: string;
-  amount: number;
-  status: "Reserved" | "Confirmed" | "Out for delivery" | "Delivered";
-  date: string;
-};
-
 export type Movement = {
   id: string;
   date: string;
@@ -159,7 +152,7 @@ export type WorkOrder = {
 
 export type CartLine = { itemId: string; qty: number };
 export type Rates = Record<Karat, number>;
-export type Role = "admin" | "customer";
+export type Role = "admin";
 export type User = { name: string; email: string; role: Role; mobile?: string; city?: string };
 export type Notification = { id: string; text: string; time: string; read: boolean };
 export type Theme = "light" | "dark";
@@ -216,11 +209,6 @@ const seedSuppliers: Supplier[] = [
 
 const seedPOs: PurchaseOrder[] = [
   { id: "po1", number: "PO-JED-2026-003301", supplier: "Raj Gems", items: "Loose Diamonds", amount: 875000, branch: "Main Branch", currency: "INR", status: "closed", date: "29 Apr, 2025" },
-];
-
-const seedOrders: CustomerOrder[] = [
-  { id: "o1", itemId: "it2", name: "Gold Necklace Set", amount: 149638, status: "Out for delivery", date: "30 Apr, 2025" },
-  { id: "o2", itemId: "it1", name: "22K Gold Ring", amount: 39193, status: "Delivered", date: "12 Apr, 2025" },
 ];
 
 const seedMovements: Movement[] = [
@@ -301,8 +289,8 @@ type StoreValue = {
   baseCurrency: CurrencyCode;
   setBaseCurrency: (currency: CurrencyCode) => void;
   currentUser: User | null;
-  signup: (u: { name: string; email: string; mobile?: string; city?: string; role: Role }) => void;
-  login: (email: string, role: Role) => void;
+  signup: (u: User) => void;
+  login: (u: User) => void;
   logout: () => void;
   updateUser: (patch: Partial<User>) => void;
   items: Item[];
@@ -319,9 +307,6 @@ type StoreValue = {
   addSupplier: (supplier: Omit<Supplier, "id" | "code" | "balance">) => void;
   purchaseOrders: PurchaseOrder[];
   addPurchaseOrder: (po: Omit<PurchaseOrder, "id" | "number" | "date" | "status">) => void;
-  orders: CustomerOrder[];
-  reserve: (itemId: string) => void;
-  unreserve: (orderId: string) => void;
   movements: Movement[];
   transferStock: (itemId: string, to: string, qty: number) => void;
   adjustStock: (itemId: string, delta: number, reason: string) => void;
@@ -339,8 +324,6 @@ type StoreValue = {
   removeFromCart: (itemId: string) => void;
   clearCart: () => void;
   checkout: (customer: string) => Invoice;
-  wishlist: string[];
-  toggleWishlist: (itemId: string) => void;
   notifications: Notification[];
   markNotificationsRead: () => void;
 };
@@ -416,13 +399,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [repairs, setRepairs] = useState<Repair[]>(seedRepairs);
   const [suppliers, setSuppliers] = useState<Supplier[]>(seedSuppliers);
   const [purchaseOrders, setPurchaseOrders] = useState<PurchaseOrder[]>(seedPOs);
-  const [orders, setOrders] = useState<CustomerOrder[]>(seedOrders);
   const [movements, setMovements] = useState<Movement[]>(seedMovements);
   const [expenses, setExpenses] = useState<Expense[]>(seedExpenses);
   const [bulkOrders, setBulkOrders] = useState<BulkOrder[]>(seedBulk);
   const [workOrders, setWorkOrders] = useState<WorkOrder[]>(seedWork);
   const [cart, setCart] = useState<CartLine[]>([]);
-  const [wishlist, setWishlist] = useState<string[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>(seedNotifications);
 
   /* eslint-disable react-hooks/set-state-in-effect */
@@ -445,12 +426,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         if (d.repairs) setRepairs(hydrateRepairs(d.repairs as Repair[]));
         if (d.suppliers) setSuppliers(d.suppliers);
         if (d.purchaseOrders) setPurchaseOrders(hydratePurchaseOrders(d.purchaseOrders as PurchaseOrder[]));
-        if (d.orders) setOrders(d.orders);
         if (d.movements) setMovements(d.movements);
         if (d.expenses) setExpenses(d.expenses);
         if (d.bulkOrders) setBulkOrders(d.bulkOrders);
         if (d.workOrders) setWorkOrders(hydrateWorkOrders(d.workOrders as WorkOrder[]));
-        if (d.wishlist) setWishlist(d.wishlist);
         if (d.notifications) setNotifications(d.notifications);
       }
       const rawCart = localStorage.getItem(KEY + "_cart");
@@ -471,12 +450,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.setItem(
         KEY,
-        JSON.stringify({ theme, rates, selectedBranch, baseCurrency, currentUser, items, customers, invoices, repairs, suppliers, purchaseOrders, orders, movements, expenses, bulkOrders, workOrders, wishlist, notifications }),
+        JSON.stringify({ theme, rates, selectedBranch, baseCurrency, currentUser, items, customers, invoices, repairs, suppliers, purchaseOrders, movements, expenses, bulkOrders, workOrders, notifications }),
       );
     } catch {
       /* ignore */
     }
-  }, [ready, theme, rates, selectedBranch, baseCurrency, currentUser, items, customers, invoices, repairs, suppliers, purchaseOrders, orders, movements, expenses, bulkOrders, workOrders, wishlist, notifications]);
+  }, [ready, theme, rates, selectedBranch, baseCurrency, currentUser, items, customers, invoices, repairs, suppliers, purchaseOrders, movements, expenses, bulkOrders, workOrders, notifications]);
 
   useEffect(() => {
     if (!ready) return;
@@ -491,31 +470,46 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     displayCurrency = baseCurrency;
   }, [baseCurrency]);
 
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) return;
+
+    let cancelled = false;
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (cancelled) return;
+      if (session?.user) setCurrentUser(userFromSupabase(session.user));
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (cancelled) return;
+      setCurrentUser(session?.user ? userFromSupabase(session.user) : null);
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, []);
+
   const toggleTheme = useCallback(() => setTheme((t) => (t === "light" ? "dark" : "light")), []);
   const setRate = useCallback((karat: Karat, value: number) => setRates((p) => ({ ...p, [karat]: value })), []);
   const setBranch = useCallback((b: string) => setSelectedBranch(b), []);
   const setBaseCurrency = useCallback((currency: CurrencyCode) => setBaseCurrencyState(currency), []);
 
-  const signup = useCallback((u: { name: string; email: string; mobile?: string; city?: string; role: Role }) => {
-    setCurrentUser({ name: u.name, email: u.email, role: u.role, mobile: u.mobile, city: u.city });
-    if (u.role === "customer") {
-      setCustomers((prev) =>
-        prev.some((c) => c.email.toLowerCase() === u.email.toLowerCase())
-          ? prev
-          : [{ id: "c" + Date.now(), code: "CUST-" + String(245 + prev.length).padStart(6, "0"), name: u.name, mobile: u.mobile ?? "", email: u.email, city: u.city ?? "", type: "retail" as const, preferredLanguage: "en", status: "active" as const }, ...prev],
-      );
+  const signup = useCallback((u: User) => {
+    setCurrentUser({ ...u, role: "admin" });
+  }, []);
+
+  const login = useCallback((u: User) => {
+    setCurrentUser({ ...u, role: "admin" });
+  }, []);
+
+  const logout = useCallback(() => {
+    if (isSupabaseConfigured && supabase) {
+      void supabase.auth.signOut();
     }
+    setCurrentUser(null);
   }, []);
-
-  const login = useCallback((email: string, role: Role) => {
-    setCurrentUser(() => {
-      const known = seedCustomers.find((c) => c.email.toLowerCase() === email.toLowerCase());
-      const name = known?.name ?? email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (m) => m.toUpperCase());
-      return { name: role === "admin" ? name || "Store Admin" : name || "Guest", email, role };
-    });
-  }, []);
-
-  const logout = useCallback(() => setCurrentUser(null), []);
   const updateUser = useCallback((patch: Partial<User>) => setCurrentUser((u) => (u ? { ...u, ...patch } : u)), []);
 
   const addItem = useCallback((item: Omit<Item, "id">) => setItems((p) => [{ ...item, id: "it" + Date.now() }, ...p]), []);
@@ -584,18 +578,6 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       currency: po.currency ?? "INR",
     }, ...p]);
   }, []);
-
-  const reserve = useCallback((itemId: string) => {
-    setItems((cur) => {
-      const item = cur.find((i) => i.id === itemId);
-      if (item) {
-        setOrders((p) => [{ id: "o" + Date.now(), itemId, name: item.name, amount: itemPrice(item, rates), status: "Reserved", date: today() }, ...p]);
-      }
-      return cur;
-    });
-  }, [rates]);
-
-  const unreserve = useCallback((orderId: string) => setOrders((p) => p.filter((o) => o.id !== orderId)), []);
 
   const logMovement = useCallback((m: Omit<Movement, "id" | "date" | "user">) => {
     setMovements((p) => [{ ...m, id: "m" + Date.now(), date: today(), user: "Admin" }, ...p]);
@@ -670,19 +652,15 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     return invoice;
   }, [cart, items, rates, invoices.length, logMovement]);
 
-  const toggleWishlist = useCallback((itemId: string) => {
-    setWishlist((p) => (p.includes(itemId) ? p.filter((i) => i !== itemId) : [...p, itemId]));
-  }, []);
-
   const markNotificationsRead = useCallback(() => setNotifications((p) => p.map((n) => ({ ...n, read: true }))), []);
 
   const value = useMemo<StoreValue>(() => ({
     ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser,
     items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, suppliers, addSupplier,
-    purchaseOrders, addPurchaseOrder, orders, reserve, unreserve, movements, transferStock, adjustStock, cycleCount,
+    purchaseOrders, addPurchaseOrder, movements, transferStock, adjustStock, cycleCount,
     expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder,
-    cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, wishlist, toggleWishlist, notifications, markNotificationsRead,
-  }), [ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser, items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, orders, reserve, unreserve, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, wishlist, toggleWishlist, notifications, markNotificationsRead]);
+    cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, notifications, markNotificationsRead,
+  }), [ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser, items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, notifications, markNotificationsRead]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

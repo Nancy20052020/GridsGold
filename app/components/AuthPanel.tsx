@@ -11,30 +11,27 @@ import {
   Lock,
   Mail,
   Phone,
-  ShieldCheck,
   UserRound,
 } from "lucide-react";
+import { userFromSupabase } from "../lib/auth";
 import { useStore } from "../lib/store";
 import { isSupabaseConfigured, supabase } from "../lib/supabase";
 import { BrandMark } from "./BrandMark";
 
-type Role = "customer" | "admin";
 type Mode = "signin" | "signup";
 
-const ADMIN_EMAIL = "nancy2005nov@gmail.com";
-const ADMIN_PASSWORD = "nancy";
-const ADMIN_NAME = "Nancy";
+const DEMO_ADMIN_EMAIL = "nancy2005nov@gmail.com";
+const DEMO_ADMIN_PASSWORD = "nancy";
+const DEMO_ADMIN_NAME = "Nancy";
 
 type AuthPanelProps = {
   compact?: boolean;
   initialMode?: Mode;
-  onRoleChange?: (role: Role) => void;
 };
 
-export function AuthPanel({ compact = false, initialMode = "signin", onRoleChange }: AuthPanelProps) {
+export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanelProps) {
   const router = useRouter();
   const { signup, login } = useStore();
-  const [role, setRole] = useState<Role>("customer");
   const [mode, setMode] = useState<Mode>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -49,12 +46,7 @@ export function AuthPanel({ compact = false, initialMode = "signin", onRoleChang
   });
 
   const isSignup = mode === "signup";
-  const isAdmin = role === "admin";
-
-  function setRoleAndNotify(next: Role) {
-    setRole(next);
-    onRoleChange?.(next);
-  }
+  const usingSupabase = isSupabaseConfigured && supabase;
 
   function update(field: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -66,16 +58,6 @@ export function AuthPanel({ compact = false, initialMode = "signin", onRoleChang
 
     if (!form.email.trim() || !form.password) {
       setError("Please enter your email and password.");
-      return;
-    }
-
-    if (isAdmin) {
-      if (form.email.trim().toLowerCase() !== ADMIN_EMAIL || form.password !== ADMIN_PASSWORD) {
-        setError("Incorrect admin email or password.");
-        return;
-      }
-      signup({ name: ADMIN_NAME, email: ADMIN_EMAIL, role: "admin" });
-      router.push("/dashboard");
       return;
     }
 
@@ -94,19 +76,21 @@ export function AuthPanel({ compact = false, initialMode = "signin", onRoleChang
       }
     }
 
-    if (isSupabaseConfigured && supabase) {
+    if (usingSupabase) {
+      if (!supabase) return;
+      const client = supabase;
       setBusy(true);
       try {
         if (isSignup) {
-          const { error: err } = await supabase.auth.signUp({
+          const { data, error: err } = await client.auth.signUp({
             email: form.email.trim(),
             password: form.password,
             options: {
               data: {
                 full_name: form.fullName.trim(),
-                role,
+                role: "admin",
                 mobile: form.mobile.trim(),
-                city: form.company.trim(),
+                company: form.company.trim(),
               },
             },
           });
@@ -115,8 +99,11 @@ export function AuthPanel({ compact = false, initialMode = "signin", onRoleChang
             setBusy(false);
             return;
           }
+          if (data.user) {
+            signup(userFromSupabase(data.user));
+          }
         } else {
-          const { error: err } = await supabase.auth.signInWithPassword({
+          const { data, error: err } = await client.auth.signInWithPassword({
             email: form.email.trim(),
             password: form.password,
           });
@@ -125,6 +112,9 @@ export function AuthPanel({ compact = false, initialMode = "signin", onRoleChang
             setBusy(false);
             return;
           }
+          if (data.user) {
+            login(userFromSupabase(data.user));
+          }
         }
       } catch {
         setError("Could not reach the authentication service. Please try again.");
@@ -132,21 +122,35 @@ export function AuthPanel({ compact = false, initialMode = "signin", onRoleChang
         return;
       }
       setBusy(false);
+      router.push("/dashboard");
+      return;
+    }
+
+    if (
+      form.email.trim().toLowerCase() !== DEMO_ADMIN_EMAIL ||
+      form.password !== DEMO_ADMIN_PASSWORD
+    ) {
+      setError("Incorrect email or password. Use demo credentials or configure Supabase.");
+      return;
     }
 
     if (isSignup) {
       signup({
-        name: form.fullName.trim(),
-        email: form.email.trim(),
+        name: form.fullName.trim() || DEMO_ADMIN_NAME,
+        email: DEMO_ADMIN_EMAIL,
         mobile: form.mobile.trim(),
         city: form.company.trim(),
-        role,
+        role: "admin",
       });
     } else {
-      login(form.email.trim(), role);
+      login({
+        name: DEMO_ADMIN_NAME,
+        email: DEMO_ADMIN_EMAIL,
+        role: "admin",
+      });
     }
 
-    router.push(isAdmin ? "/dashboard" : "/portal");
+    router.push("/dashboard");
   }
 
   return (
@@ -161,41 +165,17 @@ export function AuthPanel({ compact = false, initialMode = "signin", onRoleChang
 
       <div className="auth-card-head">
         <Gem size={26} />
-        <h2>{isSignup ? "Create your account" : "Welcome back"}</h2>
+        <h2>{isSignup ? "Create staff account" : "Welcome back"}</h2>
         <p>
           {isSignup
-            ? isAdmin
-              ? "Set up your store team access."
-              : "Join to track orders, repairs & wishlists."
-            : isAdmin
-              ? "Sign in to your store workspace."
-              : "Sign in to your customer account."}
+            ? "Set up your store team access."
+            : "Sign in to your admin workspace."}
         </p>
-      </div>
-
-      <div className="role-toggle" role="tablist" aria-label="Account type">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={role === "customer"}
-          className={role === "customer" ? "active" : ""}
-          onClick={() => setRoleAndNotify("customer")}
-        >
-          <UserRound size={17} /> Customer
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={role === "admin"}
-          className={role === "admin" ? "active" : ""}
-          onClick={() => {
-            setRoleAndNotify("admin");
-            setMode("signin");
-            setError("");
-          }}
-        >
-          <ShieldCheck size={17} /> Admin / Staff
-        </button>
+        {usingSupabase ? (
+          <p className="auth-hint">Secured with Supabase authentication.</p>
+        ) : (
+          <p className="auth-hint">Demo mode — configure Supabase env vars for production auth.</p>
+        )}
       </div>
 
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
@@ -221,7 +201,7 @@ export function AuthPanel({ compact = false, initialMode = "signin", onRoleChang
             <Mail size={17} />
             <input
               type="email"
-              placeholder="you@example.com"
+              placeholder="you@store.com"
               value={form.email}
               onChange={(event) => update("email", event.target.value)}
               autoComplete="email"
@@ -244,35 +224,19 @@ export function AuthPanel({ compact = false, initialMode = "signin", onRoleChang
                 />
               </div>
             </label>
-            {isAdmin ? (
-              <label className="field">
-                <span>Store / Company</span>
-                <div className="field-input">
-                  <Building2 size={17} />
-                  <input
-                    type="text"
-                    placeholder="Grids Gold — MG Road"
-                    value={form.company}
-                    onChange={(event) => update("company", event.target.value)}
-                    autoComplete="organization"
-                  />
-                </div>
-              </label>
-            ) : (
-              <label className="field">
-                <span>City</span>
-                <div className="field-input">
-                  <Building2 size={17} />
-                  <input
-                    type="text"
-                    placeholder="Bengaluru"
-                    value={form.company}
-                    onChange={(event) => update("company", event.target.value)}
-                    autoComplete="address-level2"
-                  />
-                </div>
-              </label>
-            )}
+            <label className="field">
+              <span>Store / Company</span>
+              <div className="field-input">
+                <Building2 size={17} />
+                <input
+                  type="text"
+                  placeholder="Grids Gold — MG Road"
+                  value={form.company}
+                  onChange={(event) => update("company", event.target.value)}
+                  autoComplete="organization"
+                />
+              </div>
+            </label>
           </div>
         ) : null}
 
@@ -319,7 +283,7 @@ export function AuthPanel({ compact = false, initialMode = "signin", onRoleChang
             <label className="checkbox">
               <input type="checkbox" defaultChecked /> <span>Remember me</span>
             </label>
-            <button type="button" className="link-plain">
+            <button type="button" className="link-plain" disabled title="Coming soon">
               Forgot password?
             </button>
           </div>
@@ -339,22 +303,18 @@ export function AuthPanel({ compact = false, initialMode = "signin", onRoleChang
         ) : null}
       </form>
 
-      {role === "customer" ? (
-        <p className="auth-switch">
-          {isSignup ? "Already have an account?" : "New to Grids Gold?"}{" "}
-          <button
-            type="button"
-            onClick={() => {
-              setMode(isSignup ? "signin" : "signup");
-              setError("");
-            }}
-          >
-            {isSignup ? "Sign in" : "Create an account"}
-          </button>
-        </p>
-      ) : (
-        <p className="auth-switch">Admin access is by invitation only.</p>
-      )}
+      <p className="auth-switch">
+        {isSignup ? "Already have an account?" : "New to Grids Gold?"}{" "}
+        <button
+          type="button"
+          onClick={() => {
+            setMode(isSignup ? "signin" : "signup");
+            setError("");
+          }}
+        >
+          {isSignup ? "Sign in" : "Create an account"}
+        </button>
+      </p>
     </div>
   );
 }

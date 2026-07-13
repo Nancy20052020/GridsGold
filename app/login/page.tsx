@@ -24,7 +24,7 @@ const highlights = [
 
 const trust = [
   { icon: TrendingUp, label: "Live Gold Rate", value: "₹ 7,245 /gm" },
-  { icon: ShieldCheck, label: "Secure", value: "Cloud ready" },
+  { icon: ShieldCheck, label: "Secure", value: "Supabase auth" },
 ];
 
 function LoginContent() {
@@ -55,8 +55,8 @@ function LoginContent() {
           </h1>
           <p>
             {isSignup
-              ? "Join as a customer or sign in as staff to run your showroom from one elegant platform."
-              : "Sign in to your customer portal or admin workspace — inventory, billing and repairs in sync."}
+              ? "Create your staff account to run your showroom from one elegant platform."
+              : "Sign in to your admin workspace — inventory, billing and repairs in sync."}
           </p>
 
           <div className="auth-highlights">
