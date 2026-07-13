@@ -179,13 +179,14 @@ function CategoryDonut({
   const radius = 42;
   const circumference = 2 * Math.PI * radius;
   const segments = useMemo(() => {
-    let cursor = 0;
-    return categories.map((cat) => {
+    return categories.reduce<
+      { name: string; percent: number; value: number; color: string; length: number; dashoffset: number }[]
+    >((acc, cat) => {
       const length = (cat.percent / 100) * circumference;
-      const segment = { ...cat, length, dashoffset: -cursor };
-      cursor += length;
-      return segment;
-    });
+      const prev = acc[acc.length - 1];
+      const dashoffset = prev ? prev.dashoffset - prev.length : 0;
+      return [...acc, { ...cat, length, dashoffset }];
+    }, []);
   }, [categories, circumference]);
 
   return (
