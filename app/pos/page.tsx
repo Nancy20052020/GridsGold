@@ -12,6 +12,7 @@ import {
   Minus,
   Percent,
   Plus,
+  Printer,
   RotateCcw,
   ScanBarcode,
   Search,
@@ -25,14 +26,17 @@ import {
   X,
 } from "lucide-react";
 import { AppShell } from "../components/AppShell";
+import { BrandMark } from "../components/BrandMark";
 import { ItemImage } from "../components/ProductImage";
 import { SHOP_CATEGORIES } from "../lib/categories";
+import { srsLabel } from "../lib/srs";
 import {
   firstName,
   formatINR,
   itemPrice,
   itemStatus,
   useStore,
+  type Invoice,
   type Item,
   type Karat,
 } from "../lib/store";
@@ -90,7 +94,11 @@ export default function PosPage() {
   const [payments, setPayments] = useState<PaymentLine[]>([]);
   const [paymentMethod, setPaymentMethod] = useState<string>(POS_PAYMENTS[0]);
   const [heldBills, setHeldBills] = useState<HeldBill[]>([]);
-  const [receipt, setReceipt] = useState<{ number: string; total: number } | null>(null);
+  const [receipt, setReceipt] = useState<{
+    invoice: Invoice;
+    payments: PaymentLine[];
+    earnPoints: number;
+  } | null>(null);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showReturns, setShowReturns] = useState(false);
   const [promoIndex, setPromoIndex] = useState(0);
@@ -279,14 +287,23 @@ export default function PosPage() {
 
   function doCheckout() {
     if (!lines.length) return;
-    if (outstanding > 0 && payments.length === 0) {
-      setPayments([{ id: `pay-${Date.now()}`, method: paymentMethod, amount: total }]);
-    }
+    const payLines =
+      outstanding > 0 && payments.length === 0
+        ? [{ id: `pay-${Date.now()}`, method: paymentMethod, amount: total }]
+        : payments.length
+          ? payments
+          : [{ id: `pay-${Date.now()}`, method: paymentMethod, amount: total }];
+    const points = earnPoints;
     const inv = checkout(customerName);
-    setReceipt({ number: inv.number, total: inv.total });
+    setReceipt({
+      invoice: inv,
+      payments: payLines,
+      earnPoints: points,
+    });
     setPayments([]);
     setDiscountPct(0);
     setLoyaltyRedeem(0);
+    flash(`Bill ${inv.number} generated`);
   }
 
   useEffect(() => {
@@ -302,15 +319,6 @@ export default function PosPage() {
   return (
     <AppShell searchPlaceholder="Search POS item, customer or SKU...">
       <section className="page-content pos-v2">
-        <div className="pos-v2-bg" aria-hidden="true">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/moment_image.png" alt="" className="pos-v2-bg-img" />
-          <div className="pos-v2-bg-veil" />
-          <div className="pos-v2-sparkle pos-v2-sparkle-a" />
-          <div className="pos-v2-sparkle pos-v2-sparkle-b" />
-          <div className="pos-v2-sparkle pos-v2-sparkle-c" />
-        </div>
-
         <div className="pos-v2-promo" role="status">
           <Gift size={16} />
           <span key={promoIndex} className="pos-v2-promo-text">{PROMO_BANNERS[promoIndex]}</span>
@@ -644,15 +652,59 @@ export default function PosPage() {
       </section>
 
       {receipt ? (
-        <div className="modal-backdrop" role="dialog" aria-modal="true">
-          <div className="modal-card pos-v2-receipt">
+        <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="pos-bill-title">
+          <div className="modal-card wide receipt pos-v2-bill">
             <button className="modal-close" type="button" onClick={() => setReceipt(null)} aria-label="Close"><X size={18} /></button>
-            <span className="modal-icon"><CheckCircle2 size={30} /></span>
-            <h2>Payment successful</h2>
-            <p>Invoice <strong>{receipt.number}</strong> is ready. Loyalty +{earnPoints} pts.</p>
-            <div className="modal-total">{money(receipt.total)}</div>
-            <Link className="ghost-action" href="/sales/invoices" style={{ width: "100%", justifyContent: "center" }}>View / print receipt</Link>
-            <button className="gold-action full" type="button" onClick={() => setReceipt(null)}>New sale</button>
+            <div className="pos-v2-bill-banner">
+              <CheckCircle2 size={22} />
+              <div>
+                <h2 id="pos-bill-title">Bill generated</h2>
+                <p>Payment successful · Loyalty +{receipt.earnPoints} pts · {selectedBranch}</p>
+              </div>
+            </div>
+            <div className="receipt-head">
+              <div className="receipt-brand"><BrandMark className="brand-mark" /> Grids Gold</div>
+              <div>
+                <strong>{receipt.invoice.number}</strong>
+                <small>{receipt.invoice.date}</small>
+              </div>
+            </div>
+            <div className="receipt-meta">
+              <div><span>Billed to</span><strong>{receipt.invoice.customer}</strong></div>
+              <div><span>Status</span><strong>{srsLabel(receipt.invoice.status)}</strong></div>
+            </div>
+            <table className="receipt-table">
+              <thead><tr><th>Item</th><th>Qty</th><th>Amount</th></tr></thead>
+              <tbody>
+                {receipt.invoice.lines.map((l, i) => (
+                  <tr key={`${l.name}-${i}`}><td>{l.name}</td><td>{l.qty}</td><td>{formatINR(l.amount)}</td></tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="totals">
+              <div><span>Sub Total</span><strong>{formatINR(receipt.invoice.subtotal)}</strong></div>
+              <div><span>GST (3%)</span><strong>{formatINR(receipt.invoice.gst)}</strong></div>
+              <div className="grand"><span>Total</span><strong>{formatINR(receipt.invoice.total)}</strong></div>
+            </div>
+            {receipt.payments.length ? (
+              <div className="pos-v2-bill-pays">
+                <span>Payments</span>
+                {receipt.payments.map((p) => (
+                  <div key={p.id}><em>{p.method}</em><strong>{money(p.amount)}</strong></div>
+                ))}
+              </div>
+            ) : null}
+            <div className="pos-v2-bill-actions">
+              <button className="gold-action full" type="button" onClick={() => window.print()}>
+                <Printer size={16} /> Print bill
+              </button>
+              <Link className="ghost-action full" href={`/sales/invoices?id=${receipt.invoice.id}`} style={{ justifyContent: "center" }}>
+                Open in Sales Invoices
+              </Link>
+              <button className="ghost-action full" type="button" onClick={() => setReceipt(null)}>
+                New sale
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
