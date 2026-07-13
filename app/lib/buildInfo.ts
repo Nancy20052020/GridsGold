@@ -1,2 +1,2 @@
 /** Shown in admin sidebar — bump when shipping UI updates. */
-export const BUILD_TAG = "Jul 13 · Landing price contrast";
+export const BUILD_TAG = "Jul 14 · New items use ring_6";
