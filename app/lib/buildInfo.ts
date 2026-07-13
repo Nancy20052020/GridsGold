@@ -1,2 +1,2 @@
 /** Shown in admin sidebar — bump when shipping UI updates. */
-export const BUILD_TAG = "Jul 13 · Dash v2";
+export const BUILD_TAG = "Jul 13 · Dash v3";
