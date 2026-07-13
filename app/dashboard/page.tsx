@@ -178,33 +178,36 @@ function CategoryDonut({
 }) {
   const radius = 42;
   const circumference = 2 * Math.PI * radius;
-  let offset = 0;
+  const segments = useMemo(() => {
+    let cursor = 0;
+    return categories.map((cat) => {
+      const length = (cat.percent / 100) * circumference;
+      const segment = { ...cat, length, dashoffset: -cursor };
+      cursor += length;
+      return segment;
+    });
+  }, [categories, circumference]);
 
   return (
     <div className="dash-donut">
       <div className="dash-donut-visual">
         <svg viewBox="0 0 120 120" aria-hidden="true">
           <circle cx="60" cy="60" r={radius} className="dash-donut-track" />
-          {categories.map((cat) => {
-            const length = (cat.percent / 100) * circumference;
-            const segment = (
-              <circle
-                key={cat.name}
-                cx="60"
-                cy="60"
-                r={radius}
-                fill="none"
-                stroke={cat.color}
-                strokeWidth="14"
-                strokeDasharray={`${length} ${circumference - length}`}
-                strokeDashoffset={-offset}
-                strokeLinecap="butt"
-                transform="rotate(-90 60 60)"
-              />
-            );
-            offset += length;
-            return segment;
-          })}
+          {segments.map((cat) => (
+            <circle
+              key={cat.name}
+              cx="60"
+              cy="60"
+              r={radius}
+              fill="none"
+              stroke={cat.color}
+              strokeWidth="14"
+              strokeDasharray={`${cat.length} ${circumference - cat.length}`}
+              strokeDashoffset={cat.dashoffset}
+              strokeLinecap="butt"
+              transform="rotate(-90 60 60)"
+            />
+          ))}
           <text x="60" y="56" textAnchor="middle" className="dash-donut-center-label">Mix</text>
           <text x="60" y="72" textAnchor="middle" className="dash-donut-center-value">
             {categories[0]?.percent ?? 0}%
