@@ -139,6 +139,19 @@ export const SRS_REPORTS = [
   "Rate History",
 ] as const;
 
+export type SrsReport = (typeof SRS_REPORTS)[number];
+
+/** §12 report families — sales, stock, repairs, finance, tax */
+export const SRS_REPORT_CATEGORIES = {
+  Sales: ["Sales Summary", "Sales by Category", "Customer History"],
+  Stock: ["Inventory Balance", "Inventory Aging", "Transfer History", "Purchase History"],
+  Repairs: ["Repair Pipeline"],
+  Finance: ["Receivables Aging", "Payables Aging"],
+  Tax: ["Tax Summary", "Rate History"],
+} as const satisfies Record<string, readonly SrsReport[]>;
+
+export type SrsReportCategory = keyof typeof SRS_REPORT_CATEGORIES;
+
 /** Demo locations per FR-ORG-002 (branch → location). */
 export const DEMO_LOCATIONS = [
   { code: "SHOW-01", name: "Main Showroom", type: "showroom", branch: "Main Branch" },

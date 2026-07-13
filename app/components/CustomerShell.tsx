@@ -43,7 +43,7 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
 
   function signOut() {
     logout();
-    router.push("/");
+    router.push("/login");
   }
 
   return (
@@ -171,7 +171,7 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
           <Link href="/portal">Shop</Link>
           <Link href="/portal/orders">Orders</Link>
           <Link href="/portal/repairs">Repairs</Link>
-          <Link href="/">Sign out</Link>
+          <button type="button" className="portal-footer-link" onClick={signOut}>Sign out</button>
         </div>
       </footer>
     </div>

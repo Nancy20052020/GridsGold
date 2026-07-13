@@ -61,7 +61,7 @@ export function AppShell({ children, searchPlaceholder = "Search item, customer,
 
   function signOut() {
     logout();
-    router.push("/");
+    router.push("/login");
   }
 
   return (
