@@ -53,11 +53,24 @@ export const REPAIR_BOARD_FLOW: RepairStatus[] = [
 export const PO_STATUSES = [
   "draft",
   "approved",
+  "ordered",
+  "in_transit",
   "partial",
+  "received",
   "closed",
   "cancelled",
 ] as const;
 export type PoStatus = (typeof PO_STATUSES)[number];
+
+/** Kanban purchase workflow (excludes cancelled / partial side-track). */
+export const PO_BOARD_FLOW: PoStatus[] = [
+  "draft",
+  "approved",
+  "ordered",
+  "in_transit",
+  "received",
+  "closed",
+];
 
 export const ITEM_STATUSES = [
   "available",
@@ -198,7 +211,7 @@ const LABELS: Record<string, string> = {
   draft: "Draft",
   posted: "Posted",
   paid: "Paid",
-  partial: "Partial",
+  partial: "Partial Receipt",
   voided: "Voided",
   refunded: "Refunded",
   exchanged: "Exchanged",
@@ -211,8 +224,10 @@ const LABELS: Record<string, string> = {
   ready: "Ready for Pickup",
   delivered: "Delivered",
   cancelled: "Cancelled",
-  approved: "Approved",
-  closed: "Closed",
+  approved: "Approval",
+  ordered: "Ordered",
+  in_transit: "In Transit",
+  closed: "Completed",
   shipped: "Shipped",
   showroom: "Showroom",
   warehouse: "Warehouse",
@@ -280,8 +295,11 @@ export function migratePoStatus(status: string): PoStatus {
     Draft: "draft",
     Sent: "approved",
     submitted: "approved",
-    Received: "closed",
+    Ordered: "ordered",
+    "In Transit": "in_transit",
+    Received: "received",
     partially_received: "partial",
+    Completed: "closed",
   };
   if (PO_STATUSES.includes(status as PoStatus)) return status as PoStatus;
   return map[status] ?? "draft";
@@ -336,6 +354,24 @@ export function migrateCustomerType(type: string): CustomerType {
 export function srsPillTone(
   status: string,
 ): "success" | "warning" | "danger" {
+  const warning = new Set([
+    "partial",
+    "posted",
+    "in_progress",
+    "awaiting_approval",
+    "estimate",
+    "quality_check",
+    "ordered",
+    "in_transit",
+    "approved",
+    "submitted",
+    "partially_received",
+    "diagnosis",
+    "released",
+    "qc",
+    "reserved",
+    "repair",
+  ]);
   const success = new Set([
     "paid",
     "closed",
@@ -344,22 +380,7 @@ export function srsPillTone(
     "completed",
     "available",
     "active",
-    "approved",
-  ]);
-  const warning = new Set([
-    "partial",
-    "posted",
-    "in_progress",
-    "awaiting_approval",
-    "estimate",
-    "quality_check",
-    "submitted",
-    "partially_received",
-    "diagnosis",
-    "released",
-    "qc",
-    "reserved",
-    "repair",
+    "received",
   ]);
   if (success.has(status)) return "success";
   if (warning.has(status)) return "warning";
@@ -377,4 +398,10 @@ export function stockToItemStatus(stock: number): ItemStatus {
 export function nextRepairStatus(current: RepairStatus): RepairStatus | null {
   const idx = REPAIR_BOARD_FLOW.indexOf(current);
   return idx >= 0 && idx < REPAIR_BOARD_FLOW.length - 1 ? REPAIR_BOARD_FLOW[idx + 1] : null;
+}
+
+/** Next purchase-order status in the kanban workflow. */
+export function nextPoStatus(current: PoStatus): PoStatus | null {
+  const idx = PO_BOARD_FLOW.indexOf(current);
+  return idx >= 0 && idx < PO_BOARD_FLOW.length - 1 ? PO_BOARD_FLOW[idx + 1] : null;
 }
