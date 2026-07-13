@@ -1,17 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Printer, ReceiptText, ShoppingCart, X } from "lucide-react";
 import { AppShell } from "../../components/AppShell";
 import { BrandMark } from "../../components/BrandMark";
 import { srsLabel, srsPillTone } from "../../lib/srs";
 import { useStore, formatINR, type Invoice } from "../../lib/store";
 
-export default function InvoicesPage() {
+function InvoicesContent() {
   const { invoices } = useStore();
-  const [selected, setSelected] = useState<Invoice | null>(null);
+  const searchParams = useSearchParams();
+  const urlId = searchParams.get("id");
+  const [manual, setManual] = useState<Invoice | null>(null);
+  const [dismissed, setDismissed] = useState(false);
   const totalSales = invoices.reduce((s, i) => s + i.total, 0);
+
+  const fromUrl =
+    !dismissed && urlId
+      ? invoices.find((inv) => inv.id === urlId || inv.number === urlId) ?? null
+      : null;
+  const selected = manual ?? fromUrl;
+
+  function openInvoice(inv: Invoice) {
+    setManual(inv);
+    setDismissed(true);
+  }
+
+  function closeInvoice() {
+    setManual(null);
+    setDismissed(true);
+  }
 
   return (
     <AppShell searchPlaceholder="Search invoices...">
@@ -43,7 +63,7 @@ export default function InvoicesPage() {
               </thead>
               <tbody>
                 {invoices.map((inv) => (
-                  <tr key={inv.id} className="clickable" onClick={() => setSelected(inv)}>
+                  <tr key={inv.id} className="clickable" onClick={() => openInvoice(inv)}>
                     <td><strong>{inv.number}</strong></td>
                     <td>{inv.customer}</td>
                     <td>{inv.lines.reduce((s, l) => s + l.qty, 0)} item(s)</td>
@@ -64,7 +84,7 @@ export default function InvoicesPage() {
       {selected ? (
         <div className="modal-backdrop" role="dialog" aria-modal="true">
           <div className="modal-card wide receipt">
-            <button className="modal-close" type="button" onClick={() => setSelected(null)} aria-label="Close"><X size={18} /></button>
+            <button className="modal-close" type="button" onClick={closeInvoice} aria-label="Close"><X size={18} /></button>
             <div className="receipt-head">
               <div className="receipt-brand"><BrandMark className="brand-mark" /> Grids Gold</div>
               <div>
@@ -95,5 +115,19 @@ export default function InvoicesPage() {
         </div>
       ) : null}
     </AppShell>
+  );
+}
+
+export default function InvoicesPage() {
+  return (
+    <Suspense fallback={
+      <AppShell searchPlaceholder="Search invoices...">
+        <section className="page-content">
+          <p className="muted">Loading invoices…</p>
+        </section>
+      </AppShell>
+    }>
+      <InvoicesContent />
+    </Suspense>
   );
 }
