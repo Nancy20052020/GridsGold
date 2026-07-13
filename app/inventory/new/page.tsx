@@ -7,6 +7,7 @@ import { ArrowLeft, PackagePlus } from "lucide-react";
 import { INVENTORY_CATEGORIES, PRODUCT_ICONS } from "../../lib/categories";
 import { AppShell } from "../../components/AppShell";
 import { useStore, itemPrice, formatINR, type Karat } from "../../lib/store";
+import { defaultProductImage } from "../../lib/productImages";
 
 const categories = [...INVENTORY_CATEGORIES];
 const karats: Karat[] = ["24K", "22K", "18K", "925", "PT950"];
@@ -58,6 +59,7 @@ export default function AddItemPage() {
       stock: Number(form.stock) || 0,
       branch: form.branch,
       icon: form.icon,
+      image: defaultProductImage(form.category, form.icon),
     });
     router.push("/inventory");
   }
