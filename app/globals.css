@@ -2415,8 +2415,14 @@ a.ghost-action {
 
 .landing-site {
   min-height: 100vh;
+  /* Keep marketing page light even when app theme is dark */
+  --ink: #101828;
+  --muted: #667085;
+  --panel: #ffffff;
+  --bg: #ffffff;
+  --line: #e4e7ec;
   background: #fff;
-  color: var(--ink);
+  color: #101828;
 }
 
 .landing-nav-wrap {
@@ -3816,6 +3822,20 @@ a.ghost-action {
 .landing-price-amount strong {
   font-size: 34px;
   letter-spacing: -0.02em;
+  color: #061327;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.landing-price-card h3 {
+  margin: 0;
+  color: #061327;
+  font-size: 20px;
+}
+
+.landing-price-card.dark h3,
+.landing-price-card.dark .landing-price-amount strong {
+  color: #ffffff;
 }
 
 .landing-price-amount span {

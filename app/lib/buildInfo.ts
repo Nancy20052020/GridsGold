@@ -1,2 +1,2 @@
 /** Shown in admin sidebar — bump when shipping UI updates. */
-export const BUILD_TAG = "Jul 13 · Geographic live map";
+export const BUILD_TAG = "Jul 13 · Landing price contrast";
