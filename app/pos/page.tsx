@@ -20,17 +20,14 @@ import { useStore, itemPrice, formatINR } from "../lib/store";
 type PaymentLine = { id: string; method: string; amount: number };
 
 export default function PosPage() {
-  const { items, rates, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, customers, selectedBranch } = useStore();
+  const { items, rates, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, customers } = useStore();
   const [query, setQuery] = useState("");
   const [customer, setCustomer] = useState("Walk-in Customer");
   const [customerPhone, setCustomerPhone] = useState("");
   const [receipt, setReceipt] = useState<{ number: string; total: number } | null>(null);
   const [scanValue, setScanValue] = useState("");
   const [addOpen, setAddOpen] = useState(false);
-  const [tab, setTab] = useState<"client" | "workshop">("client");
-  const [status, setStatus] = useState("Created");
   const [payments, setPayments] = useState<PaymentLine[]>([]);
-  const [seller] = useState("Store Admin");
 
   const lines = cart
     .map((line) => {
@@ -82,18 +79,12 @@ export default function PosPage() {
           </div>
           <div className="sales-workspace-toolbar">
             <button type="button" className="gold-action" onClick={() => setAddOpen(true)}>+ Add item</button>
-            <Link className="ghost-action" href="/inventory">Use material from stock</Link>
-            <Link className="ghost-action" href="/repairs">Workshop job</Link>
+            <Link className="export-button subtle" href="/sales/invoices">Invoices</Link>
           </div>
         </div>
 
         <div className="sales-workspace">
           <article className="sales-main erp-panel">
-            <div className="sales-tabs">
-              <button type="button" className={tab === "client" ? "active" : ""} onClick={() => setTab("client")}>Client</button>
-              <button type="button" className={tab === "workshop" ? "active" : ""} onClick={() => setTab("workshop")}>Workshop</button>
-            </div>
-
             {lines.length === 0 ? (
               <div className="sales-empty">
                 <ShoppingCart size={42} />
@@ -217,37 +208,6 @@ export default function PosPage() {
               {cart.length ? (
                 <button type="button" className="ghost-action full" onClick={clearCart}>Clear sale</button>
               ) : null}
-            </section>
-
-            <section className="sales-side-block">
-              <h3>Details</h3>
-              <label className="field">
-                <span>Date</span>
-                <div className="field-input"><input readOnly value={new Date().toLocaleString("en-IN")} /></div>
-              </label>
-              <label className="field">
-                <span>Seller</span>
-                <div className="field-input"><input readOnly value={seller} /></div>
-              </label>
-              <label className="field">
-                <span>Sales channel</span>
-                <div className="field-input"><input readOnly value="Grids Gold Showroom" /></div>
-              </label>
-              <label className="field">
-                <span>Branch</span>
-                <div className="field-input"><input readOnly value={selectedBranch} /></div>
-              </label>
-              <label className="field">
-                <span>Status</span>
-                <div className="field-input">
-                  <select value={status} onChange={(e) => setStatus(e.target.value)}>
-                    <option>Created</option>
-                    <option>In progress</option>
-                    <option>Completed</option>
-                    <option>Delivered</option>
-                  </select>
-                </div>
-              </label>
             </section>
           </aside>
         </div>

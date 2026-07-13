@@ -6,26 +6,22 @@ import { AppShell } from "../components/AppShell";
 import { useStore, formatINR } from "../lib/store";
 import { downloadCsv } from "../lib/export";
 
-const tabs = ["Overview", "Payments", "Expenses", "Ledger", "GST / Tax"] as const;
+const tabs = ["Overview", "Expenses"] as const;
 const expenseCats = ["Rent", "Salaries", "Marketing", "Utilities", "Supplies", "Other"];
 
 export default function FinancePage() {
-  const { invoices, expenses, addExpense, suppliers } = useStore();
+  const { invoices, expenses, addExpense } = useStore();
   const [tab, setTab] = useState<(typeof tabs)[number]>("Overview");
   const [form, setForm] = useState({ category: "Rent", note: "", amount: "" });
 
   const revenue = invoices.reduce((s, i) => s + i.total, 0);
   const expenseTotal = expenses.reduce((s, e) => s + e.amount, 0);
-  const gst = invoices.reduce((s, i) => s + i.gst, 0);
-  const payable = suppliers.reduce((s, x) => s + x.balance, 0);
   const net = revenue - expenseTotal;
 
   const cards = [
     { label: "Revenue", value: formatINR(revenue), tone: "green" },
     { label: "Expenses", value: formatINR(expenseTotal), tone: "red" },
     { label: "Net Position", value: formatINR(net), tone: "gold" },
-    { label: "GST Collected", value: formatINR(gst), tone: "blue" },
-    { label: "Payables (Suppliers)", value: formatINR(payable), tone: "violet" },
   ];
 
   function submitExpense(e: React.FormEvent) {
@@ -64,19 +60,6 @@ export default function FinancePage() {
           </div>
         ) : null}
 
-        {tab === "Payments" ? (
-          <article className="erp-panel table-panel">
-            <div className="table-scroll">
-              <table className="data-table">
-                <thead><tr><th>Invoice</th><th>Customer</th><th>Method</th><th>Amount</th><th>Date</th></tr></thead>
-                <tbody>
-                  {invoices.map((i) => <tr key={i.id}><td>{i.number}</td><td>{i.customer}</td><td>Card / UPI</td><td><strong>{formatINR(i.total)}</strong></td><td>{i.date}</td></tr>)}
-                </tbody>
-              </table>
-            </div>
-          </article>
-        ) : null}
-
         {tab === "Expenses" ? (
           <div className="two-col">
             <form className="erp-panel form-panel" onSubmit={submitExpense}>
@@ -97,28 +80,6 @@ export default function FinancePage() {
                 </table>
               </div>
             </article>
-          </div>
-        ) : null}
-
-        {tab === "Ledger" ? (
-          <article className="erp-panel table-panel">
-            <div className="table-scroll">
-              <table className="data-table">
-                <thead><tr><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th></tr></thead>
-                <tbody>
-                  {invoices.map((i) => <tr key={i.id}><td>{i.date}</td><td>Sale · {i.number}</td><td>—</td><td style={{ color: "#087f45", fontWeight: 700 }}>{formatINR(i.total)}</td></tr>)}
-                  {expenses.map((e) => <tr key={e.id}><td>{e.date}</td><td>Expense · {e.category}</td><td style={{ color: "#c92a2a", fontWeight: 700 }}>{formatINR(e.amount)}</td><td>—</td></tr>)}
-                </tbody>
-              </table>
-            </div>
-          </article>
-        ) : null}
-
-        {tab === "GST / Tax" ? (
-          <div className="stat-cards">
-            <article className="erp-kpi blue"><span>Taxable Value</span><strong>{formatINR(revenue - gst)}</strong></article>
-            <article className="erp-kpi gold"><span>GST @ 3%</span><strong>{formatINR(gst)}</strong></article>
-            <article className="erp-kpi green"><span>Total Collected</span><strong>{formatINR(revenue)}</strong></article>
           </div>
         ) : null}
       </section>
