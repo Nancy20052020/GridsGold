@@ -31,6 +31,7 @@ import {
   liveFeedToRates,
   priceInCurrency,
   tickUsdSpots,
+  type LiveCountry,
   type MetalId,
 } from "../lib/liveRates";
 import { formatINR, useStore } from "../lib/store";
@@ -38,7 +39,13 @@ import { formatINR, useStore } from "../lib/store";
 const FAV_KEY = "gg_live_rate_favs";
 const HUB_TABS = ["Live Map", "Compare", "Insights", "Alerts", "News"] as const;
 type HubTab = (typeof HUB_TABS)[number];
-type MapMode = "map" | "globe";
+
+/** Equirectangular pin % for the geographic world map asset. */
+function pinStyle(c: LiveCountry): { left: string; top: string } {
+  const left = ((c.lon + 180) / 360) * 100;
+  const top = ((90 - c.lat) / 180) * 100;
+  return { left: `${left}%`, top: `${Math.min(88, Math.max(8, top))}%` };
+}
 
 function loadFavs(): string[] {
   try {
@@ -56,7 +63,6 @@ export default function GoldRatesPage() {
   const [hub, setHub] = useState<HubTab>("Live Map");
   const [countryCode, setCountryCode] = useState("IN");
   const [hoverCode, setHoverCode] = useState<string | null>(null);
-  const [mapMode, setMapMode] = useState<MapMode>("map");
   const [compareA, setCompareA] = useState("IN");
   const [compareB, setCompareB] = useState("AE");
   const [usdSpots, setUsdSpots] = useState(USD_SPOT_SEED);
@@ -230,93 +236,47 @@ export default function GoldRatesPage() {
               <section className="live-glass live-v2-map-hero">
                 <div className="live-v2-section-head">
                   <h2><MapPin size={16} /> Global rate map</h2>
-                  <div className="live-v2-map-toggle" role="group" aria-label="Map mode">
-                    <button type="button" className={mapMode === "map" ? "active" : ""} onClick={() => setMapMode("map")}>World map</button>
-                    <button type="button" className={mapMode === "globe" ? "active" : ""} onClick={() => setMapMode("globe")}>3D globe</button>
-                  </div>
+                  <span className="live-v2-map-hint">Hover · click a market pin</span>
                 </div>
 
-                {mapMode === "map" ? (
-                  <div className="live-v2-map live-v2-map-lg" onMouseLeave={() => setHoverCode(null)}>
-                    <svg className="live-v2-map-svg" viewBox="0 0 1000 480" aria-hidden>
-                      <defs>
-                        <linearGradient id="liveOcean" x1="0" y1="0" x2="1" y2="1">
-                          <stop offset="0%" stopColor="#0b1f36" />
-                          <stop offset="55%" stopColor="#14324f" />
-                          <stop offset="100%" stopColor="#0f2740" />
-                        </linearGradient>
-                        <linearGradient id="liveLand" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="rgba(255,215,109,0.22)" />
-                          <stop offset="100%" stopColor="rgba(139,124,246,0.18)" />
-                        </linearGradient>
-                      </defs>
-                      <rect width="1000" height="480" fill="url(#liveOcean)" rx="24" />
-                      {/* Stylized continents */}
-                      <path fill="url(#liveLand)" d="M70 140 C120 90 210 95 250 130 C290 160 280 210 230 230 C170 255 90 220 70 180 Z" />
-                      <path fill="url(#liveLand)" d="M250 250 C290 240 320 270 310 310 C295 350 250 360 230 320 C215 285 225 260 250 250 Z" />
-                      <path fill="url(#liveLand)" d="M430 110 C500 85 560 100 590 140 C620 185 580 230 520 235 C455 240 410 185 430 110 Z" />
-                      <path fill="url(#liveLand)" d="M560 200 C610 190 650 220 670 270 C690 320 640 350 590 340 C540 330 525 255 560 200 Z" />
-                      <path fill="url(#liveLand)" d="M680 150 C760 120 850 140 890 190 C930 245 880 280 800 285 C720 290 650 220 680 150 Z" />
-                      <path fill="url(#liveLand)" d="M780 300 C840 290 900 320 920 370 C940 410 880 430 830 415 C780 400 750 330 780 300 Z" />
-                      <g opacity="0.35">
-                        {Array.from({ length: 18 }).map((_, i) => (
-                          <line key={`h${i}`} x1="40" y1={40 + i * 24} x2="960" y2={40 + i * 24} stroke="rgba(255,255,255,0.08)" strokeWidth="0.6" />
-                        ))}
-                        {Array.from({ length: 20 }).map((_, i) => (
-                          <line key={`v${i}`} x1={50 + i * 45} y1="30" x2={50 + i * 45} y2="450" stroke="rgba(255,255,255,0.06)" strokeWidth="0.6" />
-                        ))}
-                      </g>
-                    </svg>
+                <div className="live-v2-map live-v2-map-lg live-v2-map-geo" onMouseLeave={() => setHoverCode(null)}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    className="live-v2-map-geo-img"
+                    src="/images/world-map.svg"
+                    alt=""
+                    aria-hidden
+                    draggable={false}
+                  />
 
-                    {LIVE_COUNTRIES.map((c) => {
-                      const active = c.code === countryCode;
-                      const hovered = c.code === hoverCode;
-                      const price = priceInCurrency(usdSpots[focusMetal], c);
-                      return (
-                        <button
-                          key={c.code}
-                          type="button"
-                          className={`live-v2-pin ${active ? "active" : ""} ${hovered ? "hover" : ""} ${favorites.includes(c.code) ? "fav" : ""}`}
-                          style={{ left: `${c.x}%`, top: `${c.y}%` }}
-                          onMouseEnter={() => setHoverCode(c.code)}
-                          onFocus={() => setHoverCode(c.code)}
-                          onClick={() => selectCountry(c.code)}
-                          aria-label={`${c.name} ${formatLive(price, c)}`}
-                        >
-                          <i />
-                          <em>{c.code}</em>
-                          {(active || hovered) ? (
-                            <span className="live-v2-pin-tip">
-                              <strong>{c.name}</strong>
-                              <small>{focusMeta.label}</small>
-                              <b>{formatLive(price, c)}</b>
-                            </span>
-                          ) : null}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="live-v2-globe-stage live-v2-globe-lg">
-                    <div className="live-v2-globe">
-                      <div className="live-v2-globe-sphere">
-                        {LIVE_COUNTRIES.map((c) => (
-                          <button
-                            key={c.code}
-                            type="button"
-                            className={`live-v2-globe-pin ${c.code === countryCode ? "active" : ""}`}
-                            style={{ transform: `rotateY(${c.lon}deg) rotateX(${-c.lat * 0.55}deg) translateZ(118px)` }}
-                            onClick={() => selectCountry(c.code)}
-                            aria-label={c.name}
-                          >
-                            <span>{c.code}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <p className="live-v2-globe-hint">Hover pauses spin · click a pin to load rates</p>
-                  </div>
-                )}
+                  {LIVE_COUNTRIES.map((c) => {
+                    const active = c.code === countryCode;
+                    const hovered = c.code === hoverCode;
+                    const price = priceInCurrency(usdSpots[focusMetal], c);
+                    return (
+                      <button
+                        key={c.code}
+                        type="button"
+                        className={`live-v2-pin ${active ? "active" : ""} ${hovered ? "hover" : ""} ${favorites.includes(c.code) ? "fav" : ""}`}
+                        style={pinStyle(c)}
+                        onMouseEnter={() => setHoverCode(c.code)}
+                        onFocus={() => setHoverCode(c.code)}
+                        onClick={() => selectCountry(c.code)}
+                        aria-label={`${c.name} ${formatLive(price, c)}`}
+                      >
+                        <i />
+                        <em>{c.code}</em>
+                        {(active || hovered) ? (
+                          <span className="live-v2-pin-tip">
+                            <strong>{c.name}</strong>
+                            <small>{focusMeta.label}</small>
+                            <b>{formatLive(price, c)}</b>
+                          </span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </div>
 
                 <div className="live-v2-map-legend">
                   <span><i className="dot gold" /> Selected</span>
