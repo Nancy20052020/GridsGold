@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
   CalendarDays,
   Package,
-  ReceiptText,
   ShoppingCart,
+  TrendingUp,
   UserRound,
   Wrench,
 } from "lucide-react";
@@ -25,6 +25,136 @@ import { AppShell } from "../components/AppShell";
 import { firstName, formatINR, itemStatus, useStore } from "../lib/store";
 
 type TrendPoint = { label: string; value: number };
+type ChartCoord = TrendPoint & { x: number; y: number };
+
+function buildChartCoords(points: TrendPoint[]): ChartCoord[] {
+  const max = Math.max(...points.map((p) => p.value), 0.1) * 1.08;
+  const min = Math.min(...points.map((p) => p.value), 0) * 0.95;
+  const range = max - min || 1;
+  const last = Math.max(points.length - 1, 1);
+
+  return points.map((point, index) => ({
+    ...point,
+    x: 4 + (index / last) * 92,
+    y: 92 - ((point.value - min) / range) * 78,
+  }));
+}
+
+function smoothLinePath(coords: ChartCoord[]) {
+  if (coords.length < 2) return coords.length ? `M ${coords[0].x} ${coords[0].y}` : "";
+
+  let path = `M ${coords[0].x} ${coords[0].y}`;
+  for (let i = 0; i < coords.length - 1; i += 1) {
+    const p0 = coords[i - 1] ?? coords[i];
+    const p1 = coords[i];
+    const p2 = coords[i + 1];
+    const p3 = coords[i + 2] ?? p2;
+    const cp1x = p1.x + (p2.x - p0.x) / 6;
+    const cp1y = p1.y + (p2.y - p0.y) / 6;
+    const cp2x = p2.x - (p3.x - p1.x) / 6;
+    const cp2y = p2.y - (p3.y - p1.y) / 6;
+    path += ` C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${p2.x} ${p2.y}`;
+  }
+  return path;
+}
+
+function SmoothSalesChart({ points }: { points: TrendPoint[] }) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(points.length - 1);
+
+  const coords = useMemo(() => buildChartCoords(points), [points]);
+  const linePath = useMemo(() => smoothLinePath(coords), [coords]);
+  const areaPath = `${linePath} L ${coords[coords.length - 1]?.x ?? 96} 96 L ${coords[0]?.x ?? 4} 96 Z`;
+  const focus = coords[active] ?? coords[coords.length - 1];
+  const total = points.reduce((sum, p) => sum + p.value, 0);
+
+  function pickIndex(clientX: number) {
+    const rect = wrapRef.current?.getBoundingClientRect();
+    if (!rect || coords.length === 0) return;
+    const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
+    const x = 4 + ratio * 92;
+    let nearest = 0;
+    let distance = Number.POSITIVE_INFINITY;
+    coords.forEach((coord, index) => {
+      const d = Math.abs(coord.x - x);
+      if (d < distance) {
+        distance = d;
+        nearest = index;
+      }
+    });
+    setActive(nearest);
+  }
+
+  return (
+    <div
+      className="dash-chart"
+      ref={wrapRef}
+      onMouseLeave={() => setActive(points.length - 1)}
+      onMouseMove={(e) => pickIndex(e.clientX)}
+      onTouchMove={(e) => pickIndex(e.touches[0]?.clientX ?? 0)}
+    >
+      <div className="dash-chart-summary">
+        <div>
+          <span className="dash-chart-kicker">Sales trend</span>
+          <strong>₹ {focus?.value.toFixed(2) ?? "0.00"} L</strong>
+          <small>{focus?.label ?? "—"}</small>
+        </div>
+        <div className="dash-chart-stat">
+          <TrendingUp size={16} />
+          <span>{total.toFixed(1)} L total</span>
+        </div>
+      </div>
+
+      <div className="dash-chart-canvas">
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+          <defs>
+            <linearGradient id="dashAreaFill" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stopColor="#f2b33d" stopOpacity="0.28" />
+              <stop offset="55%" stopColor="#1d64d8" stopOpacity="0.12" />
+              <stop offset="100%" stopColor="#1d64d8" stopOpacity="0" />
+            </linearGradient>
+            <linearGradient id="dashLineStroke" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0%" stopColor="#1d64d8" />
+              <stop offset="100%" stopColor="#e6a520" />
+            </linearGradient>
+          </defs>
+
+          {[22, 42, 62, 82].map((y) => (
+            <line key={y} x1="4" x2="96" y1={y} y2={y} className="dash-chart-grid" vectorEffect="non-scaling-stroke" />
+          ))}
+
+          <path d={areaPath} className="dash-chart-area" fill="url(#dashAreaFill)" />
+          <path d={linePath} className="dash-chart-line" fill="none" stroke="url(#dashLineStroke)" vectorEffect="non-scaling-stroke" />
+
+          {focus ? (
+            <line
+              x1={focus.x}
+              x2={focus.x}
+              y1="12"
+              y2="96"
+              className="dash-chart-cursor"
+              vectorEffect="non-scaling-stroke"
+            />
+          ) : null}
+        </svg>
+      </div>
+
+      <div className="dash-chart-axis">
+        {points.map((point, index) => (
+          <button
+            key={point.label}
+            type="button"
+            className={index === active ? "active" : ""}
+            onMouseEnter={() => setActive(index)}
+            onFocus={() => setActive(index)}
+          >
+            {point.label.replace("Week ", "W")}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const { rates, currentUser, invoices, customers, items, repairs, movements } = useStore();
@@ -92,6 +222,14 @@ export default function DashboardPage() {
           })}
         </section>
 
+        <article className="dash-card dash-chart-card">
+          <div className="dash-card-head">
+            <h2>Revenue Overview</h2>
+            <Link href="/reports">Full report</Link>
+          </div>
+          <SmoothSalesChart points={trend} />
+        </article>
+
         <div className="dash-layout">
           <div className="dash-main">
             <article className="dash-card">
@@ -121,14 +259,6 @@ export default function DashboardPage() {
                   </tbody>
                 </table>
               </div>
-            </article>
-
-            <article className="dash-card">
-              <div className="dash-card-head">
-                <h2>Weekly Sales</h2>
-                <span className="muted">₹ Lakhs</span>
-              </div>
-              <WeeklySalesTable points={trend} />
             </article>
           </div>
 
@@ -208,47 +338,5 @@ export default function DashboardPage() {
         </div>
       </section>
     </AppShell>
-  );
-}
-
-function WeeklySalesTable({ points }: { points: TrendPoint[] }) {
-  const max = Math.max(...points.map((p) => p.value), 0.1);
-
-  return (
-    <div className="dash-table-wrap">
-      <table className="dash-table dash-table-compact">
-        <thead>
-          <tr>
-            <th>Period</th>
-            <th>Revenue</th>
-            <th>Share</th>
-          </tr>
-        </thead>
-        <tbody>
-          {points.map((row, index) => {
-            const prev = index > 0 ? points[index - 1].value : row.value;
-            const change = row.value - prev;
-            return (
-              <tr key={row.label}>
-                <td>{row.label}</td>
-                <td className="num">₹ {row.value.toFixed(2)} L</td>
-                <td>
-                  <div className="dash-inline-bar">
-                    <span style={{ width: `${(row.value / max) * 100}%` }} />
-                  </div>
-                  {index > 0 ? (
-                    <small className={change >= 0 ? "up" : "down"}>
-                      {change >= 0 ? "+" : ""}{change.toFixed(1)} L
-                    </small>
-                  ) : (
-                    <small className="muted">—</small>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
   );
 }

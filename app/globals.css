@@ -8004,3 +8004,163 @@ a.ghost-action {
     grid-template-columns: 1fr;
   }
 }
+
+/* Smooth dynamic sales chart */
+.dash-chart-card {
+  margin-bottom: 14px;
+}
+
+.dash-chart {
+  display: grid;
+  gap: 12px;
+}
+
+.dash-chart-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.dash-chart-kicker {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dash-chart-summary strong {
+  display: block;
+  margin-top: 4px;
+  font-size: clamp(24px, 2vw, 32px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  transition: color 0.2s ease;
+}
+
+.dash-chart-summary small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.dash-chart-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #f4f7fb;
+  color: #1d64d8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dash-chart-canvas {
+  position: relative;
+  height: 220px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fbfcff 0%, #f7f9fc 100%);
+  border: 1px solid rgba(16, 24, 40, 0.06);
+  overflow: hidden;
+}
+
+.dash-chart-canvas svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.dash-chart-grid {
+  stroke: rgba(16, 24, 40, 0.06);
+  stroke-width: 0.7;
+}
+
+.dash-chart-area {
+  opacity: 0;
+  animation: dashAreaIn 0.9s ease forwards;
+}
+
+.dash-chart-line {
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: dashLineDraw 1.1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.dash-chart-cursor {
+  stroke: rgba(29, 100, 216, 0.35);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 4;
+  transition: x1 0.12s ease, x2 0.12s ease;
+}
+
+.dash-chart-axis {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.dash-chart-axis button {
+  flex: 1;
+  min-height: 30px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.dash-chart-axis button:hover,
+.dash-chart-axis button.active {
+  background: rgba(29, 100, 216, 0.08);
+  color: #1d64d8;
+}
+
+@keyframes dashLineDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes dashAreaIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dash-chart-line,
+  .dash-chart-area {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+[data-theme="dark"] .dash-chart-canvas {
+  background: linear-gradient(180deg, #0f2138 0%, #0c1b2e 100%);
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .dash-chart-stat {
+  background: rgba(29, 100, 216, 0.14);
+  color: #93c5fd;
+}
+
+[data-theme="dark"] .dash-chart-grid {
+  stroke: rgba(255, 255, 255, 0.08);
+}
+
+[data-theme="dark"] .dash-chart-axis button:hover,
+[data-theme="dark"] .dash-chart-axis button.active {
+  background: rgba(242, 179, 61, 0.12);
+  color: #ffd36c;
+}
