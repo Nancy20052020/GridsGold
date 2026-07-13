@@ -5,8 +5,10 @@ import Link from "next/link";
 import {
   ArrowRight,
   CalendarDays,
+  Lightbulb,
   Package,
   ShoppingCart,
+  Sparkles,
   TrendingUp,
   UserRound,
   Wrench,
@@ -14,21 +16,31 @@ import {
 import {
   DEMO_SALES_BY_CATEGORY,
   DEMO_SALES_TREND,
+  buildAiInsights,
   lowStockItems,
   recentTransactions,
   salesByCategory,
   salesTrendFromInvoices,
   sumInvoices,
+  todaySummary,
   topSellingItems,
 } from "../lib/analytics";
 import { AppShell } from "../components/AppShell";
 import { ItemImage } from "../components/ProductImage";
 import { adminNavItems } from "../lib/adminNav";
-import { ADMIN_PORTAL_IMAGES } from "../lib/productImages";
 import { firstName, formatINR, itemStatus, useStore } from "../lib/store";
 
 type TrendPoint = { label: string; value: number };
 type ChartCoord = TrendPoint & { x: number; y: number };
+
+const GALLERY = [
+  { src: "landing_image.png", label: "Cloud workspace" },
+  { src: "customer_1.png", label: "Sapphire set" },
+  { src: "customer_2.png", label: "Bridal gold" },
+  { src: "customer_3.png", label: "Craft detail" },
+  { src: "necklace_2.png", label: "Heritage necklace" },
+  { src: "ring_3.png", label: "Diamond ring" },
+];
 
 function buildChartCoords(points: TrendPoint[]): ChartCoord[] {
   const max = Math.max(...points.map((p) => p.value), 0.1) * 1.08;
@@ -159,12 +171,67 @@ function SmoothSalesChart({ points }: { points: TrendPoint[] }) {
   );
 }
 
+function CategoryDonut({
+  categories,
+}: {
+  categories: { name: string; percent: number; value: number; color: string }[];
+}) {
+  const radius = 42;
+  const circumference = 2 * Math.PI * radius;
+  let offset = 0;
+
+  return (
+    <div className="dash-donut">
+      <div className="dash-donut-visual">
+        <svg viewBox="0 0 120 120" aria-hidden="true">
+          <circle cx="60" cy="60" r={radius} className="dash-donut-track" />
+          {categories.map((cat) => {
+            const length = (cat.percent / 100) * circumference;
+            const segment = (
+              <circle
+                key={cat.name}
+                cx="60"
+                cy="60"
+                r={radius}
+                fill="none"
+                stroke={cat.color}
+                strokeWidth="14"
+                strokeDasharray={`${length} ${circumference - length}`}
+                strokeDashoffset={-offset}
+                strokeLinecap="butt"
+                transform="rotate(-90 60 60)"
+              />
+            );
+            offset += length;
+            return segment;
+          })}
+          <text x="60" y="56" textAnchor="middle" className="dash-donut-center-label">Mix</text>
+          <text x="60" y="72" textAnchor="middle" className="dash-donut-center-value">
+            {categories[0]?.percent ?? 0}%
+          </text>
+        </svg>
+      </div>
+      <ul className="dash-donut-legend">
+        {categories.map((cat) => (
+          <li key={cat.name}>
+            <span style={{ background: cat.color }} />
+            <div>
+              <strong>{cat.name}</strong>
+              <small>{cat.percent}% · {formatINR(cat.value)}</small>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { rates, currentUser, invoices, customers, items, repairs, movements } = useStore();
   const name = firstName(currentUser) || "Admin";
 
   const totalSales = sumInvoices(invoices);
-  const topItems = useMemo(() => topSellingItems(invoices, items, rates), [invoices, items, rates]);
+  const topItems = useMemo(() => topSellingItems(invoices, items, rates, 5), [invoices, items, rates]);
   const categories = useMemo(() => {
     const live = salesByCategory(invoices, items);
     return live.length ? live : DEMO_SALES_BY_CATEGORY;
@@ -174,72 +241,90 @@ export default function DashboardPage() {
     return live.length >= 4 ? live : DEMO_SALES_TREND;
   }, [invoices]);
   const lowStock = lowStockItems(items, 5);
-  const txns = recentTransactions(invoices, movements, 8);
+  const txns = recentTransactions(invoices, movements, 6);
+  const summary = todaySummary(invoices, repairs, customers.length);
+  const insights = useMemo(
+    () => buildAiInsights({ invoices, items, repairs, customers, rates, categories, topItems }),
+    [invoices, items, repairs, customers, rates, categories, topItems],
+  );
 
   const openRepairs = repairs.filter((r) => r.status !== "delivered" && r.status !== "cancelled").length;
   const lowStockCount = items.filter((i) => itemStatus(i.stock) === "Low Stock" || itemStatus(i.stock) === "Out of Stock").length;
+  const inventoryPieces = items.reduce((sum, item) => sum + item.stock, 0);
 
   const kpis = [
-    { label: "Total Sales", value: formatINR(totalSales), href: "/sales/invoices", icon: ShoppingCart },
-    { label: "Open Repairs", value: openRepairs.toLocaleString("en-IN"), href: "/repairs", icon: Wrench },
-    { label: "Stock Alerts", value: lowStockCount.toLocaleString("en-IN"), href: "/inventory", icon: Package },
-    { label: "Customers", value: customers.length.toLocaleString("en-IN"), href: "/customers", icon: UserRound },
+    { label: "Total Sales", value: formatINR(totalSales), note: "+12% vs last week", href: "/sales/invoices", icon: ShoppingCart, tone: "gold" },
+    { label: "Open Repairs", value: openRepairs.toLocaleString("en-IN"), note: "In pipeline", href: "/repairs", icon: Wrench, tone: "blue" },
+    { label: "Stock Alerts", value: lowStockCount.toLocaleString("en-IN"), note: "Need attention", href: "/inventory", icon: Package, tone: "warn" },
+    { label: "Customers", value: customers.length.toLocaleString("en-IN"), note: "Active CRM", href: "/customers", icon: UserRound, tone: "navy" },
   ];
 
-  const quickLinks = adminNavItems.filter((m) => m.href !== "/dashboard");
+  const quickLinks = adminNavItems.filter((m) => m.href !== "/dashboard").slice(0, 4);
+
+  const showcaseItems = useMemo(() => {
+    if (topItems.length) {
+      return topItems.map((row) => {
+        const match = items.find((i) => i.name === row.name);
+        return {
+          name: row.name,
+          amount: row.amount,
+          qty: row.qty,
+          image: match?.image ?? row.image,
+          icon: match?.icon ?? row.icon,
+          karat: match?.karat,
+          weight: match?.weight,
+        };
+      });
+    }
+    return items.slice(0, 5).map((item) => ({
+      name: item.name,
+      amount: 0,
+      qty: undefined as number | undefined,
+      image: item.image,
+      icon: item.icon,
+      karat: item.karat,
+      weight: item.weight,
+    }));
+  }, [topItems, items]);
 
   return (
     <AppShell>
-      <section className="dashboard page-content dash-home admin-home-v2">
-        <section className="admin-v2-hero">
+      <section className="dashboard page-content dash-home dash-pro">
+        <section className="dash-pro-hero">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="admin-v2-hero-bg" src={`/images/${ADMIN_PORTAL_IMAGES.hero}`} alt="" />
-          <div className="admin-v2-hero-overlay" />
-          <div className="admin-v2-hero-inner">
-            <span className="admin-v2-eyebrow">Grids Gold · Admin</span>
-            <h1>Store workspace</h1>
-            <p>Welcome back, {name}. Sales, stock, finance and repairs — nine modules, one ERP.</p>
-            <div className="admin-v2-hero-actions">
+          <img className="dash-pro-hero-bg" src="/images/landing_image.png" alt="" />
+          <div className="dash-pro-hero-veil" />
+          <div className="dash-pro-hero-copy">
+            <span className="dash-pro-eyebrow"><Sparkles size={14} /> AI-ready showroom dashboard</span>
+            <h1>Welcome back, {name}</h1>
+            <p>
+              Live gold pricing, sales pulse and stock alerts — {inventoryPieces} pieces across branches.
+            </p>
+            <div className="dash-pro-hero-actions">
               <Link className="export-button" href="/pos">+ New sale</Link>
               <Link className="dash-rate" href="/gold-rates">
                 22K · ₹{rates["22K"].toLocaleString("en-IN")}/g <CalendarDays size={15} />
               </Link>
             </div>
           </div>
-        </section>
-
-        <section className="admin-v2-modules">
-          {quickLinks.map((mod) => {
-            const Icon = mod.icon;
-            return (
-              <Link className="admin-v2-module" href={mod.href} key={mod.href}>
-                <Icon size={18} />
-                <div>
-                  <strong>{mod.label}</strong>
-                  <small>{mod.description}</small>
-                </div>
-                <ArrowRight size={16} />
-              </Link>
-            );
-          })}
-        </section>
-
-        <header className="dash-header dash-header-compact">
-          <div>
-            <h2>Today&apos;s overview</h2>
-            <p className="muted">Live KPIs from your showroom</p>
+          <div className="dash-pro-hero-gallery" aria-hidden="true">
+            {GALLERY.slice(1, 4).map((shot) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img key={shot.src} src={`/images/${shot.src}`} alt="" />
+            ))}
           </div>
-        </header>
+        </section>
 
-        <section className="dash-kpis">
+        <section className="dash-kpis dash-pro-kpis">
           {kpis.map((kpi) => {
             const Icon = kpi.icon;
             return (
-              <Link className="dash-kpi" href={kpi.href} key={kpi.label}>
+              <Link className={`dash-kpi dash-pro-kpi tone-${kpi.tone}`} href={kpi.href} key={kpi.label}>
                 <div className="dash-kpi-icon"><Icon size={18} /></div>
                 <div>
                   <span>{kpi.label}</span>
                   <strong>{kpi.value}</strong>
+                  <small>{kpi.note}</small>
                 </div>
                 <ArrowRight size={16} className="dash-kpi-arrow" />
               </Link>
@@ -247,16 +332,80 @@ export default function DashboardPage() {
           })}
         </section>
 
-        <article className="dash-card dash-chart-card dash-chart-full">
-          <div className="dash-card-head">
-            <h2>Revenue Overview</h2>
-            <Link href="/reports">Full report</Link>
-          </div>
-          <SmoothSalesChart points={trend} />
-        </article>
+        <section className="dash-pro-charts">
+          <article className="dash-card dash-chart-card">
+            <div className="dash-card-head">
+              <h2>Revenue Overview</h2>
+              <Link href="/reports">Full report</Link>
+            </div>
+            <SmoothSalesChart points={trend} />
+          </article>
 
-        <div className="dash-layout">
+          <article className="dash-card">
+            <div className="dash-card-head">
+              <h2>Category Mix</h2>
+              <Link href="/analytics">Analytics</Link>
+            </div>
+            <CategoryDonut categories={categories} />
+          </article>
+        </section>
+
+        <section className="dash-pro-ai">
+          <div className="dash-card-head">
+            <h2><Lightbulb size={18} /> AI Insights</h2>
+            <span className="dash-pro-ai-badge">Live from your store data</span>
+          </div>
+          <div className="dash-pro-ai-grid">
+            {insights.map((insight) => (
+              <article className={`dash-pro-ai-card tone-${insight.tone}`} key={insight.id}>
+                <strong>{insight.title}</strong>
+                <p>{insight.detail}</p>
+                <Link href={insight.href}>{insight.action} <ArrowRight size={14} /></Link>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="dash-pro-summary">
+          <div className="dash-card-head">
+            <h2>Today&apos;s Summary</h2>
+            <Link href="/reports">View report</Link>
+          </div>
+          <div className="dash-pro-summary-grid">
+            <div><strong>{summary.orders}</strong><span>Orders</span></div>
+            <div><strong>{summary.quotations}</strong><span>Quotations</span></div>
+            <div><strong>{summary.repairs}</strong><span>Repairs</span></div>
+            <div><strong>{summary.customers}</strong><span>Customers</span></div>
+            <div><strong>{inventoryPieces}</strong><span>Stock pieces</span></div>
+            <div><strong>₹{rates["22K"].toLocaleString("en-IN")}</strong><span>22K / gram</span></div>
+          </div>
+        </section>
+
+        <div className="dash-layout dash-pro-layout">
           <div className="dash-main">
+            <article className="dash-card">
+              <div className="dash-card-head">
+                <h2>Top Selling Items</h2>
+                <Link href="/jewelry">View catalog</Link>
+              </div>
+              <ul className="dash-list dash-pro-sellers">
+                {showcaseItems.map((row) => (
+                  <li key={row.name}>
+                    <ItemImage item={row} className="product-img tile-img" />
+                    <div className="dash-pro-seller-copy">
+                      <strong>{row.name}</strong>
+                      <small>
+                        {[row.karat, row.weight ? `${row.weight}g` : null, row.qty ? `${row.qty} sold` : null]
+                          .filter(Boolean)
+                          .join(" · ") || "Featured piece"}
+                      </small>
+                    </div>
+                    <em className="dash-pro-seller-amt">{row.amount ? formatINR(row.amount) : "—"}</em>
+                  </li>
+                ))}
+              </ul>
+            </article>
+
             <article className="dash-card">
               <div className="dash-card-head">
                 <h2>Recent Transactions</h2>
@@ -285,76 +434,65 @@ export default function DashboardPage() {
                 </table>
               </div>
             </article>
-
-            <div className="dash-split-row">
-              <article className="dash-card">
-                <div className="dash-card-head">
-                  <h2>Top Items</h2>
-                  <Link href="/jewelry">Catalog</Link>
-                </div>
-                <ul className="dash-list">
-                  {(topItems.length ? topItems.slice(0, 4) : [
-                    { name: "Gold Necklace Set", amount: 145280, icon: "necklace", image: "necklace_1.png" },
-                    { name: "22K Gold Ring", amount: 38500, icon: "ring", image: "ring_1.png" },
-                  ]).map((row) => {
-                    const match = items.find((i) => i.name === row.name);
-                    return (
-                      <li key={row.name}>
-                        <ItemImage item={match ?? row} className="product-img tile-img" />
-                        <div>
-                          <strong>{row.name}</strong>
-                          <small>{row.amount ? formatINR(row.amount) : "—"}</small>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </article>
-
-              <article className="dash-card">
-                <div className="dash-card-head">
-                  <h2>Stock Alerts</h2>
-                  <Link href="/inventory">Inventory</Link>
-                </div>
-                <ul className="dash-list">
-                  {(lowStock.length ? lowStock : items.slice(0, 4)).map((item) => (
-                    <li key={item.id}>
-                      <ItemImage item={item} className="product-img tile-img" />
-                      <div>
-                        <strong>{item.name}</strong>
-                        <small>{item.karat} · {item.weight}g</small>
-                      </div>
-                      <em className={item.stock <= 0 ? "out" : "low"}>
-                        {item.stock <= 0 ? "Out" : `${item.stock} left`}
-                      </em>
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            </div>
           </div>
 
           <aside className="dash-side">
             <article className="dash-card">
               <div className="dash-card-head">
-                <h2>Category Mix</h2>
+                <h2>Stock Alerts</h2>
+                <Link href="/inventory">Inventory</Link>
               </div>
-              <div className="dash-bars">
-                {categories.map((c) => (
-                  <div className="dash-bar-row" key={c.name}>
-                    <div className="dash-bar-top">
-                      <span>{c.name}</span>
-                      <strong>{c.percent}%</strong>
+              <ul className="dash-list">
+                {(lowStock.length ? lowStock : items.slice(0, 4)).map((item) => (
+                  <li key={item.id}>
+                    <ItemImage item={item} className="product-img tile-img" />
+                    <div>
+                      <strong>{item.name}</strong>
+                      <small>{item.karat} · {item.weight}g</small>
                     </div>
-                    <div className="dash-bar-track">
-                      <span style={{ width: `${c.percent}%`, background: c.color }} />
-                    </div>
-                  </div>
+                    <em className={item.stock <= 0 ? "out" : "low"}>
+                      {item.stock <= 0 ? "Out" : `${item.stock} left`}
+                    </em>
+                  </li>
                 ))}
+              </ul>
+            </article>
+
+            <article className="dash-card">
+              <div className="dash-card-head">
+                <h2>Quick Jump</h2>
+              </div>
+              <div className="dash-pro-quick">
+                {quickLinks.map((mod) => {
+                  const Icon = mod.icon;
+                  return (
+                    <Link href={mod.href} key={mod.href}>
+                      <Icon size={16} />
+                      <span>{mod.label}</span>
+                      <ArrowRight size={14} />
+                    </Link>
+                  );
+                })}
               </div>
             </article>
           </aside>
         </div>
+
+        <section className="dash-pro-gallery">
+          <div className="dash-card-head">
+            <h2>Collection spotlight</h2>
+            <Link href="/jewelry">Browse jewelry</Link>
+          </div>
+          <div className="dash-pro-gallery-track">
+            {GALLERY.map((shot) => (
+              <figure key={shot.src}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={`/images/${shot.src}`} alt={shot.label} />
+                <figcaption>{shot.label}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
       </section>
     </AppShell>
   );

@@ -193,6 +193,107 @@ export function todaySummary(invoices: Invoice[], repairs: Repair[], customers: 
   };
 }
 
+export type AiInsight = {
+  id: string;
+  tone: "opportunity" | "warning" | "info" | "success";
+  title: string;
+  detail: string;
+  href: string;
+  action: string;
+};
+
+/** Heuristic “AI insights” from live store data (demo — no external model). */
+export function buildAiInsights(input: {
+  invoices: Invoice[];
+  items: Item[];
+  repairs: Repair[];
+  customers: Customer[];
+  rates: Rates;
+  categories: ReturnType<typeof salesByCategory>;
+  topItems: ReturnType<typeof topSellingItems>;
+}): AiInsight[] {
+  const { invoices, items, repairs, rates, categories, topItems } = input;
+  const insights: AiInsight[] = [];
+  const low = lowStockItems(items, 8);
+  const openRepairs = repairs.filter((r) => r.status !== "delivered" && r.status !== "cancelled");
+  const readyRepairs = repairs.filter((r) => r.status === "ready");
+  const topCat = categories[0];
+  const topItem = topItems[0];
+  const avgTicket = invoices.length ? Math.round(sumInvoices(invoices) / invoices.length) : 0;
+
+  if (topItem) {
+    insights.push({
+      id: "top-seller",
+      tone: "opportunity",
+      title: `${topItem.name} is your showpiece`,
+      detail: `It leads sales at ${formatCompact(topItem.amount)}. Feature it on the counter and in POS favourites.`,
+      href: "/jewelry",
+      action: "Open catalog",
+    });
+  }
+
+  if (low.length) {
+    insights.push({
+      id: "restock",
+      tone: "warning",
+      title: `Restock ${low.length} SKU${low.length === 1 ? "" : "s"} this week`,
+      detail: `${low[0].name} is down to ${low[0].stock} unit${low[0].stock === 1 ? "" : "s"}. Low stock can miss wedding-season walk-ins.`,
+      href: "/inventory",
+      action: "Review stock",
+    });
+  }
+
+  if (readyRepairs.length) {
+    insights.push({
+      id: "repairs-ready",
+      tone: "success",
+      title: `${readyRepairs.length} repair${readyRepairs.length === 1 ? "" : "s"} ready for pickup`,
+      detail: "Message customers today — ready jobs convert deposit balance into cash quickly.",
+      href: "/repairs",
+      action: "Open repairs",
+    });
+  } else if (openRepairs.length) {
+    insights.push({
+      id: "repairs-open",
+      tone: "info",
+      title: `${openRepairs.length} repairs still in the pipeline`,
+      detail: "Prioritise urgent tickets before the weekend to keep promised dates green.",
+      href: "/repairs",
+      action: "View pipeline",
+    });
+  }
+
+  if (topCat) {
+    insights.push({
+      id: "category",
+      tone: "info",
+      title: `${topCat.name} drive ${topCat.percent}% of revenue`,
+      detail: `Keep ${topCat.name.toLowerCase()} well lit in the showcase. Mix making offers on slower categories to balance margin.`,
+      href: "/analytics",
+      action: "See analytics",
+    });
+  }
+
+  insights.push({
+    id: "gold-rate",
+    tone: "opportunity",
+    title: `22K is live at ₹ ${rates["22K"].toLocaleString("en-IN")}/g`,
+    detail: avgTicket
+      ? `Average ticket is ₹ ${avgTicket.toLocaleString("en-IN")}. Update rates before the first evening rush so POS quotes stay accurate.`
+      : "Push today’s gold rate to every counter before opening — quotes stay accurate across branches.",
+    href: "/gold-rates",
+    action: "Update rates",
+  });
+
+  return insights.slice(0, 4);
+}
+
+function formatCompact(value: number): string {
+  if (value >= 10000000) return `₹ ${(value / 10000000).toFixed(2)} Cr`;
+  if (value >= 100000) return `₹ ${(value / 100000).toFixed(2)} L`;
+  return `₹ ${Math.round(value).toLocaleString("en-IN")}`;
+}
+
 export function branchComparison(invoices: Invoice[]) {
   const branches = ["Main Branch", "Branch 2", "Branch 3", "Branch 4"];
   return branches.map((branch, i) => {
