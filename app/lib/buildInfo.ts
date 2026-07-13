@@ -1,2 +1,2 @@
 /** Shown in admin sidebar — bump when shipping UI updates. */
-export const BUILD_TAG = "Jul 13 · Premium repairs";
+export const BUILD_TAG = "Jul 13 · Purchase + dark fixes";

@@ -209,7 +209,12 @@ const seedSuppliers: Supplier[] = [
 ];
 
 const seedPOs: PurchaseOrder[] = [
-  { id: "po1", number: "PO-JED-2026-003301", supplier: "Raj Gems", items: "Loose Diamonds", amount: 875000, branch: "Main Branch", currency: "INR", status: "closed", date: "29 Apr, 2025" },
+  { id: "po1", number: "PO-JED-2026-003301", supplier: "Raj Gems", items: "Loose Diamonds 2.4 ct", amount: 875000, branch: "Main Branch", currency: "INR", status: "closed", date: "29 Apr, 2025" },
+  { id: "po2", number: "PO-JED-2026-003302", supplier: "Kundan Casting Co.", items: "22K casting grain 500g", amount: 3420000, branch: "Main Branch", currency: "INR", status: "in_transit", date: "05 May, 2025" },
+  { id: "po3", number: "PO-JED-2026-003303", supplier: "Raj Gems", items: "Sapphire melee parcel", amount: 520000, branch: "Branch 2", currency: "INR", status: "approved", date: "08 May, 2025" },
+  { id: "po4", number: "PO-JED-2026-003304", supplier: "Kundan Casting Co.", items: "Silver findings pack", amount: 48000, branch: "Main Branch", currency: "INR", status: "draft", date: "10 May, 2025" },
+  { id: "po5", number: "PO-JED-2026-003305", supplier: "Raj Gems", items: "Bridal filigree mounts ×12", amount: 960000, branch: "Vault", currency: "INR", status: "ordered", date: "06 May, 2025" },
+  { id: "po6", number: "PO-JED-2026-003306", supplier: "Kundan Casting Co.", items: "Rhodium salts + solder", amount: 28500, branch: "Main Branch", currency: "INR", status: "received", date: "02 May, 2025" },
 ];
 
 const seedMovements: Movement[] = [
@@ -309,6 +314,7 @@ type StoreValue = {
   addSupplier: (supplier: Omit<Supplier, "id" | "code" | "balance">) => void;
   purchaseOrders: PurchaseOrder[];
   addPurchaseOrder: (po: Omit<PurchaseOrder, "id" | "number" | "date" | "status">) => void;
+  updatePurchaseOrderStatus: (id: string, status: PoStatus) => void;
   movements: Movement[];
   transferStock: (itemId: string, to: string, qty: number) => void;
   adjustStock: (itemId: string, delta: number, reason: string) => void;
@@ -585,6 +591,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }, ...p]);
   }, []);
 
+  const updatePurchaseOrderStatus = useCallback((id: string, status: PoStatus) => {
+    setPurchaseOrders((p) => p.map((po) => (po.id === id ? { ...po, status } : po)));
+  }, []);
+
   const logMovement = useCallback((m: Omit<Movement, "id" | "date" | "user">) => {
     setMovements((p) => [{ ...m, id: "m" + Date.now(), date: today(), user: "Admin" }, ...p]);
   }, []);
@@ -663,10 +673,10 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<StoreValue>(() => ({
     ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser,
     items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, assignRepairTechnician, suppliers, addSupplier,
-    purchaseOrders, addPurchaseOrder, movements, transferStock, adjustStock, cycleCount,
+    purchaseOrders, addPurchaseOrder, updatePurchaseOrderStatus, movements, transferStock, adjustStock, cycleCount,
     expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder,
     cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, notifications, markNotificationsRead,
-  }), [ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser, items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, assignRepairTechnician, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, notifications, markNotificationsRead]);
+  }), [ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser, items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, assignRepairTechnician, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, updatePurchaseOrderStatus, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, notifications, markNotificationsRead]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
