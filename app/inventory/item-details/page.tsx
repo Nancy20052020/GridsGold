@@ -2,16 +2,17 @@
 
 import { Suspense } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { ArrowLeft, ShoppingCart } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft, ShoppingCart, Trash2 } from "lucide-react";
 import { AppShell } from "../../components/AppShell";
 import { ItemImage } from "../../components/ProductImage";
 import { useStore, itemPrice, itemStatus, formatINR } from "../../lib/store";
 
 function ItemDetail() {
+  const router = useRouter();
   const params = useSearchParams();
   const id = params.get("id") ?? "";
-  const { getItem, rates, addToCart } = useStore();
+  const { getItem, rates, addToCart, removeItem } = useStore();
   const item = getItem(id);
 
   if (!item) {
@@ -39,6 +40,12 @@ function ItemDetail() {
     ["Stock", `${item.stock} pcs`],
   ];
 
+  function handleRemove() {
+    if (!window.confirm(`Remove “${item.name}” from inventory? This cannot be undone.`)) return;
+    removeItem(item.id);
+    router.push("/inventory");
+  }
+
   return (
     <section className="page-content">
       <div className="page-heading">
@@ -51,6 +58,9 @@ function ItemDetail() {
         </div>
         <div className="heading-actions">
           <Link className="ghost-action" href="/inventory"><ArrowLeft size={16} /> Back</Link>
+          <button className="ghost-action danger-action" type="button" onClick={handleRemove}>
+            <Trash2 size={16} /> Remove
+          </button>
           <button className="export-button" type="button" disabled={status === "Out of Stock"} onClick={() => addToCart(item.id)}>
             <ShoppingCart size={16} /> Add to Sale
           </button>

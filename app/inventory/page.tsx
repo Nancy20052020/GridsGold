@@ -15,6 +15,7 @@ import {
   ScanBarcode,
   Search,
   Sparkles,
+  Trash2,
   Truck,
   Upload,
   Warehouse,
@@ -61,7 +62,7 @@ function batchFor(item: Item) {
 }
 
 export default function InventoryPage() {
-  const { items, rates, movements, suppliers, selectedBranch } = useStore();
+  const { items, rates, movements, suppliers, selectedBranch, removeItem } = useStore();
   const scanRef = useRef<HTMLInputElement>(null);
 
   const [query, setQuery] = useState("");
@@ -209,6 +210,12 @@ export default function InventoryPage() {
       ]),
     );
     flash("Inventory CSV exported");
+  }
+
+  function confirmRemove(item: Item) {
+    if (!window.confirm(`Remove “${item.name}” from inventory? This cannot be undone.`)) return;
+    removeItem(item.id);
+    flash(`Removed ${item.name}`);
   }
 
   const kpis = [
@@ -377,25 +384,36 @@ export default function InventoryPage() {
                     const st = itemStatus(item.stock);
                     const value = itemPrice(item, rates);
                     return (
-                      <Link className={`inv-v2-card status-${st.replace(/\s+/g, "-").toLowerCase()}`} href={`/inventory/item-details?id=${item.id}`} key={item.id}>
-                        <div className="inv-v2-card-media">
-                          <ItemImage item={item} className="product-img tile-img" />
-                          <em className={`inv-v2-stock ${st === "In Stock" ? "ok" : st === "Low Stock" ? "low" : "out"}`}>
-                            {st === "Out of Stock" ? "Out" : `${item.stock} pcs`}
-                          </em>
-                        </div>
-                        <strong>{item.name}</strong>
-                        <small>{item.sku} · {collectionFor(item)}</small>
-                        <div className="inv-v2-card-meta">
-                          <span>{item.karat}</span>
-                          <span>{item.weight.toFixed(2)}g</span>
-                          <span>{item.branch}</span>
-                        </div>
-                        <div className="inv-v2-card-foot">
-                          <b>{formatINR(value)}</b>
-                          <span>{srsLabel(stockToItemStatus(item.stock))}</span>
-                        </div>
-                      </Link>
+                      <article className={`inv-v2-card status-${st.replace(/\s+/g, "-").toLowerCase()}`} key={item.id}>
+                        <Link className="inv-v2-card-link" href={`/inventory/item-details?id=${item.id}`}>
+                          <div className="inv-v2-card-media">
+                            <ItemImage item={item} className="product-img tile-img" />
+                            <em className={`inv-v2-stock ${st === "In Stock" ? "ok" : st === "Low Stock" ? "low" : "out"}`}>
+                              {st === "Out of Stock" ? "Out" : `${item.stock} pcs`}
+                            </em>
+                          </div>
+                          <strong>{item.name}</strong>
+                          <small>{item.sku} · {collectionFor(item)}</small>
+                          <div className="inv-v2-card-meta">
+                            <span>{item.karat}</span>
+                            <span>{item.weight.toFixed(2)}g</span>
+                            <span>{item.branch}</span>
+                          </div>
+                          <div className="inv-v2-card-foot">
+                            <b>{formatINR(value)}</b>
+                            <span>{srsLabel(stockToItemStatus(item.stock))}</span>
+                          </div>
+                        </Link>
+                        <button
+                          type="button"
+                          className="inv-v2-card-remove"
+                          aria-label={`Remove ${item.name}`}
+                          title="Remove from inventory"
+                          onClick={() => confirmRemove(item)}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </article>
                     );
                   })}
                   {filtered.length === 0 ? (
@@ -424,6 +442,7 @@ export default function InventoryPage() {
                         <th className="col-num">Pcs</th>
                         <th>Status</th>
                         <th className="col-num">Value</th>
+                        <th className="col-actions">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -454,11 +473,20 @@ export default function InventoryPage() {
                             <td className="col-num">{item.stock}</td>
                             <td><span className={`status-pill ${srsPillTone(srs)}`}>{srsLabel(srs)}</span></td>
                             <td className="col-num">{item.stock ? formatINR(itemPrice(item, rates) * item.stock) : "—"}</td>
+                            <td className="col-actions">
+                              <button
+                                type="button"
+                                className="inv-v2-btn ghost compact danger"
+                                onClick={() => confirmRemove(item)}
+                              >
+                                <Trash2 size={14} /> Remove
+                              </button>
+                            </td>
                           </tr>
                         );
                       })}
                       {filtered.length === 0 ? (
-                        <tr><td colSpan={13} className="empty-note">No items match your filters.</td></tr>
+                        <tr><td colSpan={14} className="empty-note">No items match your filters.</td></tr>
                       ) : null}
                     </tbody>
                   </table>
