@@ -21,8 +21,7 @@ export default function StockMovementsPage() {
             </div>
           </div>
           <div className="heading-actions">
-            <Link className="ghost-action" href="/inventory/transfers">New Transfer</Link>
-            <Link className="export-button" href="/inventory/adjustments">New Adjustment</Link>
+            <Link className="export-button" href="/inventory">Back to Inventory</Link>
           </div>
         </div>
 

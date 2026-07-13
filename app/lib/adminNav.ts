@@ -1,14 +1,12 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Boxes,
-  ChartNoAxesCombined,
   Factory,
   Gem,
   Handshake,
   Home,
   LayoutGrid,
   Package,
-  ReceiptText,
   Settings,
   ShoppingCart,
   TrendingUp,
@@ -23,14 +21,10 @@ export type AdminNavItem = {
   icon: LucideIcon;
 };
 
-/**
- * Grids Gold SRS v1 — 15 admin modules (frontend-only).
- * Flat sidebar for presentation; sub-screens open from each hub.
- */
+/** SRS v1 admin modules — flat sidebar */
 export const adminNavItems: AdminNavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: Home },
   { label: "POS & Sales", href: "/pos", icon: ShoppingCart },
-  { label: "Invoices", href: "/sales/invoices", icon: ReceiptText },
   { label: "Inventory", href: "/inventory", icon: Boxes },
   { label: "Jewelry Catalog", href: "/jewelry", icon: Gem },
   { label: "Customers", href: "/customers", icon: UserRound },
@@ -41,11 +35,9 @@ export const adminNavItems: AdminNavItem[] = [
   { label: "Wholesale", href: "/wholesale", icon: Handshake },
   { label: "Finance", href: "/finance", icon: WalletCards },
   { label: "Reports", href: "/reports", icon: LayoutGrid },
-  { label: "Analytics", href: "/analytics", icon: ChartNoAxesCombined },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 
-/** @deprecated Use adminNavItems — kept for search compatibility */
 export const adminNavGroups = [{ label: "Modules", items: adminNavItems }];
 
 export const adminQuickAddLinks = [

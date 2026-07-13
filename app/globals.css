@@ -7012,3 +7012,56 @@ a.ghost-action {
     grid-template-columns: 1fr;
   }
 }
+
+/* Simple bar charts (dashboard) */
+.chart-bars-wrap {
+  padding: 8px 4px 0;
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 180px;
+  padding: 0 8px;
+}
+
+.chart-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.chart-bar {
+  width: 100%;
+  max-width: 48px;
+  min-height: 8px;
+  border-radius: 6px 6px 2px 2px;
+  background: linear-gradient(180deg, #ffd36c, #e6a520);
+}
+
+.chart-bar-col em {
+  font-size: 11px;
+  color: var(--muted);
+  font-style: normal;
+}
+
+.erp-kpis-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.erp-kpis-3,
+.stat-cards-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  .erp-kpis-3,
+  .stat-cards-3 {
+    grid-template-columns: 1fr;
+  }
+}

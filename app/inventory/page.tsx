@@ -32,16 +32,12 @@ export default function InventoryPage() {
   );
 
   const totalValue = items.reduce((sum, i) => sum + itemPrice(i, rates) * i.stock, 0);
-  const totalWeight = items.reduce((sum, i) => sum + i.weight * i.stock, 0);
   const low = items.filter((i) => itemStatus(i.stock) === "Low Stock").length;
-  const out = items.filter((i) => itemStatus(i.stock) === "Out of Stock").length;
 
   const kpis = [
     { label: "Total Items", value: items.length.toLocaleString("en-IN"), tone: "violet" },
-    { label: "Total Weight", value: totalWeight.toFixed(2) + " g", tone: "blue" },
     { label: "Stock Value", value: formatINR(totalValue), tone: "gold" },
     { label: "Low Stock", value: String(low), tone: "red" },
-    { label: "Out of Stock", value: String(out), tone: "red" },
   ];
 
   return (
@@ -61,7 +57,7 @@ export default function InventoryPage() {
           </div>
         </div>
 
-        <section className="erp-kpis erp-kpis-5">
+        <section className="erp-kpis erp-kpis-3">
           {kpis.map((kpi) => (
             <article className={`erp-kpi ${kpi.tone}`} key={kpi.label}>
               <span>{kpi.label}</span>

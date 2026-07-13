@@ -29,11 +29,9 @@ export default function InvoicesPage() {
           </div>
         </div>
 
-        <section className="erp-kpis">
+        <section className="erp-kpis erp-kpis-2">
           <article className="erp-kpi gold"><span>Total Invoices</span><strong>{invoices.length}</strong></article>
           <article className="erp-kpi green"><span>Total Sales</span><strong>{formatINR(totalSales)}</strong></article>
-          <article className="erp-kpi blue"><span>Paid</span><strong>{invoices.filter((i) => i.status === "Paid").length}</strong></article>
-          <article className="erp-kpi violet"><span>Draft</span><strong>{invoices.filter((i) => i.status === "Draft").length}</strong></article>
         </section>
 
         <article className="erp-panel table-panel">

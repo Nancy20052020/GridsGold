@@ -15,7 +15,8 @@ export const INVENTORY_CATEGORIES = [
   "Others",
 ] as const;
 
-export const INVENTORY_TABS = ["All Items", ...INVENTORY_CATEGORIES.filter((c) => c !== "Others"), "Others"] as const;
+/** Admin inventory filter tabs — core categories only */
+export const INVENTORY_TABS = ["All Items", "Rings", "Necklaces", "Bangles", "Earrings", "Pendants"] as const;
 
 export const PRODUCT_ICONS = ["ring", "necklace", "bangle", "earrings", "pendant"] as const;
 

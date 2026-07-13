@@ -2,7 +2,6 @@ import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
   Boxes,
-  ChartNoAxesCombined,
   Factory,
   Gem,
   Handshake,
@@ -52,8 +51,8 @@ export const moduleGroups: LandingModuleGroup[] = [
     items: [
       { icon: WalletCards, title: "Finance", copy: "Expenses, margins and ledgers.", href: "/finance" },
       { icon: LayoutGrid, title: "Reports", copy: "Sales, stock and branch KPIs.", href: "/reports" },
-      { icon: ChartNoAxesCombined, title: "Analytics", copy: "Trends and category mix.", href: "/analytics" },
       { icon: ReceiptText, title: "Invoices", copy: "Printable bills and tax-ready exports.", href: "/sales/invoices" },
+      { icon: BarChart3, title: "Dashboard", copy: "Sales trends and showroom KPIs.", href: "/dashboard" },
     ],
   },
   {

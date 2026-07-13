@@ -5,7 +5,7 @@ import { Factory, Plus, X } from "lucide-react";
 import { AppShell } from "../components/AppShell";
 import { useStore } from "../lib/store";
 
-const tabs = ["Work Orders", "Karigar Tracking", "Wastage"] as const;
+const tabs = ["Work Orders", "Wastage"] as const;
 const karigars = ["Suresh Karigar", "Ramesh Workshop", "Anil Casting", "Vijay Polishing"];
 
 export default function ManufacturingPage() {
@@ -30,8 +30,8 @@ export default function ManufacturingPage() {
             <Factory size={28} />
             <div>
               <span className="eyebrow">Manufacturing</span>
-              <h1>Manufacturing &amp; Job Work</h1>
-              <p>Work orders, karigar (craftsman) progress and metal wastage.</p>
+              <h1>Manufacturing</h1>
+              <p>Work orders and metal wastage tracking.</p>
             </div>
           </div>
           <div className="heading-actions">
@@ -39,22 +39,21 @@ export default function ManufacturingPage() {
           </div>
         </div>
 
-        <section className="stat-cards">
+        <section className="stat-cards stat-cards-3">
           <article className="erp-kpi gold"><span>Active Orders</span><strong>{workOrders.filter((w) => w.status !== "Completed").length}</strong></article>
           <article className="erp-kpi green"><span>Completed</span><strong>{workOrders.filter((w) => w.status === "Completed").length}</strong></article>
           <article className="erp-kpi blue"><span>Pieces Planned</span><strong>{workOrders.reduce((s, w) => s + w.qtyPlanned, 0)}</strong></article>
-          <article className="erp-kpi violet"><span>Pieces Done</span><strong>{workOrders.reduce((s, w) => s + w.qtyDone, 0)}</strong></article>
         </section>
 
         <div className="tabs-bar">
           {tabs.map((t) => <button key={t} className={t === tab ? "active" : ""} type="button" onClick={() => setTab(t)}>{t}</button>)}
         </div>
 
-        {tab === "Work Orders" || tab === "Karigar Tracking" ? (
+        {tab === "Work Orders" ? (
           <article className="erp-panel table-panel">
             <div className="table-scroll">
               <table className="data-table">
-                <thead><tr><th>Order #</th><th>Product</th><th>Karigar</th><th>Progress</th><th>Status</th><th>Due</th></tr></thead>
+                <thead><tr><th>Order #</th><th>Product</th><th>Workshop</th><th>Progress</th><th>Status</th><th>Due</th></tr></thead>
                 <tbody>
                   {workOrders.map((w) => (
                     <tr key={w.id}>
@@ -97,7 +96,7 @@ export default function ManufacturingPage() {
             <h2>New Work Order</h2>
             <div className="form-grid">
               <label className="field"><span>Product *</span><div className="field-input"><input value={form.product} onChange={(e) => setForm({ ...form, product: e.target.value })} placeholder="e.g. 22K Bangle (custom)" /></div></label>
-              <label className="field"><span>Karigar</span><div className="field-input"><select value={form.karigar} onChange={(e) => setForm({ ...form, karigar: e.target.value })}>{karigars.map((k) => <option key={k}>{k}</option>)}</select></div></label>
+              <label className="field"><span>Workshop</span><div className="field-input"><select value={form.karigar} onChange={(e) => setForm({ ...form, karigar: e.target.value })}>{karigars.map((k) => <option key={k}>{k}</option>)}</select></div></label>
               <label className="field"><span>Qty planned</span><div className="field-input"><input type="number" value={form.qtyPlanned} onChange={(e) => setForm({ ...form, qtyPlanned: e.target.value })} placeholder="20" /></div></label>
               <label className="field"><span>Due date</span><div className="field-input"><input value={form.due} onChange={(e) => setForm({ ...form, due: e.target.value })} placeholder="10 May, 2025" /></div></label>
             </div>
