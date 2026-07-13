@@ -1,5 +1,72 @@
-import type { Expense, Invoice, Item, Movement, Repair, Rates } from "./store";
+import type { Customer, Expense, Invoice, Item, Movement, Repair, Rates } from "./store";
 import { itemPrice } from "./store";
+
+const UNPAID_INVOICE_STATUSES = new Set(["draft", "posted", "partial"]);
+
+const MONTH_INDEX: Record<string, number> = {
+  Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5,
+  Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11,
+};
+
+export function parseDemoDate(date: string): Date {
+  const match = date.match(/(\d+)\s+(\w+),\s+(\d+)/);
+  if (!match) return new Date();
+  const month = MONTH_INDEX[match[2].slice(0, 3)] ?? 0;
+  return new Date(Number(match[3]), month, Number(match[1]));
+}
+
+export function daysSinceDemoDate(date: string, now = new Date()): number {
+  const parsed = parseDemoDate(date);
+  return Math.max(0, Math.floor((now.getTime() - parsed.getTime()) / 86_400_000));
+}
+
+function outstandingInvoiceAmount(invoice: Invoice): number {
+  if (invoice.status === "partial") return Math.round(invoice.total * 0.45);
+  if (UNPAID_INVOICE_STATUSES.has(invoice.status)) return invoice.total;
+  return 0;
+}
+
+export function receivablesAging(customers: Customer[], invoices: Invoice[], repairs: Repair[]) {
+  return customers
+    .map((customer) => {
+      const unpaid = invoices.filter((inv) => inv.customer === customer.name && UNPAID_INVOICE_STATUSES.has(inv.status));
+      const repairDue = repairs
+        .filter((repair) => repair.customer === customer.name)
+        .reduce((sum, repair) => sum + (repair.balanceDue ?? 0), 0);
+
+      let bucket0to30 = repairDue;
+      let bucket31to60 = 0;
+      let bucket61plus = 0;
+
+      for (const invoice of unpaid) {
+        const amount = outstandingInvoiceAmount(invoice);
+        const age = daysSinceDemoDate(invoice.date);
+        if (age <= 30) bucket0to30 += amount;
+        else if (age <= 60) bucket31to60 += amount;
+        else bucket61plus += amount;
+      }
+
+      const outstanding = bucket0to30 + bucket31to60 + bucket61plus;
+      return {
+        customer: customer.name,
+        code: customer.code,
+        outstanding,
+        bucket0to30,
+        bucket31to60,
+        bucket61plus,
+      };
+    })
+    .filter((row) => row.outstanding > 0)
+    .sort((a, b) => b.outstanding - a.outstanding);
+}
+
+export function inventoryAgingBucket(sku: string, stock: number): string {
+  if (stock <= 0) return "Sold out";
+  const hash = sku.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  if (hash % 5 === 0) return "91+ days";
+  if (hash % 3 === 0) return "31–90 days";
+  return "0–30 days";
+}
 
 const CATEGORY_COLORS: Record<string, string> = {
   Rings: "#f2b33d",

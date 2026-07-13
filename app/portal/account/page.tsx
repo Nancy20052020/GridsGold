@@ -27,7 +27,7 @@ export default function AccountPage() {
 
   function signOut() {
     logout();
-    router.push("/");
+    router.push("/login");
   }
 
   if (!currentUser) {
@@ -38,7 +38,7 @@ export default function AccountPage() {
             <span className="portal-placeholder-icon"><UserRound size={24} /></span>
             <h2>You&apos;re not signed in</h2>
             <p>Sign in to view and manage your account.</p>
-            <Link className="portal-btn" href="/">Sign in</Link>
+            <Link className="portal-btn" href="/login">Sign in</Link>
           </div>
         </section>
       </CustomerShell>

@@ -198,6 +198,8 @@ const seedInvoices: Invoice[] = [
   { id: "inv2", number: "INV-SA-JED-2026-000016", customer: "Priya Mehta", date: "01 May, 2025", lines: [{ name: "Textured Gold Band Ring", qty: 1, amount: 38051 }], subtotal: 38051, gst: 1142, total: 39193, status: "paid" },
   { id: "inv3", number: "INV-SA-JED-2026-000017", customer: "Raj Gems (B2B)", date: "05 May, 2025", lines: [{ name: "Royal Gold Bangle", qty: 2, amount: 186400 }], subtotal: 186400, gst: 5592, total: 191992, status: "paid" },
   { id: "inv4", number: "INV-SA-JED-2026-000018", customer: "John Smith", date: "12 May, 2025", lines: [{ name: "Gold Hoop Earrings", qty: 1, amount: 64200 }], subtotal: 64200, gst: 1926, total: 66126, status: "paid" },
+  { id: "inv5", number: "INV-SA-JED-2026-000019", customer: "Zara Jewels (B2B)", date: "18 Mar, 2025", lines: [{ name: "Bridal Filigree Necklace", qty: 1, amount: 2100000 }], subtotal: 2100000, gst: 63000, total: 2163000, status: "posted" },
+  { id: "inv6", number: "INV-SA-JED-2026-000020", customer: "Raj Gems (B2B)", date: "22 Apr, 2025", lines: [{ name: "Royal Gold Bangle", qty: 4, amount: 372800 }], subtotal: 372800, gst: 11184, total: 383984, status: "partial" },
 ];
 
 const seedRepairs: Repair[] = [
