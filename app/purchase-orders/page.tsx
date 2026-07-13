@@ -74,7 +74,6 @@ export default function PurchaseOrdersPage() {
   const [query, setQuery] = useState("");
   const [branchFilter, setBranchFilter] = useState("All");
   const [selectedId, setSelectedId] = useState<string | null>(purchaseOrders[0]?.id ?? null);
-  const [dragId, setDragId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(true);
   const [open, setOpen] = useState(false);
   const [supOpen, setSupOpen] = useState(false);
@@ -173,12 +172,6 @@ export default function PurchaseOrdersPage() {
     flash(`PO → ${srsLabel(status)}`);
   }
 
-  function onDropColumn(status: PoStatus) {
-    if (!dragId) return;
-    moveTo(dragId, status);
-    setDragId(null);
-  }
-
   const boardColumns = PO_BOARD_FLOW.map((status) => ({
     status,
     items: filtered.filter((po) => po.status === status),
@@ -197,7 +190,7 @@ export default function PurchaseOrdersPage() {
           <div>
             <span className="pur-v2-eyebrow"><ClipboardList size={14} /> Purchasing · {selectedBranch}</span>
             <h1>Purchase Management</h1>
-            <p>Kanban buying workflow — draft to completed with GRN, AI picks and live metal checks.</p>
+            <p>Click a PO to open the side panel — change stage, GRN, and match invoices without dragging.</p>
           </div>
           <div className="pur-v2-head-actions">
             <button type="button" className="pur-v2-btn gold" onClick={() => setOpen(true)}>
@@ -264,12 +257,7 @@ export default function PurchaseOrdersPage() {
           <div className={`pur-v2-layout ${drawerOpen ? "" : "wide"}`}>
             <div className="pur-v2-board" role="list">
               {boardColumns.map((col) => (
-                <section
-                  key={col.status}
-                  className={`pur-glass pur-v2-col ${dragId ? "droppable" : ""}`}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => onDropColumn(col.status)}
-                >
+                <section key={col.status} className="pur-glass pur-v2-col">
                   <div className="pur-v2-col-head">
                     <h2>{srsLabel(col.status)}</h2>
                     <span>{col.items.length}</span>
@@ -279,11 +267,16 @@ export default function PurchaseOrdersPage() {
                       <article
                         key={po.id}
                         className={`pur-v2-card ${selected?.id === po.id ? "active" : ""}`}
-                        draggable
-                        onDragStart={() => setDragId(po.id)}
-                        onDragEnd={() => setDragId(null)}
                         onClick={() => { setSelectedId(po.id); setDrawerOpen(true); }}
                         role="listitem"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedId(po.id);
+                            setDrawerOpen(true);
+                          }
+                        }}
                       >
                         <div className="pur-v2-card-top">
                           <code>{po.number.slice(-7)}</code>
@@ -298,7 +291,9 @@ export default function PurchaseOrdersPage() {
                         <div className="pur-v2-eta"><Truck size={12} /> {etaFor(po)}</div>
                       </article>
                     ))}
-                    {col.items.length === 0 ? <div className="pur-v2-col-empty">Drop PO here</div> : null}
+                    {col.items.length === 0 ? (
+                      <div className="pur-v2-col-empty">No POs · open a card and set status in the panel</div>
+                    ) : null}
                   </div>
                 </section>
               ))}
@@ -309,6 +304,7 @@ export default function PurchaseOrdersPage() {
                 <DrawerPanel
                   po={selected}
                   score={scoreFor(selected.supplier)}
+                  onSetStatus={(status) => moveTo(selected.id, status)}
                   onAdvance={() => {
                     const next = nextPoStatus(selected.status);
                     if (next) moveTo(selected.id, next);
@@ -469,6 +465,7 @@ export default function PurchaseOrdersPage() {
 function DrawerPanel({
   po,
   score,
+  onSetStatus,
   onAdvance,
   onPartial,
   onGrn,
@@ -478,6 +475,7 @@ function DrawerPanel({
 }: {
   po: PurchaseOrder;
   score: number;
+  onSetStatus: (status: PoStatus) => void;
   onAdvance: () => void;
   onPartial: () => void;
   onGrn: () => void;
@@ -499,12 +497,45 @@ function DrawerPanel({
         <button type="button" className="pur-v2-btn ghost compact" onClick={onClose} aria-label="Close panel"><X size={16} /></button>
       </div>
 
+      <div className="pur-v2-section-head">
+        <h2>Change status</h2>
+        <span>Click a stage</span>
+      </div>
+      <div className="pur-v2-status-grid" role="listbox" aria-label="Purchase status">
+        {PO_BOARD_FLOW.map((s) => (
+          <button
+            type="button"
+            key={s}
+            role="option"
+            aria-selected={po.status === s}
+            className={`pur-v2-status-chip ${po.status === s ? "active" : ""}`}
+            onClick={() => onSetStatus(s)}
+          >
+            {srsLabel(s)}
+          </button>
+        ))}
+        <button
+          type="button"
+          role="option"
+          aria-selected={po.status === "partial"}
+          className={`pur-v2-status-chip ${po.status === "partial" ? "active" : ""}`}
+          onClick={onPartial}
+        >
+          Partial
+        </button>
+      </div>
+
       <div className="pur-v2-timeline" aria-label="Purchase timeline">
         {PO_BOARD_FLOW.map((s, i) => (
-          <div key={s} className={`pur-v2-step ${i <= idx ? "done" : ""} ${i === idx ? "current" : ""}`}>
+          <button
+            type="button"
+            key={s}
+            className={`pur-v2-step ${i <= idx || (po.status === "partial" && i <= 4) ? "done" : ""} ${po.status === s ? "current" : ""}`}
+            onClick={() => onSetStatus(s)}
+          >
             <i />
             <span>{srsLabel(s)}</span>
-          </div>
+          </button>
         ))}
       </div>
 

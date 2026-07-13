@@ -199,8 +199,21 @@ const seedInvoices: Invoice[] = [
 ];
 
 const seedRepairs: Repair[] = [
-  { id: "r1", number: "REP-JED-2026-000028", customer: "Priya Mehta", item: "Gold Ring", issue: "Ring resizing", status: "ready", estimate: 1200, approvedAmount: 1200, deposit: 500, balanceDue: 700, promisedDate: "08 May, 2025", priority: "normal", itemReferenceType: "external_item", observedCondition: "Minor scratches on band", date: "02 May, 2025", technician: "Ravi Nair" },
+  { id: "r1", number: "REP-JED-2026-000028", customer: "Priya Mehta", item: "Gold Ring", issue: "Ring resizing US 6→7", status: "ready", estimate: 1200, approvedAmount: 1200, deposit: 500, balanceDue: 700, promisedDate: "08 May, 2025", priority: "normal", itemReferenceType: "external_item", observedCondition: "Minor scratches on band", date: "02 May, 2025", technician: "Ravi Nair" },
   { id: "r2", number: "REP-JED-2026-000029", customer: "John Smith", item: "Gold Bangle", issue: "Resize bangle", status: "in_progress", estimate: 850, approvedAmount: 850, deposit: 300, balanceDue: 550, promisedDate: "12 May, 2025", priority: "urgent", itemReferenceType: "external_item", metalDetails: "22K gold", date: "03 May, 2025", technician: "Karim Ali" },
+  { id: "r3", number: "REP-JED-2026-000030", customer: "Aisha Khan", item: "Necklace clasp", issue: "Broken lobster clasp", status: "received", estimate: 650, approvedAmount: 0, deposit: 200, balanceDue: 450, promisedDate: "16 May, 2025", priority: "normal", itemReferenceType: "external_item", observedCondition: "Clasp snapped, chain intact", date: "11 May, 2025" },
+  { id: "r4", number: "REP-JED-2026-000031", customer: "Rahul Iyer", item: "Temple pendant", issue: "Stone reset + polish", status: "received", estimate: 2400, approvedAmount: 0, deposit: 800, balanceDue: 1600, promisedDate: "18 May, 2025", priority: "vip", itemReferenceType: "external_item", stoneDetails: "0.18 ct ruby loose", date: "11 May, 2025" },
+  { id: "r5", number: "REP-JED-2026-000032", customer: "Meera Shah", item: "Diamond studs", issue: "Post bent / security check", status: "diagnosis", estimate: 900, approvedAmount: 0, deposit: 0, balanceDue: 900, promisedDate: "14 May, 2025", priority: "normal", itemReferenceType: "external_item", observedCondition: "Left post bent", date: "10 May, 2025", technician: "Sonal Desai" },
+  { id: "r6", number: "REP-JED-2026-000033", customer: "Omar Farook", item: "22K chain", issue: "Kinked links inspection", status: "diagnosis", estimate: 1100, approvedAmount: 0, deposit: 400, balanceDue: 700, promisedDate: "15 May, 2025", priority: "normal", itemReferenceType: "external_item", metalDetails: "22K yellow", date: "09 May, 2025", technician: "Imran Khan" },
+  { id: "r7", number: "REP-JED-2026-000034", customer: "Neha Kapoor", item: "Bridal set", issue: "Rhodium + cleaning quote", status: "estimate", estimate: 3800, approvedAmount: 0, deposit: 1000, balanceDue: 2800, promisedDate: "20 May, 2025", priority: "vip", itemReferenceType: "external_item", date: "08 May, 2025", technician: "Ravi Nair" },
+  { id: "r8", number: "REP-JED-2026-000035", customer: "Vikram Seth", item: "Signet ring", issue: "Engraving refresh quote", status: "estimate", estimate: 1500, approvedAmount: 0, deposit: 500, balanceDue: 1000, promisedDate: "17 May, 2025", priority: "normal", itemReferenceType: "external_item", date: "09 May, 2025" },
+  { id: "r9", number: "REP-JED-2026-000036", customer: "Sara Ali", item: "Hoop earrings", issue: "Solder join approval", status: "awaiting_approval", estimate: 720, approvedAmount: 720, deposit: 250, balanceDue: 470, promisedDate: "13 May, 2025", priority: "urgent", itemReferenceType: "external_item", date: "07 May, 2025", technician: "Karim Ali" },
+  { id: "r10", number: "REP-JED-2026-000037", customer: "Dev Patel", item: "Gold kada", issue: "Size + polish approval", status: "awaiting_approval", estimate: 2100, approvedAmount: 2100, deposit: 700, balanceDue: 1400, promisedDate: "19 May, 2025", priority: "normal", itemReferenceType: "external_item", date: "06 May, 2025" },
+  { id: "r11", number: "REP-JED-2026-000038", customer: "Fatima Noor", item: "Bracelet", issue: "Link rebuild in bench", status: "in_progress", estimate: 1650, approvedAmount: 1650, deposit: 600, balanceDue: 1050, promisedDate: "14 May, 2025", priority: "normal", itemReferenceType: "external_item", date: "05 May, 2025", technician: "Sonal Desai" },
+  { id: "r12", number: "REP-JED-2026-000039", customer: "Arjun Malhotra", item: "Cufflinks", issue: "QC polish & weigh", status: "quality_check", estimate: 980, approvedAmount: 980, deposit: 300, balanceDue: 680, promisedDate: "12 May, 2025", priority: "normal", itemReferenceType: "external_item", date: "04 May, 2025", technician: "Imran Khan" },
+  { id: "r13", number: "REP-JED-2026-000040", customer: "Lavanya Rao", item: "Nose pin", issue: "Stone seating QC", status: "quality_check", estimate: 450, approvedAmount: 450, deposit: 150, balanceDue: 300, promisedDate: "11 May, 2025", priority: "normal", itemReferenceType: "external_item", date: "04 May, 2025", technician: "Ravi Nair" },
+  { id: "r14", number: "REP-JED-2026-000041", customer: "Kabir Singh", item: "Mangalsutra", issue: "Ready — OTP desk", status: "ready", estimate: 2200, approvedAmount: 2200, deposit: 800, balanceDue: 1400, promisedDate: "10 May, 2025", priority: "vip", itemReferenceType: "external_item", date: "01 May, 2025", technician: "Karim Ali" },
+  { id: "r15", number: "REP-JED-2026-000042", customer: "Ananya Bose", item: "Anklet", issue: "Delivered with warranty card", status: "delivered", estimate: 780, approvedAmount: 780, deposit: 780, balanceDue: 0, promisedDate: "05 May, 2025", priority: "normal", itemReferenceType: "external_item", date: "28 Apr, 2025", technician: "Sonal Desai" },
 ];
 
 const seedSuppliers: Supplier[] = [
@@ -215,6 +228,14 @@ const seedPOs: PurchaseOrder[] = [
   { id: "po4", number: "PO-JED-2026-003304", supplier: "Kundan Casting Co.", items: "Silver findings pack", amount: 48000, branch: "Main Branch", currency: "INR", status: "draft", date: "10 May, 2025" },
   { id: "po5", number: "PO-JED-2026-003305", supplier: "Raj Gems", items: "Bridal filigree mounts ×12", amount: 960000, branch: "Vault", currency: "INR", status: "ordered", date: "06 May, 2025" },
   { id: "po6", number: "PO-JED-2026-003306", supplier: "Kundan Casting Co.", items: "Rhodium salts + solder", amount: 28500, branch: "Main Branch", currency: "INR", status: "received", date: "02 May, 2025" },
+  { id: "po7", number: "PO-JED-2026-003307", supplier: "Raj Gems", items: "Emerald baguette lot 1.1 ct", amount: 410000, branch: "Main Branch", currency: "INR", status: "draft", date: "11 May, 2025" },
+  { id: "po8", number: "PO-JED-2026-003308", supplier: "Kundan Casting Co.", items: "18K white casting grain 200g", amount: 980000, branch: "Branch 2", currency: "INR", status: "draft", date: "11 May, 2025" },
+  { id: "po9", number: "PO-JED-2026-003309", supplier: "Raj Gems", items: "Pearl string A-grade ×40", amount: 186000, branch: "Main Branch", currency: "INR", status: "approved", date: "09 May, 2025" },
+  { id: "po10", number: "PO-JED-2026-003310", supplier: "Kundan Casting Co.", items: "Antique polish compound case", amount: 12500, branch: "Vault", currency: "INR", status: "ordered", date: "07 May, 2025" },
+  { id: "po11", number: "PO-JED-2026-003311", supplier: "Raj Gems", items: "VS diamond melee 3.0 ct", amount: 1280000, branch: "Main Branch", currency: "INR", status: "in_transit", date: "04 May, 2025" },
+  { id: "po12", number: "PO-JED-2026-003312", supplier: "Kundan Casting Co.", items: "Hallmark punch kit + tags", amount: 34000, branch: "Main Branch", currency: "INR", status: "received", date: "03 May, 2025" },
+  { id: "po13", number: "PO-JED-2026-003313", supplier: "Raj Gems", items: "IGI certified solitaires ×4", amount: 2100000, branch: "Vault", currency: "INR", status: "received", date: "01 May, 2025" },
+  { id: "po14", number: "PO-JED-2026-003314", supplier: "Kundan Casting Co.", items: "Findings assort — clasps/jumps", amount: 56000, branch: "Branch 2", currency: "INR", status: "closed", date: "26 Apr, 2025" },
 ];
 
 const seedMovements: Movement[] = [
@@ -358,25 +379,39 @@ function hydrateInvoices(saved: Invoice[] | undefined): Invoice[] {
   return saved.map((i) => ({ ...i, status: migrateInvoiceStatus(i.status as string) }));
 }
 
-function hydrateRepairs(saved: Repair[] | undefined): Repair[] {
-  if (!saved?.length) return seedRepairs;
-  return saved.map((r) => ({
+function normalizeRepair(r: Repair): Repair {
+  return {
     ...r,
     status: migrateRepairStatus(r.status as string),
     priority: migrateRepairPriority(r.priority),
     itemReferenceType: r.itemReferenceType ?? "external_item",
     balanceDue: r.balanceDue ?? Math.max(0, (r.approvedAmount ?? r.estimate) - (r.deposit ?? 0)),
-  }));
+  };
 }
 
-function hydratePurchaseOrders(saved: PurchaseOrder[] | undefined): PurchaseOrder[] {
-  if (!saved?.length) return seedPOs;
-  return saved.map((p) => ({
+function hydrateRepairs(saved: Repair[] | undefined): Repair[] {
+  const savedMap = new Map((saved ?? []).map((r) => [r.id, r]));
+  const fromSeed = seedRepairs.map((seed) => normalizeRepair(savedMap.get(seed.id) ?? seed));
+  const seedIds = new Set(seedRepairs.map((r) => r.id));
+  const extras = (saved ?? []).filter((r) => !seedIds.has(r.id)).map(normalizeRepair);
+  return [...fromSeed, ...extras];
+}
+
+function normalizePo(p: PurchaseOrder): PurchaseOrder {
+  return {
     ...p,
     status: migratePoStatus(p.status as string),
     branch: p.branch ?? "Main Branch",
     currency: p.currency ?? "INR",
-  }));
+  };
+}
+
+function hydratePurchaseOrders(saved: PurchaseOrder[] | undefined): PurchaseOrder[] {
+  const savedMap = new Map((saved ?? []).map((p) => [p.id, p]));
+  const fromSeed = seedPOs.map((seed) => normalizePo(savedMap.get(seed.id) ?? seed));
+  const seedIds = new Set(seedPOs.map((p) => p.id));
+  const extras = (saved ?? []).filter((p) => !seedIds.has(p.id)).map(normalizePo);
+  return [...fromSeed, ...extras];
 }
 
 function hydrateWorkOrders(saved: WorkOrder[] | undefined): WorkOrder[] {
