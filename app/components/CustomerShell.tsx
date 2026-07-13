@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Gem, Heart, Home, LogOut, Menu, Package, Sparkles, UserRound, Wrench } from "lucide-react";
+import { Gem, Heart, Home, LogOut, Menu, Moon, Package, Sparkles, Sun, UserRound, Wrench } from "lucide-react";
 import { firstName, useStore } from "../lib/store";
 import { BrandMark } from "./BrandMark";
 
@@ -22,7 +22,7 @@ function isActive(pathname: string, href: string) {
 export function CustomerShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { rates, wishlist, currentUser, logout } = useStore();
+  const { rates, wishlist, currentUser, logout, theme, toggleTheme } = useStore();
   const greeting = firstName(currentUser);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -139,6 +139,9 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
             <Sparkles size={14} /> 22K · ₹ {rates["22K"].toLocaleString("en-IN")}/gm
           </span>
           {greeting ? <span className="portal-greeting">Hi, {greeting}</span> : null}
+          <button className="portal-icon-btn" type="button" aria-label="Toggle theme" onClick={toggleTheme}>
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <Link className="portal-icon-btn" href="/portal/account" aria-label="Account">
             <UserRound size={18} />
           </Link>
@@ -148,6 +151,9 @@ export function CustomerShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <div className="portal-actions-mobile">
+          <button className="portal-icon-btn" type="button" aria-label="Toggle theme" onClick={toggleTheme}>
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
           <Link className="portal-icon-btn" href="/portal/account" aria-label="Account">
             <UserRound size={18} />
           </Link>
