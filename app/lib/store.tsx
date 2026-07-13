@@ -310,7 +310,7 @@ type StoreValue = {
   theme: Theme;
   toggleTheme: () => void;
   rates: Rates;
-  setRate: (karat: Karat, value: number) => void;
+  applyLiveRates: (next: Rates) => void;
   selectedBranch: string;
   setBranch: (branch: string) => void;
   baseCurrency: CurrencyCode;
@@ -535,7 +535,9 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const toggleTheme = useCallback(() => setTheme((t) => (t === "light" ? "dark" : "light")), []);
-  const setRate = useCallback((karat: Karat, value: number) => setRates((p) => ({ ...p, [karat]: value })), []);
+  const applyLiveRates = useCallback((next: Rates) => {
+    setRates((prev) => ({ ...prev, ...next }));
+  }, []);
   const setBranch = useCallback((b: string) => setSelectedBranch(b), []);
   const setBaseCurrency = useCallback((currency: CurrencyCode) => setBaseCurrencyState(currency), []);
 
@@ -706,12 +708,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   const markNotificationsRead = useCallback(() => setNotifications((p) => p.map((n) => ({ ...n, read: true }))), []);
 
   const value = useMemo<StoreValue>(() => ({
-    ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser,
+    ready, theme, toggleTheme, rates, applyLiveRates, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser,
     items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, assignRepairTechnician, suppliers, addSupplier,
     purchaseOrders, addPurchaseOrder, updatePurchaseOrderStatus, movements, transferStock, adjustStock, cycleCount,
     expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder,
     cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, notifications, markNotificationsRead,
-  }), [ready, theme, toggleTheme, rates, setRate, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser, items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, assignRepairTechnician, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, updatePurchaseOrderStatus, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, notifications, markNotificationsRead]);
+  }), [ready, theme, toggleTheme, rates, applyLiveRates, selectedBranch, setBranch, baseCurrency, setBaseCurrency, currentUser, signup, login, logout, updateUser, items, addItem, getItem, customers, addCustomer, invoices, getInvoice, repairs, addRepair, updateRepairStatus, assignRepairTechnician, suppliers, addSupplier, purchaseOrders, addPurchaseOrder, updatePurchaseOrderStatus, movements, transferStock, adjustStock, cycleCount, expenses, addExpense, bulkOrders, addBulkOrder, workOrders, addWorkOrder, cart, addToCart, addToCartBySku, setQty, removeFromCart, clearCart, checkout, notifications, markNotificationsRead]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

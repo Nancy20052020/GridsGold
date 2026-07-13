@@ -82,7 +82,7 @@ const seeds: Array<[string, string, string, ScreenKind, string?]> = [
   ["/reports/customers", "Customer Report", "Reports", "report"],
   ["/reports/products", "Product Performance Report", "Reports", "report"],
   ["/analytics", "Analytics Dashboard", "Analytics", "hub"],
-  ["/gold-rates", "Live Gold Rates", "Metal Rates", "settings", "Update Rates"],
+  ["/gold-rates", "Live Gold Rates", "Metal Rates", "settings", "View Live Feed"],
   ["/notifications", "Notifications / Activity Center", "System", "workflow"],
   ["/roles", "User Roles & Permissions", "Settings", "settings", "New Role"],
   ["/settings", "Company / Branch Settings", "Settings", "settings", "Save Changes"],
