@@ -29,7 +29,7 @@ Optional browser icons: `app/icon.png` (512×512), `app/apple-icon.png` (180×18
 
 | File | Used for |
 |------|----------|
-| `ring_1.png` … `ring_5.png` | Ring products + category tiles |
+| `ring_1.png` … `ring_6.png` | Ring products + category tiles |
 | `necklace_1.png` … `necklace_3.png` | Necklace products + hero banner |
 | `earrings_1.png`, `earrings_2.png` | Earring products + category tile |
 | `bangle_1.png`, `bangle_2.png` | Bangle products + category tile |
