@@ -28,6 +28,8 @@ function ItemDetail() {
 
   const status = itemStatus(item.stock);
   const metalValue = Math.round(item.weight * (rates[item.karat] ?? 0));
+  const itemName = item.name;
+  const itemId = item.id;
 
   const specs: [string, string][] = [
     ["SKU / Barcode", item.sku],
@@ -41,8 +43,8 @@ function ItemDetail() {
   ];
 
   function handleRemove() {
-    if (!window.confirm(`Remove “${item.name}” from inventory? This cannot be undone.`)) return;
-    removeItem(item.id);
+    if (!window.confirm(`Remove “${itemName}” from inventory? This cannot be undone.`)) return;
+    removeItem(itemId);
     router.push("/inventory");
   }
 

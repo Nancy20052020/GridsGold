@@ -1,2 +1,2 @@
 /** Shown in admin sidebar — bump when shipping UI updates. */
-export const BUILD_TAG = "Jul 14 · Inventory remove items";
+export const BUILD_TAG = "Jul 14 · Fix item remove types";
