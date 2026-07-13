@@ -92,7 +92,7 @@ export default function RepairsPage() {
   const [query, setQuery] = useState("");
   const [priorityFilter, setPriorityFilter] = useState<"All" | RepairPriority>("All");
   const [selectedId, setSelectedId] = useState<string | null>(repairs[0]?.id ?? null);
-  const [dragId, setDragId] = useState<string | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(true);
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState("");
   const [notes, setNotes] = useState<Record<string, string>>({});
@@ -193,12 +193,6 @@ export default function RepairsPage() {
     flash(`Moved to ${srsLabel(status)}`);
   }
 
-  function onDropColumn(status: RepairStatus) {
-    if (!dragId) return;
-    moveTo(dragId, status);
-    setDragId(null);
-  }
-
   function verifyOtp() {
     if (!selected) return;
     if (otpInput.trim() === otpFor(selected)) {
@@ -227,7 +221,7 @@ export default function RepairsPage() {
           <div>
             <span className="rep-v2-eyebrow"><Wrench size={14} /> Repairs · {selectedBranch}</span>
             <h1>Repair Management</h1>
-            <p>Drag jobs through the bench — intake to OTP pickup in one glass board.</p>
+            <p>Click a job to open the side panel — change status, assign tech, and notify from one place.</p>
           </div>
           <div className="rep-v2-head-actions">
             <button type="button" className="rep-v2-btn gold" onClick={() => setOpen(true)}>
@@ -296,19 +290,17 @@ export default function RepairsPage() {
               <button type="button" className={view === "list" ? "active" : ""} onClick={() => setView("list")}>List</button>
               <button type="button" className={view === "analytics" ? "active" : ""} onClick={() => setView("analytics")}>Analytics</button>
             </div>
+            <button type="button" className="rep-v2-btn ghost compact" onClick={() => setDrawerOpen((v) => !v)}>
+              {drawerOpen ? "Hide panel" : "Show panel"}
+            </button>
           </div>
         </section>
 
         {view === "board" ? (
-          <div className="rep-v2-layout">
+          <div className={`rep-v2-layout ${drawerOpen ? "" : "wide"}`}>
             <div className="rep-v2-board" role="list">
               {boardColumns.map((col) => (
-                <section
-                  key={col.status}
-                  className={`rep-glass rep-v2-col ${dragId ? "droppable" : ""}`}
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={() => onDropColumn(col.status)}
-                >
+                <section key={col.status} className="rep-glass rep-v2-col">
                   <div className="rep-v2-col-head">
                     <h2>{srsLabel(col.status)}</h2>
                     <span>{col.items.length}</span>
@@ -318,11 +310,16 @@ export default function RepairsPage() {
                       <article
                         key={r.id}
                         className={`rep-v2-card ${selected?.id === r.id ? "active" : ""} ${isOverdue(r) ? "overdue" : ""}`}
-                        draggable
-                        onDragStart={() => setDragId(r.id)}
-                        onDragEnd={() => setDragId(null)}
-                        onClick={() => setSelectedId(r.id)}
+                        onClick={() => { setSelectedId(r.id); setDrawerOpen(true); }}
                         role="listitem"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedId(r.id);
+                            setDrawerOpen(true);
+                          }
+                        }}
                       >
                         <div className="rep-v2-card-top">
                           <code>{r.number.slice(-8)}</code>
@@ -338,38 +335,43 @@ export default function RepairsPage() {
                         {r.promisedDate ? <div className="rep-v2-due"><CalendarDays size={12} /> {r.promisedDate}</div> : null}
                       </article>
                     ))}
-                    {col.items.length === 0 ? <div className="rep-v2-col-empty">Drop here</div> : null}
+                    {col.items.length === 0 ? (
+                      <div className="rep-v2-col-empty">No jobs here · open a card and set status in the panel</div>
+                    ) : null}
                   </div>
                 </section>
               ))}
             </div>
 
-            <aside className="rep-v2-detail">
-              {selected ? (
-                <DetailPanel
-                  repair={selected}
-                  note={notes[selected.id] ?? ""}
-                  setNote={(v) => setNotes((p) => ({ ...p, [selected.id]: v }))}
-                  otpInput={otpInput}
-                  setOtpInput={setOtpInput}
-                  otpOk={Boolean(otpVerified[selected.id])}
-                  onVerifyOtp={verifyOtp}
-                  onAssign={(tech) => { assignRepairTechnician(selected.id, tech); flash(`Assigned ${tech}`); }}
-                  onAdvance={() => {
-                    const next = nextRepairStatus(selected.status);
-                    if (next) moveTo(selected.id, next);
-                  }}
-                  onNotify={notify}
-                  flash={flash}
-                />
-              ) : (
-                <section className="rep-glass rep-v2-empty">
-                  <Wrench size={36} />
-                  <strong>Select a job</strong>
-                  <p>Click a card or drop into a column to update status.</p>
-                </section>
-              )}
-            </aside>
+            {drawerOpen ? (
+              <aside className="rep-v2-detail">
+                {selected ? (
+                  <DetailPanel
+                    repair={selected}
+                    note={notes[selected.id] ?? ""}
+                    setNote={(v) => setNotes((p) => ({ ...p, [selected.id]: v }))}
+                    otpInput={otpInput}
+                    setOtpInput={setOtpInput}
+                    otpOk={Boolean(otpVerified[selected.id])}
+                    onVerifyOtp={verifyOtp}
+                    onAssign={(tech) => { assignRepairTechnician(selected.id, tech); flash(`Assigned ${tech || "Unassigned"}`); }}
+                    onSetStatus={(status) => moveTo(selected.id, status)}
+                    onAdvance={() => {
+                      const next = nextRepairStatus(selected.status);
+                      if (next) moveTo(selected.id, next);
+                    }}
+                    onNotify={notify}
+                    flash={flash}
+                  />
+                ) : (
+                  <section className="rep-glass rep-v2-empty">
+                    <Wrench size={36} />
+                    <strong>Select a job</strong>
+                    <p>Click any card — change status from the side panel.</p>
+                  </section>
+                )}
+              </aside>
+            ) : null}
           </div>
         ) : null}
 
@@ -487,6 +489,7 @@ function DetailPanel({
   otpOk,
   onVerifyOtp,
   onAssign,
+  onSetStatus,
   onAdvance,
   onNotify,
   flash,
@@ -499,6 +502,7 @@ function DetailPanel({
   otpOk: boolean;
   onVerifyOtp: () => void;
   onAssign: (tech: string) => void;
+  onSetStatus: (status: RepairStatus) => void;
   onAdvance: () => void;
   onNotify: (c: "WhatsApp" | "SMS") => void;
   flash: (m: string) => void;
@@ -519,12 +523,36 @@ function DetailPanel({
         <em className={`prio ${(repair.priority ?? "normal")}`}>{srsLabel(repair.priority ?? "normal")}</em>
       </div>
 
+      <div className="rep-v2-section-head">
+        <h2>Change status</h2>
+        <span>Click a stage</span>
+      </div>
+      <div className="rep-v2-status-grid" role="listbox" aria-label="Repair status">
+        {REPAIR_BOARD_FLOW.map((s) => (
+          <button
+            type="button"
+            key={s}
+            role="option"
+            aria-selected={repair.status === s}
+            className={`rep-v2-status-chip ${repair.status === s ? "active" : ""}`}
+            onClick={() => onSetStatus(s)}
+          >
+            {srsLabel(s)}
+          </button>
+        ))}
+      </div>
+
       <div className="rep-v2-timeline" aria-label="Repair timeline">
         {REPAIR_BOARD_FLOW.map((s, i) => (
-          <div key={s} className={`rep-v2-step ${i <= idx ? "done" : ""} ${i === idx ? "current" : ""}`}>
+          <button
+            type="button"
+            key={s}
+            className={`rep-v2-step ${i <= idx ? "done" : ""} ${i === idx ? "current" : ""}`}
+            onClick={() => onSetStatus(s)}
+          >
             <i />
             <span>{srsLabel(s)}</span>
-          </div>
+          </button>
         ))}
       </div>
 
