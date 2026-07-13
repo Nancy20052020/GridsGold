@@ -152,6 +152,17 @@ export const SRS_REPORT_CATEGORIES = {
 
 export type SrsReportCategory = keyof typeof SRS_REPORT_CATEGORIES;
 
+/** Supported company / document currencies */
+export const CURRENCY_CODES = ["INR", "USD", "AED", "SAR"] as const;
+export type CurrencyCode = (typeof CURRENCY_CODES)[number];
+
+export const CURRENCY_LABELS: Record<CurrencyCode, string> = {
+  INR: "INR (₹)",
+  USD: "USD ($)",
+  AED: "AED (د.إ)",
+  SAR: "SAR",
+};
+
 /** Demo locations per FR-ORG-002 (branch → location). */
 export const DEMO_LOCATIONS = [
   { code: "SHOW-01", name: "Main Showroom", type: "showroom", branch: "Main Branch" },
