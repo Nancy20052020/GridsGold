@@ -19,14 +19,14 @@ const stats = [
   { value: "4", label: "Branches synced", note: "Multi-location inventory" },
   { value: "22K", label: "Live gold pricing", note: "Updates every counter" },
   { value: "100%", label: "Hallmark ready", note: "BIS workflows built-in" },
-  { value: "24/7", label: "Customer portal", note: "Orders & repairs online" },
+  { value: "24/7", label: "Cloud sync", note: "Multi-branch inventory" },
 ];
 
 const trustStrip = [
   "POS that's fast",
   "Repairs that track",
   "Inventory that syncs",
-  "Portal clients love",
+  "Reports that export",
   "Secure & reliable",
 ];
 
@@ -40,8 +40,8 @@ const features = [
     copy: "Track grams, karat, making charges and stones. Know margin to the gram, not just piece count.",
   },
   {
-    title: "Portal your clients expect",
-    copy: "Browse, wishlist, reserve and track repairs — branded in navy and gold, like your showroom.",
+    title: "Repairs that stay on track",
+    copy: "Tickets from drop-off to pickup — deposits, estimates and status updates in one place.",
   },
 ];
 
@@ -51,7 +51,7 @@ const plans = [
     price: "₹ 24,999",
     period: "/month",
     note: "Single store getting started",
-    features: ["1 branch", "3 staff users", "POS + Inventory", "Customer portal", "Email support"],
+    features: ["1 branch", "3 staff users", "POS + Inventory", "Repairs module", "Email support"],
   },
   {
     name: "Growth",
@@ -92,7 +92,7 @@ export default function LandingPage() {
           </h1>
           <p>
             Cut admin in half, catch every repair on time, and know your margin to the gram.
-            Retail, repairs, wholesale and manufacturing — with a customer portal your clients will love.
+            Retail, repairs, wholesale and manufacturing — one connected admin platform.
           </p>
           <div className="landing-hero-actions">
             <Link className="landing-btn-primary" href="/login?signup=1">
@@ -132,7 +132,7 @@ export default function LandingPage() {
         <ScrollReveal className="landing-section-head centered">
           <span className="landing-eyebrow light">Modules</span>
           <h2 className="display-serif">Everything your showroom needs</h2>
-          <p>From the counter to the workshop, back office and customer portal — one connected platform.</p>
+          <p>From the counter to the workshop and back office — one connected platform.</p>
         </ScrollReveal>
 
         <div className="landing-module-grid">

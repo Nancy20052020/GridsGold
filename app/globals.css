@@ -2228,6 +2228,20 @@ a.ghost-action {
   border: 1px solid #ffd9d9;
 }
 
+.auth-hint {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.auth-guard-loading {
+  display: grid;
+  place-items: center;
+  min-height: 100dvh;
+  color: var(--muted);
+  font-size: 14px;
+}
+
 .auth-submit,
 .portal-btn {
   display: inline-flex;
