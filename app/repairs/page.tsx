@@ -12,10 +12,11 @@ import {
   srsPillTone,
   type RepairStatus,
 } from "../lib/srs";
-import { useStore, formatINR } from "../lib/store";
+import { useStore, formatINR, currencySymbol } from "../lib/store";
 
 export default function RepairsPage() {
   const { repairs, addRepair, updateRepairStatus, customers } = useStore();
+  const money = currencySymbol();
   const [open, setOpen] = useState(false);
   const [boardFilter, setBoardFilter] = useState<RepairStatus | "all">("all");
   const [form, setForm] = useState({
@@ -160,8 +161,8 @@ export default function RepairsPage() {
               <label className="field" style={{ gridColumn: "1 / -1" }}><span>Observed condition</span><div className="field-input"><input value={form.observedCondition} onChange={(e) => setForm({ ...form, observedCondition: e.target.value })} placeholder="Scratches, dents, missing stones..." /></div></label>
               <label className="field"><span>Metal details</span><div className="field-input"><input value={form.metalDetails} onChange={(e) => setForm({ ...form, metalDetails: e.target.value })} placeholder="e.g. 22K yellow gold" /></div></label>
               <label className="field"><span>Stone details</span><div className="field-input"><input value={form.stoneDetails} onChange={(e) => setForm({ ...form, stoneDetails: e.target.value })} placeholder="e.g. 0.25 ct diamond" /></div></label>
-              <label className="field"><span>Estimate (₹)</span><div className="field-input"><input type="number" value={form.estimate} onChange={(e) => setForm({ ...form, estimate: e.target.value })} placeholder="1200" /></div></label>
-              <label className="field"><span>Deposit (₹)</span><div className="field-input"><input type="number" value={form.deposit} onChange={(e) => setForm({ ...form, deposit: e.target.value })} placeholder="500" /></div></label>
+              <label className="field"><span>Estimate ({money})</span><div className="field-input"><input type="number" value={form.estimate} onChange={(e) => setForm({ ...form, estimate: e.target.value })} placeholder="1200" /></div></label>
+              <label className="field"><span>Deposit ({money})</span><div className="field-input"><input type="number" value={form.deposit} onChange={(e) => setForm({ ...form, deposit: e.target.value })} placeholder="500" /></div></label>
               <label className="field"><span>Promised date</span><div className="field-input"><input value={form.promisedDate} onChange={(e) => setForm({ ...form, promisedDate: e.target.value })} placeholder="e.g. 15 May, 2025" /></div></label>
               <label className="field"><span>Priority</span><div className="field-input"><select value={form.priority} onChange={(e) => setForm({ ...form, priority: e.target.value as typeof form.priority })}>{REPAIR_PRIORITIES.map((p) => <option key={p} value={p}>{srsLabel(p)}</option>)}</select></div></label>
             </div>
