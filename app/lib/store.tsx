@@ -8,8 +8,6 @@ import {
   useMemo,
   useState,
 } from "react";
-import { userFromSupabase } from "./auth";
-import { getSupabase, initSupabase, isSupabaseConfigured } from "./supabase";
 import {
   migrateCustomerType,
   migrateInvoiceStatus,
@@ -445,19 +443,7 @@ function hydrateItems(saved: Item[] | undefined, removedIds: string[] = []): Ite
   return [...extras, ...fromSeed];
 }
 
-export function StoreProvider({
-  children,
-  supabaseUrl = "",
-  supabaseAnonKey = "",
-}: {
-  children: React.ReactNode;
-  /** Passed from the server layout so client auth works even without env inlining. */
-  supabaseUrl?: string;
-  supabaseAnonKey?: string;
-}) {
-  // Initialize before any child (AuthPanel, etc.) reads the shared client.
-  initSupabase(supabaseUrl, supabaseAnonKey);
-
+export function StoreProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [theme, setTheme] = useState<Theme>("light");
   const [rates, setRates] = useState<Rates>(seedRates);
@@ -546,28 +532,6 @@ export function StoreProvider({
     displayCurrency = baseCurrency;
   }, [baseCurrency]);
 
-  useEffect(() => {
-    const supabase = getSupabase();
-    if (!isSupabaseConfigured() || !supabase) return;
-
-    let cancelled = false;
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (cancelled) return;
-      if (session?.user) setCurrentUser(userFromSupabase(session.user));
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (cancelled) return;
-      setCurrentUser(session?.user ? userFromSupabase(session.user) : null);
-    });
-
-    return () => {
-      cancelled = true;
-      subscription.unsubscribe();
-    };
-  }, []);
-
   const toggleTheme = useCallback(() => setTheme((t) => (t === "light" ? "dark" : "light")), []);
   const applyLiveRates = useCallback((next: Rates) => {
     setRates((prev) => ({ ...prev, ...next }));
@@ -584,10 +548,6 @@ export function StoreProvider({
   }, []);
 
   const logout = useCallback(() => {
-    const supabase = getSupabase();
-    if (isSupabaseConfigured() && supabase) {
-      void supabase.auth.signOut();
-    }
     setCurrentUser(null);
   }, []);
   const updateUser = useCallback((patch: Partial<User>) => setCurrentUser((u) => (u ? { ...u, ...patch } : u)), []);
