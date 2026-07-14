@@ -2228,6 +2228,15 @@ a.ghost-action {
   border: 1px solid #ffd9d9;
 }
 
+.auth-info {
+  padding: 10px 13px;
+  border-radius: 9px;
+  background: #f0faf4;
+  color: #0f7a3f;
+  font-size: 13.5px;
+  border: 1px solid #c6e9d4;
+}
+
 .auth-hint {
   margin-top: 6px;
   color: var(--muted);
