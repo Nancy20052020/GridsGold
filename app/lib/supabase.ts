@@ -3,12 +3,13 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 /**
  * Supabase (PostgreSQL) client.
  *
- * The URL + anon key come from environment variables — NEVER hardcode them in
- * source. Set them in `.env.local` for local dev and in Vercel → Project →
- * Settings → Environment Variables for production:
+ * Public credentials come from environment variables — NEVER hardcode them.
+ * Set in `.env.local` (local) and Vercel → Project → Environment Variables (prod):
  *
  *   NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
- *   NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR-ANON-KEY
+ *   NEXT_PUBLIC_SUPABASE_ANON_KEY=...          # legacy JWT anon key
+ *   # or
+ *   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...  # new sb_publishable_… key
  *
  * Client bundles (Turbopack) do not always inline `process.env.NEXT_PUBLIC_*`,
  * so the root layout also passes these values into `initSupabase()` from the
@@ -30,8 +31,20 @@ function isPlaceholder(value: string): boolean {
     v.includes("your-project") ||
     v.includes("your-anon-key") ||
     v.includes("your_anon_key") ||
+    v.includes("your-publishable") ||
+    v.includes("your_publishable") ||
     v === "changeme"
   );
+}
+
+/** Prefer anon key, fall back to the newer publishable key name. */
+export function readSupabasePublicKey(
+  anonKey?: string | null,
+  publishableKey?: string | null,
+): string {
+  const anon = (anonKey ?? "").trim();
+  const publishable = (publishableKey ?? "").trim();
+  return anon || publishable;
 }
 
 /** Validate and normalize public Supabase credentials. */
@@ -54,7 +67,10 @@ export function resolveSupabaseConfig(
 export function readSupabaseEnv(): SupabasePublicConfig | null {
   return resolveSupabaseConfig(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    readSupabasePublicKey(
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    ),
   );
 }
 
