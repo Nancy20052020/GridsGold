@@ -24,7 +24,7 @@ const highlights = [
 
 const trust = [
   { icon: TrendingUp, label: "Live Gold Rate", value: "₹ 7,245 /gm" },
-  { icon: ShieldCheck, label: "Secure", value: "Supabase auth" },
+  { icon: ShieldCheck, label: "Secure", value: "Admin access" },
 ];
 
 function LoginContent() {
