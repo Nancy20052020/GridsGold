@@ -13,16 +13,15 @@ import {
   Phone,
   UserRound,
 } from "lucide-react";
-import { userFromSupabase } from "../lib/auth";
 import { useStore } from "../lib/store";
-import { getSupabase, isSupabaseConfigured } from "../lib/supabase";
 import { BrandMark } from "./BrandMark";
 
 type Mode = "signin" | "signup";
 
-const DEMO_ADMIN_EMAIL = "nancy2005nov@gmail.com";
-const DEMO_ADMIN_PASSWORD = "nancy";
-const DEMO_ADMIN_NAME = "Nancy";
+/** Hardcoded admin login — no Supabase / remote auth. */
+const ADMIN_EMAIL = "nancy2005nov@gmail.com";
+const ADMIN_PASSWORD = "nancy";
+const ADMIN_NAME = "Nancy";
 
 type AuthPanelProps = {
   compact?: boolean;
@@ -35,8 +34,6 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
   const [mode, setMode] = useState<Mode>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [info, setInfo] = useState("");
-  const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -47,18 +44,15 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
   });
 
   const isSignup = mode === "signup";
-  const usingSupabase = isSupabaseConfigured() && Boolean(getSupabase());
 
   function update(field: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (error) setError("");
-    if (info) setInfo("");
   }
 
-  async function handleSubmit(event: React.FormEvent) {
+  function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError("");
-    setInfo("");
 
     if (!form.email.trim() || !form.password) {
       setError("Please enter your email and password.");
@@ -70,97 +64,33 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
         setError("Please enter your full name.");
         return;
       }
-      if (form.password.length < 6) {
-        setError("Password must be at least 6 characters.");
-        return;
-      }
       if (form.password !== form.confirm) {
         setError("Passwords do not match.");
         return;
       }
     }
 
-    const client = getSupabase();
-    if (usingSupabase && client) {
-      setBusy(true);
-      try {
-        if (isSignup) {
-          const { data, error: err } = await client.auth.signUp({
-            email: form.email.trim(),
-            password: form.password,
-            options: {
-              data: {
-                full_name: form.fullName.trim(),
-                role: "admin",
-                mobile: form.mobile.trim(),
-                company: form.company.trim(),
-              },
-            },
-          });
-          if (err) {
-            setError(err.message);
-            setBusy(false);
-            return;
-          }
-          // Email confirmation enabled → user exists but no session yet.
-          if (data.user && !data.session) {
-            setInfo(
-              "Account created. Check your email to confirm, then sign in.",
-            );
-            setMode("signin");
-            setBusy(false);
-            return;
-          }
-          if (data.user) {
-            signup(userFromSupabase(data.user));
-          }
-        } else {
-          const { data, error: err } = await client.auth.signInWithPassword({
-            email: form.email.trim(),
-            password: form.password,
-          });
-          if (err) {
-            setError(err.message);
-            setBusy(false);
-            return;
-          }
-          if (data.user) {
-            login(userFromSupabase(data.user));
-          }
-        }
-      } catch {
-        setError("Could not reach the authentication service. Please try again.");
-        setBusy(false);
-        return;
-      }
-      setBusy(false);
-      router.push("/dashboard");
+    const email = form.email.trim().toLowerCase();
+    if (email !== ADMIN_EMAIL || form.password !== ADMIN_PASSWORD) {
+      setError(`Incorrect email or password. Use ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
       return;
     }
 
-    // Demo mode — Supabase env vars are not available.
     if (isSignup) {
-      setError(
-        "Account creation needs Supabase. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY), then redeploy — or sign in with the demo account.",
-      );
-      return;
+      signup({
+        name: form.fullName.trim() || ADMIN_NAME,
+        email: ADMIN_EMAIL,
+        mobile: form.mobile.trim(),
+        city: form.company.trim(),
+        role: "admin",
+      });
+    } else {
+      login({
+        name: ADMIN_NAME,
+        email: ADMIN_EMAIL,
+        role: "admin",
+      });
     }
-
-    if (
-      form.email.trim().toLowerCase() !== DEMO_ADMIN_EMAIL ||
-      form.password !== DEMO_ADMIN_PASSWORD
-    ) {
-      setError(
-        `Incorrect email or password. Demo sign-in: ${DEMO_ADMIN_EMAIL} / ${DEMO_ADMIN_PASSWORD}`,
-      );
-      return;
-    }
-
-    login({
-      name: DEMO_ADMIN_NAME,
-      email: DEMO_ADMIN_EMAIL,
-      role: "admin",
-    });
 
     router.push("/dashboard");
   }
@@ -183,13 +113,9 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
             ? "Set up your store team access."
             : "Sign in to your admin workspace."}
         </p>
-        {usingSupabase ? (
-          <p className="auth-hint">Secured with Supabase authentication.</p>
-        ) : (
-          <p className="auth-hint">
-            Demo mode — set Supabase env vars on Vercel and redeploy for live auth.
-          </p>
-        )}
+        <p className="auth-hint">
+          Admin login: {ADMIN_EMAIL} / {ADMIN_PASSWORD}
+        </p>
       </div>
 
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
@@ -215,7 +141,7 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
             <Mail size={17} />
             <input
               type="email"
-              placeholder="you@store.com"
+              placeholder={ADMIN_EMAIL}
               value={form.email}
               onChange={(event) => update("email", event.target.value)}
               autoComplete="email"
@@ -304,10 +230,9 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
         ) : null}
 
         {error ? <p className="auth-error">{error}</p> : null}
-        {info ? <p className="auth-info">{info}</p> : null}
 
-        <button type="submit" className="auth-submit" disabled={busy}>
-          {busy ? "Please wait…" : isSignup ? "Create account" : "Sign in"}
+        <button type="submit" className="auth-submit">
+          {isSignup ? "Create account" : "Sign in"}
           <ArrowRight size={18} />
         </button>
 
@@ -325,7 +250,6 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
           onClick={() => {
             setMode(isSignup ? "signin" : "signup");
             setError("");
-            setInfo("");
           }}
         >
           {isSignup ? "Sign in" : "Create an account"}
