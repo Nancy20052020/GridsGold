@@ -13,15 +13,11 @@ import {
   Phone,
   UserRound,
 } from "lucide-react";
+import { authenticateAccount, registerAccount } from "../lib/accounts";
 import { useStore } from "../lib/store";
 import { BrandMark } from "./BrandMark";
 
 type Mode = "signin" | "signup";
-
-/** Hardcoded admin login — no Supabase / remote auth. */
-const ADMIN_EMAIL = "nancy2005nov@gmail.com";
-const ADMIN_PASSWORD = "nancy";
-const ADMIN_NAME = "Nancy";
 
 type AuthPanelProps = {
   compact?: boolean;
@@ -68,30 +64,43 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
         setError("Passwords do not match.");
         return;
       }
-    }
 
-    const email = form.email.trim().toLowerCase();
-    if (email !== ADMIN_EMAIL || form.password !== ADMIN_PASSWORD) {
-      setError(`Incorrect email or password. Use ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
+      const result = registerAccount({
+        fullName: form.fullName,
+        email: form.email,
+        password: form.password,
+        mobile: form.mobile,
+        company: form.company,
+      });
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+
+      signup({
+        name: result.account.fullName,
+        email: result.account.email,
+        mobile: result.account.mobile,
+        city: result.account.company,
+        role: "admin",
+      });
+      router.push("/dashboard");
       return;
     }
 
-    if (isSignup) {
-      signup({
-        name: form.fullName.trim() || ADMIN_NAME,
-        email: ADMIN_EMAIL,
-        mobile: form.mobile.trim(),
-        city: form.company.trim(),
-        role: "admin",
-      });
-    } else {
-      login({
-        name: ADMIN_NAME,
-        email: ADMIN_EMAIL,
-        role: "admin",
-      });
+    const result = authenticateAccount(form.email, form.password);
+    if (!result.ok) {
+      setError(result.error);
+      return;
     }
 
+    login({
+      name: result.account.fullName,
+      email: result.account.email,
+      mobile: result.account.mobile,
+      city: result.account.company,
+      role: "admin",
+    });
     router.push("/dashboard");
   }
 
@@ -110,11 +119,13 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
         <h2>{isSignup ? "Create staff account" : "Welcome back"}</h2>
         <p>
           {isSignup
-            ? "Set up your store team access."
-            : "Sign in to your admin workspace."}
+            ? "Create any email and password — saved on this device."
+            : "Sign in with your account."}
         </p>
         <p className="auth-hint">
-          Admin login: {ADMIN_EMAIL} / {ADMIN_PASSWORD}
+          {isSignup
+            ? "Accounts are stored locally for this browser."
+            : "Use an account you created, or nancy2005nov@gmail.com / nancy."}
         </p>
       </div>
 
@@ -141,7 +152,7 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
             <Mail size={17} />
             <input
               type="email"
-              placeholder={ADMIN_EMAIL}
+              placeholder="you@store.com"
               value={form.email}
               onChange={(event) => update("email", event.target.value)}
               autoComplete="email"
