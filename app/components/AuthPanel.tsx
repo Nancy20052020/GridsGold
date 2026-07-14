@@ -141,7 +141,7 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
     // Demo mode — Supabase env vars are not available.
     if (isSignup) {
       setError(
-        "Account creation needs Supabase. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY, then redeploy — or sign in with the demo account.",
+        "Account creation needs Supabase. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY), then redeploy — or sign in with the demo account.",
       );
       return;
     }
