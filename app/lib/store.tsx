@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import { userFromSupabase } from "./auth";
-import { isSupabaseConfigured, supabase } from "./supabase";
+import { getSupabase, initSupabase, isSupabaseConfigured } from "./supabase";
 import {
   migrateCustomerType,
   migrateInvoiceStatus,
@@ -445,7 +445,19 @@ function hydrateItems(saved: Item[] | undefined, removedIds: string[] = []): Ite
   return [...extras, ...fromSeed];
 }
 
-export function StoreProvider({ children }: { children: React.ReactNode }) {
+export function StoreProvider({
+  children,
+  supabaseUrl = "",
+  supabaseAnonKey = "",
+}: {
+  children: React.ReactNode;
+  /** Passed from the server layout so client auth works even without env inlining. */
+  supabaseUrl?: string;
+  supabaseAnonKey?: string;
+}) {
+  // Initialize before any child (AuthPanel, etc.) reads the shared client.
+  initSupabase(supabaseUrl, supabaseAnonKey);
+
   const [ready, setReady] = useState(false);
   const [theme, setTheme] = useState<Theme>("light");
   const [rates, setRates] = useState<Rates>(seedRates);
@@ -535,7 +547,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, [baseCurrency]);
 
   useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) return;
+    const supabase = getSupabase();
+    if (!isSupabaseConfigured() || !supabase) return;
 
     let cancelled = false;
 
@@ -571,7 +584,8 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
-    if (isSupabaseConfigured && supabase) {
+    const supabase = getSupabase();
+    if (isSupabaseConfigured() && supabase) {
       void supabase.auth.signOut();
     }
     setCurrentUser(null);

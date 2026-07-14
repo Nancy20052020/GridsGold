@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { userFromSupabase } from "../lib/auth";
 import { useStore } from "../lib/store";
-import { isSupabaseConfigured, supabase } from "../lib/supabase";
+import { getSupabase, isSupabaseConfigured } from "../lib/supabase";
 import { BrandMark } from "./BrandMark";
 
 type Mode = "signin" | "signup";
@@ -35,6 +35,7 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
   const [mode, setMode] = useState<Mode>(initialMode);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
     fullName: "",
@@ -46,15 +47,18 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
   });
 
   const isSignup = mode === "signup";
-  const usingSupabase = isSupabaseConfigured && supabase;
+  const usingSupabase = isSupabaseConfigured() && Boolean(getSupabase());
 
   function update(field: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (error) setError("");
+    if (info) setInfo("");
   }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    setError("");
+    setInfo("");
 
     if (!form.email.trim() || !form.password) {
       setError("Please enter your email and password.");
@@ -76,9 +80,8 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
       }
     }
 
-    if (usingSupabase) {
-      if (!supabase) return;
-      const client = supabase;
+    const client = getSupabase();
+    if (usingSupabase && client) {
       setBusy(true);
       try {
         if (isSignup) {
@@ -96,6 +99,15 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
           });
           if (err) {
             setError(err.message);
+            setBusy(false);
+            return;
+          }
+          // Email confirmation enabled → user exists but no session yet.
+          if (data.user && !data.session) {
+            setInfo(
+              "Account created. Check your email to confirm, then sign in.",
+            );
+            setMode("signin");
             setBusy(false);
             return;
           }
@@ -126,29 +138,29 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
       return;
     }
 
+    // Demo mode — Supabase env vars are not available.
+    if (isSignup) {
+      setError(
+        "Account creation needs Supabase. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY, then redeploy — or sign in with the demo account.",
+      );
+      return;
+    }
+
     if (
       form.email.trim().toLowerCase() !== DEMO_ADMIN_EMAIL ||
       form.password !== DEMO_ADMIN_PASSWORD
     ) {
-      setError("Incorrect email or password. Use demo credentials or configure Supabase.");
+      setError(
+        `Incorrect email or password. Demo sign-in: ${DEMO_ADMIN_EMAIL} / ${DEMO_ADMIN_PASSWORD}`,
+      );
       return;
     }
 
-    if (isSignup) {
-      signup({
-        name: form.fullName.trim() || DEMO_ADMIN_NAME,
-        email: DEMO_ADMIN_EMAIL,
-        mobile: form.mobile.trim(),
-        city: form.company.trim(),
-        role: "admin",
-      });
-    } else {
-      login({
-        name: DEMO_ADMIN_NAME,
-        email: DEMO_ADMIN_EMAIL,
-        role: "admin",
-      });
-    }
+    login({
+      name: DEMO_ADMIN_NAME,
+      email: DEMO_ADMIN_EMAIL,
+      role: "admin",
+    });
 
     router.push("/dashboard");
   }
@@ -174,7 +186,9 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
         {usingSupabase ? (
           <p className="auth-hint">Secured with Supabase authentication.</p>
         ) : (
-          <p className="auth-hint">Demo mode — configure Supabase env vars for production auth.</p>
+          <p className="auth-hint">
+            Demo mode — set Supabase env vars on Vercel and redeploy for live auth.
+          </p>
         )}
       </div>
 
@@ -290,6 +304,7 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
         ) : null}
 
         {error ? <p className="auth-error">{error}</p> : null}
+        {info ? <p className="auth-info">{info}</p> : null}
 
         <button type="submit" className="auth-submit" disabled={busy}>
           {busy ? "Please wait…" : isSignup ? "Create account" : "Sign in"}
@@ -310,6 +325,7 @@ export function AuthPanel({ compact = false, initialMode = "signin" }: AuthPanel
           onClick={() => {
             setMode(isSignup ? "signin" : "signup");
             setError("");
+            setInfo("");
           }}
         >
           {isSignup ? "Sign in" : "Create an account"}

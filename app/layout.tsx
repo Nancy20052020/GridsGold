@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { StoreProvider } from "./lib/store";
+import { readSupabaseEnv } from "./lib/supabase";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,10 +26,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Read on the server so values reach the client even when Turbopack does not
+  // inline NEXT_PUBLIC_* into the browser bundle.
+  const supabase = readSupabaseEnv();
+
   return (
     <html lang="en" className={playfair.variable}>
       <body className={inter.className}>
-        <StoreProvider>{children}</StoreProvider>
+        <StoreProvider
+          supabaseUrl={supabase?.url ?? ""}
+          supabaseAnonKey={supabase?.anonKey ?? ""}
+        >
+          {children}
+        </StoreProvider>
       </body>
     </html>
   );
