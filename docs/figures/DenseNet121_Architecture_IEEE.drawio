@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" agent="GridsGold-DenseNet121" version="24.7.17">
+  <diagram id="densenet121" name="DenseNet121 Architecture">
+    <mxGraphModel dx="1000" dy="1400" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="420" pageHeight="1244" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+<mxCell id="title" value="DenseNet121 Architecture"
+        style="text;html=1;align=center;verticalAlign=middle;fontStyle=1;fontSize=16;fontColor=#111111;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="12" width="340" height="28" as="geometry"/>
+      </mxCell>
+<mxCell id="subtitle" value="Osteoporosis Severity Classification | k = 32, 121 layers"
+        style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fontColor=#555555;"
+        vertex="1" parent="1">
+        <mxGeometry x="20" y="36" width="380" height="20" as="geometry"/>
+      </mxCell>
+<mxCell id="a6c75991" value="DenseNet121 Backbone (pre-trained, ImageNet)"
+        style="text;html=1;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#505050;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="60" width="340" height="22" as="geometry"/>
+      </mxCell>
+<mxCell id="710a119b" value="Input Knee X-ray
+224 × 224 × 3"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EBEBEB;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="90" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="533fbcb2" value="Conv 7×7, stride 2 + BN + ReLU
+112 × 112 × 64"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCDCDC;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="152" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="be729c68" value="MaxPool 3×3, stride 2
+56 × 56 × 64"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#DCDCDC;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="214" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="169da189" value="Dense Block 1  (6 layers, k = 32)
+56 × 56 × 256"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D2DCEB;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="276" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="3681303b" value="Transition Layer 1  (1×1 Conv + AvgPool)
+28 × 28 × 128"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E1D2;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="338" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="ceb80972" value="Dense Block 2  (12 layers, k = 32)
+28 × 28 × 512"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D2DCEB;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="400" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="d73fd18a" value="Transition Layer 2  (1×1 Conv + AvgPool)
+14 × 14 × 256"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E1D2;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="462" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="7dbff308" value="Dense Block 3  (24 layers, k = 32)
+14 × 14 × 1024"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D2DCEB;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="524" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="89afc9ea" value="Transition Layer 3  (1×1 Conv + AvgPool)
+7 × 7 × 512"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E6E1D2;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="586" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="da6c1c22" value="Dense Block 4  (16 layers, k = 32)
+7 × 7 × 1024"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D2DCEB;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="648" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="3bf15ee6" value="Custom Classification Head"
+        style="text;html=1;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#505050;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="710" width="340" height="22" as="geometry"/>
+      </mxCell>
+<mxCell id="bf99dc06" value="Global Average Pooling 2D
+1024"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1EBE1;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="740" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="94823333" value="Batch Normalization
+1024"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1EBE1;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="802" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="7331fb9d" value="Dense (512) + ReLU
+512"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1EBE1;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="864" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="5aaec72b" value="Dropout (0.5)
+512"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1EBE1;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="926" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="946a7c07" value="Dense (128) + ReLU
+128"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1EBE1;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="988" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="22980c25" value="Dropout (0.3)
+128"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1EBE1;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="1050" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="1350cf85" value="Dense (3) + Softmax
+Healthy / Moderate / Severe"
+        style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0E6D2;strokeColor=#141414;strokeWidth=1.5;fontSize=11;fontStyle=1;align=center;verticalAlign=middle;"
+        vertex="1" parent="1">
+        <mxGeometry x="40" y="1112" width="340" height="44" as="geometry"/>
+      </mxCell>
+<mxCell id="6212f172" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="710a119b" target="533fbcb2">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="711dd06c" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="533fbcb2" target="be729c68">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="2c2069d8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="be729c68" target="169da189">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="a3c46abe" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="169da189" target="3681303b">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="9182cf30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="3681303b" target="ceb80972">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="5951ff7f" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="ceb80972" target="d73fd18a">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="ac6b1636" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="d73fd18a" target="7dbff308">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="fbb05837" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="7dbff308" target="89afc9ea">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="332c8a8e" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="89afc9ea" target="da6c1c22">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="d066189d" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="da6c1c22" target="bf99dc06">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="fa2779ed" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="bf99dc06" target="94823333">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="e3444b47" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="94823333" target="7331fb9d">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="e4f8e7f0" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="7331fb9d" target="5aaec72b">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="58ee1fa1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="5aaec72b" target="946a7c07">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="22282641" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="946a7c07" target="22980c25">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="d32aae58" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeColor=#282828;strokeWidth=1.5;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;"
+        edge="1" parent="1" source="22980c25" target="1350cf85">
+        <mxGeometry relative="1" as="geometry"/>
+      </mxCell>
+<mxCell id="caption" value="Fig. DenseNet121 + custom head for 3-class knee osteoporosis grading.&#xa;Total parameters: 8,571,755 | Softmax → Healthy, Moderate, Severe"
+        style="text;html=1;align=center;verticalAlign=top;fontSize=10;fontColor=#222222;"
+        vertex="1" parent="1">
+        <mxGeometry x="20" y="1178" width="380" height="48" as="geometry"/>
+      </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
