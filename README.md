@@ -57,15 +57,9 @@ public/images/
 
 If a file is missing, the UI falls back to the jewel icon placeholder for that item.
 
-## Environment variables (Supabase / PostgreSQL auth)
+## Accounts / auth
 
-Create `.env.local` (git-ignored) from `.env.local.example`, or set these in
-Vercel → Project → Settings → Environment Variables, then redeploy:
+Login and sign up are fully client-side (no backend, no environment variables required).
 
-```
-NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR-ANON-KEY
-```
-
-When unset, auth falls back to local mock login.
-The admin account is fixed: `nancy2005nov@gmail.com`.
+- Seed admin account: `nancy2005nov@gmail.com` / `nancy` (see `data/accounts.json`).
+- New sign-ups are stored in the browser (`localStorage`), so they persist per device.
